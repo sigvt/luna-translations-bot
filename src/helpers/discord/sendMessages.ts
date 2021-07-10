@@ -1,5 +1,5 @@
 import merge from 'ts-deepmerge'
-import { client } from '../'
+import { client } from '../../core/'
 import {
   EmbedField,
   FileOptions,
@@ -38,7 +38,7 @@ export function createEmbed (options: EmbedOptions): MessageEmbed {
     color:     '#8e4497',
     thumbnail: getEmbedSelfThumbnail ()
   }
-  return merge (base, options) |> newMessageEmbed
+  return new MessageEmbed (merge (base, options))
 }
 
 export interface EmbedOptions {
@@ -67,9 +67,4 @@ function getEmbedSelfAuthor (): MessageEmbedAuthor {
 
 function getEmbedSelfThumbnail (): MessageEmbedThumbnail {
   return { url: client.user!.displayAvatarURL () }
-}
-
-/** Workaround for pipe operator PR not working with 'new' */
-function newMessageEmbed (data?: MessageEmbed | MessageEmbedOptions) {
-  return new MessageEmbed (data) as MessageEmbed
 }

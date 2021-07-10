@@ -48,7 +48,7 @@ type CommandName = string
 function loadModule (dir: string, moduleFile: string): Module {
   const exportName = path.basename (moduleFile, '.js')
   const moduleObj  = tryOrDie (
-    ()  => require (`../${dir}/${moduleFile}`)[exportName] as Module,
+    ()  => require (`../../core/${dir}/${moduleFile}`)[exportName] as Module,
     err => throwIt (`Failed to load ${dir}/${moduleFile}: ${err}`)
   )
 
@@ -58,7 +58,7 @@ function loadModule (dir: string, moduleFile: string): Module {
 }
 
 function loadAll (type: string): Map<string, Module> {
-  const modules = resolveRelativePath (`../${type}`)
+  const modules = resolveRelativePath (`../../core/${type}`)
     |> readdirSync
     |> filter (isNotSourceMapFile)
     |> map ((f: string) => [path.basename(f, '.js'), loadModule (type, f)])

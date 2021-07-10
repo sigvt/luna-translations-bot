@@ -1,7 +1,7 @@
 /** @file Functions accessing or interfacing with Guild settings */
 
 import { Guild, GuildMember, Message, Snowflake } from 'discord.js'
-import { isGuild, isMessage, isDm, hasRole, getGuildId } from '../discordHelpers'
+import { isGuild, hasRole, getGuildId } from '../../helpers/discord'
 import { GuildSettings, GuildSettingsDb } from './models'
 import { config, PermLevel } from '../../config'
 import { asyncFind } from '../../helpers'
@@ -15,13 +15,13 @@ import { DocumentType } from '@typegoose/typegoose'
 export function getSettings (
   x: Message | Guild | GuildMember
 ): Promise<GuildSettings> {
-  return getGuildSettings (getGuildId (x))
+  return getGuildSettings (getGuildId (x) ?? '0')
 }
 
 export async function updateSettings (
   x: Message | Guild | GuildMember, update: NewSettings
 ): Promise<GuildSettings> {
-  const _id = getGuildId (x)
+  const _id = getGuildId (x) ?? '0'
   return GuildSettingsDb.findOneAndUpdate (
     { _id }, { ...update, _id }, { upsert: true, new: true }
   )

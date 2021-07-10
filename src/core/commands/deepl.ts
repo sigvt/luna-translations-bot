@@ -1,7 +1,7 @@
-import { Command, createEmbedMessage, emoji, reply } from '../discordHelpers'
+import { Command, createEmbedMessage, emoji, reply } from '../../helpers/discord'
 import { oneLine } from 'common-tags'
 import { getSettings, updateSettings } from '../db'
-import { Message, Snowflake } from 'discord.js'
+import { Message } from 'discord.js'
 
 export const deepl: Command = {
   config: {

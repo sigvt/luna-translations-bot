@@ -1,5 +1,5 @@
 import { GuildMember, Intents, Message } from 'discord.js'
-import { isGuildOwner, isBotOwner, hasKickPerms } from './core/discordHelpers'
+import { isGuildOwner, isBotOwner, hasKickPerms } from './helpers/discord'
 import { isBlacklister, isAdmin } from './core/db'
 
 export const config: LunaBotConfig = {
@@ -10,8 +10,8 @@ export const config: LunaBotConfig = {
   permLevels: [
     { level: 0,  name: 'User',        check: _=> true },
     { level: 1,  name: 'Blacklister', check: isBlacklister },
-    { level: 2,  name: 'Admin',       check: isAdmin },
-    { level: 3,  name: 'Guild Mod',   check: hasKickPerms },
+    { level: 2,  name: 'Guild Mod',   check: hasKickPerms },
+    { level: 3,  name: 'Admin',       check: isAdmin },
     { level: 4,  name: 'Guild Owner', check: isGuildOwner },
     { level: 10, name: 'Bot Owner',   check: isBotOwner }
   ],

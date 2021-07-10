@@ -1,4 +1,4 @@
-import { Command } from '../discordHelpers'
+import { Command } from '../../helpers/discord'
 import { Message } from 'discord.js'
 import { inspect } from 'util'
 import { config } from '../../config'

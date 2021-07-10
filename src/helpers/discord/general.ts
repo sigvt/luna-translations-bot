@@ -1,7 +1,7 @@
 /** @file Generic Discord.js helper functions applicable to any bot. */
 import { config } from '../../config'
 import { Guild, GuildMember, Message, Snowflake, } from 'discord.js'
-import { client } from '../lunaBotClient'
+import { client } from '../../core'
 
 export function isGuild (scrutinee: any): scrutinee is Guild {
   return scrutinee instanceof Guild
@@ -39,15 +39,14 @@ export function hasKickPerms (subject: Message | GuildMember): boolean {
     ? subject.member
     : subject
 
-    return author?.permissions.has ('KICK_MEMBERS') |> Boolean
+  return <boolean> author?.permissions.has ('KICK_MEMBERS')
 }
 
-/** Returning '0' for DMs. */
 export function getGuildId (
   subject: Message | Guild | GuildMember
-): Snowflake {
+): Snowflake | undefined {
   const isADm = isMessage (subject) && isDm (subject)
-  return isADm               ? '0'
+  return isADm               ? undefined
        : isMessage (subject) ? subject.guild!.id
        : isGuild (subject)   ? subject.id
                              : subject.guild!.id

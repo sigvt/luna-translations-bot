@@ -7,7 +7,7 @@ import { isNil } from 'ramda'
 import { oneLine } from 'common-tags'
 import {
   isDm, createEmbed, emoji, Command, reply, mentionsMe, isBot
-} from '../discordHelpers'
+} from '../../helpers/discord'
 
 export async function message (msg: Message): Promise<void> {
   const mustSendPrefix = mentionsMe (msg) && !isBot (msg)

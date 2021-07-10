@@ -1,10 +1,10 @@
-import { Command, createEmbed, reply } from '../discordHelpers'
 import { commands } from '../lunaBotClient'
 import { getPermLevel, getSettings } from '../db'
 import { Message } from 'discord.js'
 import { Map, Set } from 'immutable'
 import { GuildSettings } from '../db/models'
 import { head, log, toTitleCase } from '../../helpers'
+import { Command, createEmbed, reply } from '../../helpers/discord'
 import { oneLine } from 'common-tags'
 
 
