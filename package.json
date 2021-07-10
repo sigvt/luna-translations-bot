@@ -1,0 +1,47 @@
+{
+  "name": "luna_translations_bot",
+  "version": "3",
+  "description": "Bot for the Hololive community processing all Hololive YouTube livechats.",
+  "main": "build/index.js",
+  "scripts": {
+    "tsc": "tsc",
+    "typedoc": "typedoc"
+  },
+  "engines": {
+    "node": ">=12"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/An-Idiots-Guide/guidebot.git"
+  },
+  "author": "tam <m.tam.carre@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "@typegoose/typegoose": "^7.6.0",
+    "@types/common-tags": "^1.8.0",
+    "@types/node": "^15.6.0",
+    "@types/ramda": "^0.27.40",
+    "@types/ws": "^7.4.4",
+    "better-sqlite3": "^6.0.1",
+    "chalk": "^4.0.0",
+    "common-tags": "^1.8.0",
+    "cross-spawn": "^7.0.3",
+    "discord.js": "^13.0.0-dev.f7e420bf290f5404e8b99b8896c63e178f77bbfc",
+    "dotenv": "^10.0.0",
+    "enmap": "^5.2.4",
+    "fp-ts": "^2.10.5",
+    "immutable": "*",
+    "inquirer": "^7.1.0",
+    "mongoose": "^5.10.18",
+    "node-fetch": "^2.6.1",
+    "ramda": "^0.27.1",
+    "ts-deepmerge": "^1.0.8",
+    "ws": "^7.4.4"
+  },
+  "devDependencies": {
+    "@types/mongoose": "^5.10.5",
+    "mongodb-memory-server": "^6.9.6",
+    "tsconfig-paths": "^3.9.0",
+    "typescript": "npm:@typescript-deploys/pr-build@4.3.0-pr-38305-57"
+  }
+}
