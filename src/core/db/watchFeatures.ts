@@ -4,13 +4,13 @@
  **/
 import { createEmbed, createEmbedMessage, emoji, reply } from '../../helpers/discord'
 import { getSettings, updateSettings } from '../db'
-import { Message } from 'discord.js'
+import { Message, Snowflake } from 'discord.js'
 import { config } from '../../config'
 import { findStreamer, showStreamerList, StreamerName } from '../db/streamers/'
 import { WatchFeatureSettings, WatchFeature } from '../db/models'
 
 export function validateInputAndModifyEntryList (
-  { msg, verb, streamer, usage, feature, add, remove }: ValidateFnOptions
+  { msg, verb, streamer, role, usage, feature, add, remove }: ValidateFnOptions
 ) {
   const isVerbValid       = validVerbs.includes (verb as any)
   const validatedVerb     = <ValidVerb> verb
@@ -19,7 +19,7 @@ export function validateInputAndModifyEntryList (
                           : !streamer    ? showStreamerList
                                          : modifyEntryList
 
-  modifyIfValid ({ msg, usage, feature, add, remove,
+  modifyIfValid ({ msg, usage, feature, role, add, remove,
     verb: validatedVerb,
     streamer: validatedStreamer,
   })
@@ -45,7 +45,7 @@ async function modifyEntryList (opts: ValidatedOptions): Promise<void> {
 }
 
 async function addEntry (
-  { feature, msg, streamer, add }: ValidatedOptions
+  { feature, msg, streamer, role, add }: ValidatedOptions
 ): Promise<void> {
   const settings = await getSettings (msg)
   const isNew = settings[feature].every (
@@ -53,25 +53,31 @@ async function addEntry (
   )
   if (isNew) {
     const newEntries = [...settings[feature], {
-      streamer, discordChannel: msg.channel.id
+      streamer,
+      discordChannel: msg.channel.id,
+      ...(role ? { roleToNotify: role } : {})
     }]
     updateSettings (msg, { [feature]: newEntries })
     reply (msg, createEmbed ({ fields: [{
-      name:  add.success,
+      name:   add.success,
       value:  streamer,
       inline: true
     }, {
       name:  `${emoji.discord} In channel`,
       value: `<#${msg.channel.id}>`,
       inline: true
-    }, {
+    }, ...( role ? [{
+      name:  `${emoji.ping} @mentioning`,
+      value: `<@&${role}>`,
+      inline: true
+    }] : []), {
       name:   'Currently relayed',
       value:  getEntryList (newEntries),
       inline: false
     }]}, false))
   } else {
     reply (msg, createEmbed ({ fields: [{
-      name: add.failure,
+      name:   add.failure,
       value:  getEntryList (settings[feature]),
       inline: false
     }]}, false))
@@ -120,23 +126,25 @@ function getEntryList (entries: WatchFeatureSettings[]): string {
 }
 
 interface ValidateFnOptions {
-  msg: Message,
-  verb: string,
+  msg:      Message,
+  verb:     string,
   streamer: string,
-  usage: string,
-  feature: WatchFeature,
-  add: AttemptResultMessages,
-  remove: AttemptResultMessages
+  role?:    Snowflake,
+  usage:    string,
+  feature:  WatchFeature,
+  add:      AttemptResultMessages,
+  remove:   AttemptResultMessages
 }
 
 export interface ValidatedOptions {
-  msg: Message,
-  verb: ValidVerb,
+  msg:      Message,
+  verb:     ValidVerb,
   streamer: StreamerName,
-  usage: string,
-  feature: WatchFeature,
-  add: AttemptResultMessages,
-  remove: AttemptResultMessages
+  role?:    Snowflake,
+  usage:    string,
+  feature:  WatchFeature,
+  add:      AttemptResultMessages,
+  remove:   AttemptResultMessages
 }
 
 interface AttemptResultMessages {
