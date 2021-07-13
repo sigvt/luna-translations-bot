@@ -4,10 +4,9 @@
  */
 import { getModelForClass, prop } from '@typegoose/typegoose'
 import { Snowflake } from 'discord.js'
+import { StreamerName } from '../streamers/'
 
-export type StreamerName = string
-
-class WatchFeatureSettings {
+export class WatchFeatureSettings {
   @prop ({ required: true })
   public streamer: StreamerName
 
@@ -18,12 +17,12 @@ class WatchFeatureSettings {
   public roleToNotify?: Snowflake
 }
 
-class BlacklistItem {
+export class BlacklistItem {
   @prop ({ required: true })
-  public ytSnowflake: string
+  public ytId: string
 
-  @prop ({ type: () => String, required: true })
-  public discordChannel: Snowflake
+  @prop ({ required: true })
+  public name: string
 
   @prop ()
   public reason?: string
@@ -34,40 +33,51 @@ export class GuildSettings {
   public _id: Snowflake
 
   @prop ({ type: () => [String], default: [] })
-  public admins?: Snowflake[]
+  public admins: Snowflake[]
 
   @prop ({ type: () => BlacklistItem, default: [] })
-  public blacklist?: BlacklistItem[]
+  public blacklist: BlacklistItem[]
 
   @prop ({ type: () => [String], default: [] })
-  public blacklisters?: Snowflake[]
+  public blacklisters: Snowflake[]
 
   @prop ({ type: () => WatchFeatureSettings, default: [] })
-  public community?: WatchFeatureSettings[]
+  public community: WatchFeatureSettings[]
 
   @prop ({ type: () => [String], default: [] })
-  public customWantedPatterns?: string[]
+  public customWantedPatterns: string[]
   
   @prop ({ type: () => [String], default: [] })
-  public customBannedPatterns?: string[]
+  public customBannedPatterns: string[]
 
   @prop ({ default: true })
-  public deepl?: boolean
+  public deepl: boolean
 
   @prop ({ type: () => WatchFeatureSettings, default: [] })
-  public mentions?: WatchFeatureSettings[]
+  public holochats: WatchFeatureSettings[]
+
+  @prop ({ type: () => WatchFeatureSettings, default: [] })
+  public mentions: WatchFeatureSettings[]
 
   @prop ({ default: true })
-  public modMessages?: boolean
+  public modMessages: boolean
 
   @prop ({ type: () => WatchFeatureSettings, default: [] })
-  public relay?: WatchFeatureSettings[]
+  public relay: WatchFeatureSettings[]
 
   @prop ({ type: () => WatchFeatureSettings, default: [] })
-  public twitcasting?: WatchFeatureSettings[]
+  public twitcasting: WatchFeatureSettings[]
 
   @prop ({ type: () => WatchFeatureSettings })
-  youtube?: WatchFeatureSettings[]
+  youtube: WatchFeatureSettings[]
 }
 
 export const GuildSettingsDb = getModelForClass (GuildSettings)
+
+export type WatchFeature =
+  | 'community'
+  | 'holochats'
+  | 'mentions'
+  | 'relay'
+  | 'twitcasting'
+  | 'youtube'

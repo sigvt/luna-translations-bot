@@ -94,6 +94,10 @@ export function toTitleCase (str: string): string {
   return str.toLowerCase ().replace (/\b(\w)/g, c => c.toUpperCase ())
 }
 
+export function ciEquals (a: string, b: string) {
+  return a.localeCompare (b, undefined, { sensitivity: 'accent' }) === 0
+}
+
 /** Conveys a function has side-effects. Not enforced by compiler. Optional. */
 export type SideEffect = unknown
 

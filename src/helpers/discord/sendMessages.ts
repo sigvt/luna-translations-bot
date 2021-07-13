@@ -1,59 +1,53 @@
 import merge from 'ts-deepmerge'
 import { client } from '../../core/'
 import {
-  EmbedField,
-  FileOptions,
   Message,
   MessageAttachment,
   MessageEmbed,
-  MessageEmbedOptions,
   MessageEmbedAuthor,
-  MessageEmbedFooter,
-  MessageEmbedImage,
-  MessageEmbedProvider,
+  MessageEmbedOptions,
   MessageEmbedThumbnail,
 } from 'discord.js'
 
 export function reply (
-  msg: Message,
-  embed: MessageEmbed
+  msg:    Message,
+  embed?: MessageEmbed,
+  text?:  string,
+  file?:  MessageAttachment,
 ): Promise<(Message | Message[])> {
-  return msg.reply ({ embed, failIfNotExists: false})
+  return msg.reply ({
+    ...(embed ? { embeds:  [embed] } : {}),
+    ...(text  ? { content: text }    : {}),
+    ...(file  ? { files:   [file] }  : {}),
+    failIfNotExists: false
+  })
 }
 
-export function createEmbedMessage ({ body, fancy = false }: {
-  body:   string,
-  fancy?: boolean
-}): MessageEmbed {
+export function createEmbedMessage (
+  body: string, fancy: boolean = false
+): MessageEmbed {
   return createEmbed ({
-    author:      fancy ? getEmbedSelfAuthor () : undefined,
+    author:      fancy ? getEmbedSelfAuthor ()    : undefined,
     thumbnail:   fancy ? getEmbedSelfThumbnail () : undefined,
     description: body
   })
 }
 
-export function createEmbed (options: EmbedOptions): MessageEmbed {
-  const base: EmbedOptions = {
-    author:    getEmbedSelfAuthor (),
+export function createEmbed (
+  options: Partial<MessageEmbedOptions>, fancy: boolean = false
+): MessageEmbed {
+  const base: Partial<MessageEmbedOptions> = {
+    author:    fancy ? getEmbedSelfAuthor () : undefined,
     color:     '#8e4497',
-    thumbnail: getEmbedSelfThumbnail ()
+    thumbnail: fancy ? getEmbedSelfThumbnail () : undefined
   }
   return new MessageEmbed (merge (base, options))
 }
 
-export interface EmbedOptions {
-  author?:      MessageEmbedAuthor,
-  color?:       string | number,
-  description?: string,
-  fields?:      EmbedField[],
-  files?:       Array<FileOptions|string|MessageAttachment>,
-  footer?:      MessageEmbedFooter,
-  image?:       MessageEmbedImage,
-  provider?:    MessageEmbedProvider,
-  thumbnail?:   MessageEmbedThumbnail,
-  timestamp?:   number,
-  title?:       string,
-  url?:         string
+export function createTxtEmbed (
+  title: string, content: string
+): MessageAttachment {
+  return new MessageAttachment (Buffer.from (content, 'utf-8'), title)
 }
 
 //// PRIVATE //////////////////////////////////////////////////////////////////

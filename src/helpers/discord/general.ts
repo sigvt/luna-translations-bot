@@ -22,7 +22,7 @@ export function hasRole (x: Message | GuildMember, role: Snowflake): boolean {
 }
 
 export function isGuildOwner (scrutinee: Message | GuildMember): boolean {
-  return getUserId (scrutinee) === scrutinee.guild?.ownerID
+  return getUserId (scrutinee) === scrutinee.guild?.ownerId
 }
 
 export function isBotOwner (scrutinee: Message | GuildMember): boolean {
@@ -54,9 +54,15 @@ export function getGuildId (
 
 export function mentionsMe (msg: Message): boolean {
   const mentionRegex = new RegExp (`^<@!?${client.user!.id}>`)
-  return msg.content.match (mentionRegex) |> Boolean
+  return Boolean (msg.content.match (mentionRegex))
 }
 
 export function isBot (msg: Message): boolean {
-  return msg.author?.bot |> Boolean
+  return Boolean (msg.author?.bot)
+}
+
+export function validateRole (
+  g: Guild, role: string | undefined
+): Snowflake | undefined {
+  return g.roles.cache.get (role?.replace (/[<@&>]/g, '') as any)?.id
 }

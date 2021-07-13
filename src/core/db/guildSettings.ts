@@ -46,11 +46,11 @@ export type PrivilegedRole = 'admins' | 'blacklisters'
 //// PRIVATE //////////////////////////////////////////////////////////////////
 
 async function getGuildSettings (g: Guild | Snowflake): Promise<GuildSettings> {
-  const guildId = isGuild (g) ? g.id
+  const _id = isGuild (g) ? g.id
                               : g
 
   return GuildSettingsDb.findOneAndUpdate (
-    { _id: guildId }, { _id: guildId }, { upsert: true, new: true }
+    { _id }, { _id }, { upsert: true, new: true }
   )
 }
 

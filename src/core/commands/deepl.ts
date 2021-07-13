@@ -28,15 +28,15 @@ export const deepl: Command = {
 
 function disableDeepL (msg: Message): void {
   updateSettings (msg, { deepl: false })
-  reply (msg, createEmbedMessage ({ body: oneLine`
+  reply (msg, createEmbedMessage (oneLine`
     ${emoji.deepl} I will no longer translate Hololive members' chats
     with DeepL.
-  `}))
+  `))
 }
 
 function enableDeepL (msg: Message): void {
   updateSettings (msg, { deepl: true })
-  reply (msg, createEmbedMessage ({ body: `
+  reply (msg, createEmbedMessage (`
     ${emoji.deepl} I will now translate Hololive members' chats with DeepL.
-  `}))
+  `))
 }

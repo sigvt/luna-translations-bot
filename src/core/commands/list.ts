@@ -1,6 +1,6 @@
 import { Message } from 'discord.js'
 import { Command, createEmbed, reply } from '../../helpers/discord'
-import { streamers } from '../db/streamers'
+import { getStreamerList } from '../db/streamers/'
 
 export const list: Command = {
   config: {
@@ -10,13 +10,12 @@ export const list: Command = {
   help: {
     category:    'General',
     usage:       'list',
-    description: 'Lists supported YT channels and the name to use.',
+    description: 'Lists supported YT channels.',
   },
   callback: (msg: Message): void => {
-    const names = streamers.map (streamer => streamer.name)
     reply (msg, createEmbed ({
       title: 'Supported channels',
-      description: names.join(', ')
+      description: getStreamerList ()
     }))
   }
 }
