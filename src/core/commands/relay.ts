@@ -24,13 +24,13 @@ export const relay: Command = {
       msg, verb, streamer, usage,
       feature: 'relay',
       add: {
-        success: `:speech_balloon: Relaying TLs for ${emoji.nbsp}`,
+        success: `:speech_balloon: Relaying TLs for`,
         failure: `
            :warning: ${streamer} is already being relayed in this channel
         `
       },
       remove: {
-        success: `:speech_balloon: Stopped relaying TLs for ${emoji.nbsp}`,
+        success: `:speech_balloon: Stopped relaying TLs for`,
         failure: oneLine`
           :warning: ${streamer}'s translations weren't already being relayed
           in <#${msg.channel.id}>. Are you in the right channel?

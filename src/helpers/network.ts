@@ -1,9 +1,19 @@
-import fetch from 'node-fetch'
+import fetch, { RequestInit } from 'node-fetch'
 
-export async function getJson (endpoint: string): Promise<any> {
-  new URLSearchParams ()
-  const resp = await fetch (endpoint)
+export async function getJson (
+  endpoint: string,
+  options?: RequestInit
+): Promise<any> {
+  const resp = await fetch (endpoint, options)
   return resp.json ()
+}
+
+export async function getText (
+  endpoint: string,
+  options?: RequestInit
+): Promise<string> {
+  const resp = await fetch (endpoint, options)
+  return resp.text ()
 }
 
 export function Params (params: UrlParams) {

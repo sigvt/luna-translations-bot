@@ -6,7 +6,7 @@ import { createEmbed, createEmbedMessage, emoji, reply } from '../../helpers/dis
 import { getSettings, updateSettings } from '../db'
 import { Message, Snowflake } from 'discord.js'
 import { config } from '../../config'
-import { findStreamer, showStreamerList, StreamerName } from '../db/streamers/'
+import { findStreamerName, showStreamerList, StreamerName } from '../db/streamers/'
 import { WatchFeatureSettings, WatchFeature } from '../db/models'
 
 export function validateInputAndModifyEntryList (
@@ -14,7 +14,7 @@ export function validateInputAndModifyEntryList (
 ) {
   const isVerbValid       = validVerbs.includes (verb as any)
   const validatedVerb     = <ValidVerb> verb
-  const validatedStreamer = <StreamerName> findStreamer (streamer)
+  const validatedStreamer = <StreamerName> findStreamerName (streamer)
   const modifyIfValid     = !isVerbValid ? showHelp
                           : !streamer    ? showStreamerList
                                          : modifyEntryList
@@ -111,7 +111,11 @@ async function removeEntry (
     }]}, false))
   } else {
     reply (msg, createEmbed ({ fields: [{
-      name:   remove.failure,
+      name:   'Error',
+      value:  remove.failure,
+      inline: false
+    }, {
+      name:   'Currently relayed',
       value:  getEntryList (settings.relay),
       inline: false
     }]}, false))

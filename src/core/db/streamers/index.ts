@@ -1,5 +1,6 @@
+/** @file Exports main streamer list and streamer-related utility functions */
 import { Message } from 'discord.js'
-import { ciEquals } from '../../../helpers'
+import { ciEquals, log } from '../../../helpers'
 import { createEmbed, reply } from '../../../helpers/discord'
 import { ValidatedOptions } from '../watchFeatures'
 import { hololive } from './hololive'
@@ -8,15 +9,17 @@ export const streamers = StreamerArray([
   ...hololive
 ] as const)
 
-export const names = streamers.map (x => x.name)
+export const names    = streamers.map (x => x.name)
+export const twitters = streamers.map (x => x.twitter)
 
-export type StreamerName = typeof names[number]
+export type StreamerName    = typeof names[number]
+export type StreamerTwitter = typeof twitters[number]
 
 export function getStreamerList (): string {
   return streamers.map (streamer => streamer.name).join (', ')
 }
 
-export function findStreamer (name: string): StreamerName | undefined {
+export function findStreamerName (name: string): StreamerName | undefined {
   const bySubname = streamers.find (s => s.name.split (' ').some (
     word => ciEquals (word, name)
   ))
@@ -28,6 +31,11 @@ export function findStreamer (name: string): StreamerName | undefined {
 
   return streamer?.name
 }
+
+export function getTwitterUsername (streamer: StreamerName): StreamerTwitter {
+  return streamers.find (x => x.name === streamer)!.twitter
+}
+
 
 export function showStreamerList (x: Message | ValidatedOptions): void {
   const msg = x instanceof Message ? x : x.msg

@@ -8,15 +8,17 @@ export const config: LunaBotConfig = {
   logFile:  'debug2.log',
   ownerId:  '150696503428644864',
   permLevels: [
-    { level: 0,  name: 'User',        check: _=> true },
+    { level: 0,  name: 'User',        check: () => true },
     { level: 1,  name: 'Blacklister', check: isBlacklister },
     { level: 2,  name: 'Admin',       check: isAdmin },
     { level: 3,  name: 'Guild Mod',   check: hasKickPerms },
     { level: 4,  name: 'Guild Owner', check: isGuildOwner },
     { level: 10, name: 'Bot Owner',   check: isBotOwner }
   ],
-  prefix: 'tl.',
-  token:  process.env.DISCORD_DEV_TOKEN,
+  prefix:            'tl.',
+  token:             process.env.DISCORD_DEV_TOKEN,
+  twitcastingId:     process.env.TWITCASTING_CLIENT_ID,
+  twitcastingSecret: process.env.TWITCASTING_CLIENT_SECRET,
 }
 
 export interface PermLevel {
@@ -28,11 +30,13 @@ export interface PermLevel {
 //// PRIVATE ///////////////////////////////////////////////////////////////////
 
 interface LunaBotConfig {
-  deeplKey?:  string,
-  intents:    Intents,
-  logFile:    string,
-  ownerId:    string,
-  permLevels: PermLevel[]
-  prefix:     string,
-  token?:     string,
+  deeplKey?:          string,
+  intents:            Intents,
+  logFile:            string,
+  ownerId:            string,
+  permLevels:         PermLevel[]
+  prefix:             string,
+  token?:             string,
+  twitcastingId?:     string,
+  twitcastingSecret?: string
 }

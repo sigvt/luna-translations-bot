@@ -25,14 +25,14 @@ export const community: Command = {
       msg, verb, streamer, role, usage,
       feature: 'community',
       add: {
-        success: `:family_mmbb: Notifying community posts by ${emoji.nbsp}`,
+        success: `:family_mmbb: Notifying community posts by`,
         failure: oneLine`
           :warning: ${streamer}'s community posts are already being
           relayed in this channel.
         `
       },
       remove: {
-        success: `:family_mmbb: Stopped notifying community posts by ${emoji.nbsp}`,
+        success: `:family_mmbb: Stopped notifying community posts by`,
         failure: oneLine`
           :warning: ${streamer}'s community posts weren't already being notified
           in <#${msg.channel.id}>. Are you in the right channel?

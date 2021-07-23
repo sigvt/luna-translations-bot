@@ -26,14 +26,14 @@ export const youtube: Command = {
       msg, verb, streamer, role, usage,
       feature: 'youtube',
       add: {
-        success: `${emoji.yt} Notifying YouTube lives for ${emoji.nbsp}`,
+        success: `${emoji.yt} Notifying YouTube lives for`,
         failure: oneLine`
           :warning: ${streamer}'s YouTube lives are already being
           relayed in this channel.
         `
       },
       remove: {
-        success: `${emoji.yt} Stopped notifying YouTube lives by ${emoji.nbsp}`,
+        success: `${emoji.yt} Stopped notifying YouTube lives by`,
         failure: oneLine`
           :warning: ${streamer}'s YouTube lives weren't already being
           notified in <#${msg.channel.id}>. Are you in the right channel?

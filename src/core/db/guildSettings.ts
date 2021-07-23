@@ -7,6 +7,7 @@ import { config, PermLevel } from '../../config'
 import { asyncFind } from '../../helpers'
 import { UpdateQuery } from 'mongoose'
 import { DocumentType } from '@typegoose/typegoose'
+import { client } from '../lunaBotClient'
 
 /**
  * Returns guild settings from the DB or creates them if they don't exist.
@@ -18,10 +19,18 @@ export function getSettings (
   return getGuildSettings (getGuildId (x) ?? '0')
 }
 
+export function getAllSettings (): Promise<GuildSettings[]> {
+  return Promise.all (client.guilds.cache.map (getSettings))
+}
+
 export async function updateSettings (
-  x: Message | Guild | GuildMember, update: NewSettings
+  x: Message | Guild | GuildMember | Snowflake, update: NewSettings
 ): Promise<GuildSettings> {
-  const _id = getGuildId (x) ?? '0'
+  // TODO: remove the temporary bandaid
+  const isObject = x instanceof Message
+                || x instanceof Guild
+                || x instanceof GuildMember
+  const _id = isObject ? (getGuildId (x as any) ?? '0') : x as any
   return GuildSettingsDb.findOneAndUpdate (
     { _id }, { ...update, _id }, { upsert: true, new: true }
   )
@@ -43,15 +52,15 @@ export async function getPermLevel (x: Message | GuildMember): Promise<PermLevel
 
 export type PrivilegedRole = 'admins' | 'blacklisters'
 
+export type NewSettings = UpdateQuery<DocumentType<GuildSettings>>
+
 //// PRIVATE //////////////////////////////////////////////////////////////////
 
 async function getGuildSettings (g: Guild | Snowflake): Promise<GuildSettings> {
   const _id = isGuild (g) ? g.id
                               : g
-
-  return GuildSettingsDb.findOneAndUpdate (
-    { _id }, { _id }, { upsert: true, new: true }
-  )
+  const query = [{ _id }, { _id }, { upsert: true, new: true }] as const
+  return GuildSettingsDb.findOneAndUpdate (...query)
 }
 
 /** Returns perm levels in descending order (Bot Owner -> User) */
@@ -68,4 +77,3 @@ async function hasPerms (
   return <boolean> roles!.some (role => hasRole (x, role))
 }
 
-type NewSettings = UpdateQuery<DocumentType<GuildSettings>>

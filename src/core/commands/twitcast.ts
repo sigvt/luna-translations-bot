@@ -26,14 +26,14 @@ export const twitcast: Command = {
       msg, verb, streamer, role, usage,
       feature: 'twitcasting',
       add: {
-        success: `${emoji.tc} Notifying twitcasting lives for ${emoji.nbsp}`,
+        success: `${emoji.tc} Notifying twitcasting lives for`,
         failure: oneLine`
           :warning: ${streamer}'s twitcasting lives are already being
           relayed in this channel.
         `
       },
       remove: {
-        success: `${emoji.tc} Stopped notifying twitcasting lives by ${emoji.nbsp}`,
+        success: `${emoji.tc} Stopped notifying twitcasting lives by`,
         failure: oneLine`
           :warning: ${streamer}'s twitcasting lives weren't already being
           notified in <#${msg.channel.id}>. Are you in the right channel?

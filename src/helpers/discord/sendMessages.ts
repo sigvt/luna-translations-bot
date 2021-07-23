@@ -7,7 +7,10 @@ import {
   MessageEmbedAuthor,
   MessageEmbedOptions,
   MessageEmbedThumbnail,
+  TextChannel,
 } from 'discord.js'
+import { GuildSettings, WatchFeature } from '../../core/db/models'
+import { Streamer } from '../../core/db/streamers'
 
 export function reply (
   msg:    Message,
@@ -50,6 +53,26 @@ export function createTxtEmbed (
   return new MessageAttachment (Buffer.from (content, 'utf-8'), title)
 }
 
+export async function notifyDiscord (opts: NotifyOptions): Promise<void> {
+  const { streamer, subbedGuilds, feature, embedBody, emoji } = opts
+  subbedGuilds.forEach (g => {
+    const entries  = g[feature].filter (ent => ent.streamer == streamer!.name)
+    const guildObj = client.guilds.cache.find (guild => guild.id === g._id)
+    entries.forEach (({ discordChannel, roleToNotify }) => {
+      const ch = <TextChannel> guildObj?.channels.cache
+                    .find (ch => ch.id === discordChannel)
+      ch?.send ({
+        content: `${roleToNotify ? emoji + ' <@&'+roleToNotify+'>' : ''} `,
+        embeds: [createEmbed ({
+          author: { name: streamer!.name, iconURL: streamer!.picture },
+          thumbnail: { url: streamer!.picture },
+          description: embedBody
+        })]
+      })
+    })
+  })
+}
+
 //// PRIVATE //////////////////////////////////////////////////////////////////
 
 function getEmbedSelfAuthor (): MessageEmbedAuthor {
@@ -61,4 +84,12 @@ function getEmbedSelfAuthor (): MessageEmbedAuthor {
 
 function getEmbedSelfThumbnail (): MessageEmbedThumbnail {
   return { url: client.user!.displayAvatarURL () }
+}
+
+interface NotifyOptions {
+  subbedGuilds: GuildSettings[]
+  feature:      WatchFeature
+  streamer:     Streamer
+  embedBody:    string
+  emoji:        string
 }

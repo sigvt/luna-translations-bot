@@ -17,6 +17,10 @@ export function match (
     : new TypeError ('Invalid scrutinee type. Try using a Map.') |> throwIt
 }
 
+export function sleep (ms: number): Promise<void> {
+  return new Promise (resolve => setTimeout(resolve, ms))
+}
+
 export function isEven (x: number) {
   return x % 2 === 0
 }
@@ -39,11 +43,8 @@ export function zip <T, U> (arr1: T[], arr2: U[]): Array<[T, U]> {
 
 /** Imperfect throw expression awaiting for the TC39 proposal to advance. */
 export function throwIt (err: Error | string): never {
-  if (typeof err === 'string') {
-    throw new Error (err)
-  } else {
-    throw err
-  }
+  throw (typeof err === 'string') ? new Error (err)
+                                  : err
 }
 
 export async function asyncFind <T> (
@@ -58,7 +59,18 @@ export async function asyncFind <T> (
 
 export function doNothing (): void {}
 
-export function tryOrDie <T> (tryFn: () => T, catchFn: (e: any) => never): T {
+export function tryOrDie <T> (
+  tryFn: () => T,
+  catchFn: (e: any) => never = throwIt
+): T {
+  try {
+    return tryFn ()
+  } catch (e) {
+    catchFn (e)
+  }
+}
+
+export function tryOrDo <T> (tryFn: () => T, catchFn: Fn): T | undefined {
   try {
     return tryFn ()
   } catch (e) {
@@ -96,6 +108,10 @@ export function toTitleCase (str: string): string {
 
 export function ciEquals (a: string, b: string) {
   return a.localeCompare (b, undefined, { sensitivity: 'accent' }) === 0
+}
+
+export function removeDupes <T> (array: T[]): T[] {
+  return [...new Set (array)]
 }
 
 /** Conveys a function has side-effects. Not enforced by compiler. Optional. */
