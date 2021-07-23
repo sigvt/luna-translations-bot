@@ -4,7 +4,7 @@ import { getSettings, updateSettings } from '../db'
 import { Message, Snowflake } from 'discord.js'
 import { config } from '../../config'
 
-export const blacklisters: Command = {
+export const blacklist: Command = {
   config: {
     aliases:   ['bl', 'block'],
     permLevel: 1

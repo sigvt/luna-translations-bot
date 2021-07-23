@@ -2,7 +2,7 @@ import { getAllSettings } from '../core/db'
 import { GuildSettings } from '../core/db/models'
 import { Streamer, StreamerName, streamers } from '../core/db/streamers'
 import { emoji, notifyDiscord } from '../helpers/discord'
-import { frameEmitter } from './holodex/'
+import { frameEmitter } from './holodex/frameEmitter'
 import { DexFrame } from './holodex/frames'
 
 frameEmitter.on ('frame', notifyFrame)

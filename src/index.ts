@@ -10,10 +10,10 @@ import mongoose from 'mongoose'
 import './modules/community/communityNotifier'
 import './modules/youtubeNotifier'
 import './modules/twitcastingNotifier'
-import { oldSettings } from './oldSettings'
-import { NewSettings, updateSettings } from './core/db/guildSettings'
-import { findStreamerName } from './core/db/streamers/'
-import { Snowflake } from 'discord.js'
+// import { oldSettings } from './oldSettings'
+// import { NewSettings, updateSettings } from './core/db/guildSettings'
+// import { findStreamerName } from './core/db/streamers/'
+// import { Snowflake } from 'discord.js'
 
 client.login (config.token)
 
