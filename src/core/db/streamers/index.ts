@@ -12,7 +12,7 @@ export const streamers = StreamerArray([
 export const names    = streamers.map (x => x.name)
 export const twitters = streamers.map (x => x.twitter)
 
-export type StreamerName    = typeof names[number]
+export type StreamerName    = typeof names[number] | 'all'
 export type StreamerTwitter = typeof twitters[number]
 
 export function getStreamerList (): string {
@@ -29,7 +29,7 @@ export function findStreamerName (name: string): StreamerName | undefined {
   ))
   const streamer = bySubname ?? byFullName ?? byAlias
 
-  return streamer?.name
+  return name === 'all' ? 'all' : streamer?.name
 }
 
 export function getTwitterUsername (streamer: StreamerName): StreamerTwitter {

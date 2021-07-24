@@ -40,12 +40,12 @@ mongoose.connect ('mongodb://localhost/luna', {
           // roleToNotify: settings?.communityRole?.id as any
         // }]
         // : [],
-      // customWantedPatterns: settings?.customWantedStrings,
-      // customBannedPatterns: settings?.customBannedStrings,
+      // customWantedPatterns: settings?.customWantedStrings ?? [],
+      // customBannedPatterns: settings?.customBannedStrings ?? [],
       // deepl: settings?.deepl == null ? true : settings?.deepl,
       // holochats: settings?.stalkStreamer
         // ? [{
-          // streamer: findStreamerName (settings?.stalkStreamer) as any,
+          // streamer: findStreamerName (settings?.stalkStreamer) as any ?? 'Himemori Luna',
           // discordChannel: settings?.stalkChannel.replace (/\D/g, '') as any,
         // }]
         // : [],

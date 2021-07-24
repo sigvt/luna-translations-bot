@@ -1,4 +1,4 @@
-import { getJson, Params } from '../../helpers'
+import { debug, getJson, Params } from '../../helpers'
 
 export async function getFrameList () {
   const firstPg   = await getJson (framesUrl + Params (params)) as PaginatedResp
@@ -7,7 +7,7 @@ export async function getFrameList () {
   const otherPgs  = await getFramePages ({ offset: 1, limit: remaining })
   return [
     ...firstPg.items,
-    ...otherPgs.flatMap (pg => pg.items)
+    ...otherPgs.flatMap?. (pg => pg.items)
   ]
 }
 
@@ -39,10 +39,11 @@ const params = {
 function getFramePages ({ offset = 0, limit = 0 }): Promise<PaginatedResp[]> {
   const emptyArr = [...Array (limit)]
   const getPage  = (page: number) => getJson (framesUrl + Params ({
-    ...params,
-    offset: (50 * page).toString ()
-  }))
-  return Promise.all (emptyArr.map ((_, i) => getPage (i + offset)))
+                     ...params,
+                     offset: (50 * page).toString ()
+                   }))
+ return Promise.all (emptyArr.map ((_, i) => getPage (i + offset)))
+               .catch (e => debug (e))
 }
 
 interface PaginatedResp {

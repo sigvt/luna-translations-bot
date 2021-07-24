@@ -20,7 +20,7 @@ export const blacklist: Command = {
   callback: async (msg: Message, args: string[]): Promise<void> => {
     const reason = args.join (' ').trim () || 'No reason provided.'
     const isReply = msg.reference != null
-
+    showHelp (msg)
     // TODO: complete this after guildlog is implemented
   }
 }
@@ -28,7 +28,7 @@ export const blacklist: Command = {
 async function showHelp (msg: Message) {
   const settings = await getSettings (msg)
   const list = 'Channel ID               | Name (Reason)'
-    + settings.blacklist.map (el => `${el.ytId} | ${el.name} ($el.reason)`)
+    + settings.blacklist.map (el => `${el.ytId} | ${el.name} (${el.reason})`)
                         .join ('\n')
 
   reply (msg, createEmbed ({ fields: [{
@@ -43,9 +43,7 @@ async function showHelp (msg: Message) {
       specific YouTube channel.
     `,
     inline: false
-  }]})),
-  '',
-  createTxtEmbed ('blacklist.txt', list)
+  }]}), '', createTxtEmbed ('blacklist.txt', list))
 }
 
   // const guildLog = client.tlLog.get(message.guild.id)

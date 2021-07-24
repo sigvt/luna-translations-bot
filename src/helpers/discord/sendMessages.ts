@@ -14,12 +14,12 @@ import { Streamer } from '../../core/db/streamers'
 
 export function reply (
   msg:    Message,
-  embed?: MessageEmbed,
+  embed?: MessageEmbed | MessageEmbed[],
   text?:  string,
   file?:  MessageAttachment,
 ): Promise<(Message | Message[])> {
   return msg.reply ({
-    ...(embed ? { embeds:  [embed] } : {}),
+    ...(embed ? { embeds:  Array.isArray (embed) ? embed : [embed] } : {}),
     ...(text  ? { content: text }    : {}),
     ...(file  ? { files:   [file] }  : {}),
     failIfNotExists: false

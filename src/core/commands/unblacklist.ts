@@ -35,7 +35,7 @@ async function unblacklistLastItem (msg: Message): Promise<void> {
       ${lastBlacklisted.ytId} (${lastBlacklisted.name}).
     `
     : ':warning: No items in blacklist.'
-  updateSettings (msg, { blacklist: init (blacklist) })
+  if (lastBlacklisted) updateSettings (msg, { blacklist: init (blacklist) })
   reply (msg, createEmbedMessage (replyContent))
 }
 
@@ -46,6 +46,6 @@ async function unblacklistItem (msg: Message, ytId: string): Promise<void> {
   const replyContent = target
     ? `:white_check_mark: Successfully unblacklisted ${ytId}.`
     : `:warning: YouTube channel ID ${ytId} was not found.`
-  updateSettings (msg, { blacklist: newBlacklist })
+  if (target) updateSettings (msg, { blacklist: newBlacklist })
   reply (msg, createEmbedMessage (replyContent))
 }
