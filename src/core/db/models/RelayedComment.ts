@@ -6,6 +6,9 @@ export class RelayedComment {
   @prop ({ type: () => String, required: false })
   public msgId?: Snowflake
 
+  @prop ({ type: () => String, required: false })
+  public discordCh?: Snowflake
+
   @prop ({ required: true })
   public body: string
 

@@ -17,8 +17,9 @@ export class BotData {
 
 export const BotDataDb = getModelForClass (BotData)
 
+export type YouTubeChannelId = string
+
 ///////////////////////////////////////////////////////////////////////////////
 
-type YouTubeChannelId = string
 type CommunityPostURL = string
 type YouTubeVideoId   = string

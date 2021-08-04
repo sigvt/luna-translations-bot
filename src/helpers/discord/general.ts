@@ -16,6 +16,10 @@ export function isMessage (scrutinee: any): scrutinee is Message {
   return scrutinee instanceof Message
 }
 
+export function isMember (scrutinee: any): scrutinee is GuildMember {
+  return scrutinee instanceof GuildMember
+}
+
 export function isDm (msg: Message): boolean {
   return msg.guild === undefined
 }

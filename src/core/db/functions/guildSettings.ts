@@ -14,9 +14,10 @@ import { client } from '../../lunaBotClient'
  * Returns default settings for DMs. (guildId 0)
  */
 export function getSettings (
-  x: Message | Guild | GuildMember
+  x: Message | Guild | GuildMember | Snowflake
 ): Promise<GuildSettings> {
-  return getGuildSettings (getGuildId (x) ?? '0')
+  const id = (typeof x === 'string') ? x : getGuildId (x)
+  return getGuildSettings (id ?? '0')
 }
 
 export function getAllSettings (): Promise<GuildSettings[]> {
@@ -57,8 +58,7 @@ export type NewSettings = UpdateQuery<DocumentType<GuildSettings>>
 //// PRIVATE //////////////////////////////////////////////////////////////////
 
 async function getGuildSettings (g: Guild | Snowflake): Promise<GuildSettings> {
-  const _id = isGuild (g) ? g.id
-                              : g
+  const _id = isGuild (g) ? g.id : g
   const query = [{ _id }, { _id }, { upsert: true, new: true }] as const
   return GuildSettingsDb.findOneAndUpdate (...query)
 }

@@ -33,6 +33,7 @@ export interface DexFrame {
 }
 
 export type VideoId = string
+export type YouTubeChannelId = string
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -74,7 +75,7 @@ interface PaginatedResp {
 }
 
 interface DexChannel {
-  id:           string
+  id:           YouTubeChannelId
   name:         string
   org:          string
   type:         'vtuber' | 'subber'

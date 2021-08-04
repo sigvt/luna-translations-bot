@@ -1,5 +1,6 @@
 import { DocumentType } from '@typegoose/typegoose'
 import { UpdateQuery } from 'mongoose'
+import { setKey } from '../../../helpers'
 import { VideoId } from '../../../modules/holodex/frames'
 import { BotData, BotDataDb } from '../models'
 import { RelayedComment } from '../models/RelayedComment'
@@ -17,13 +18,13 @@ export async function updateBotData (update: NewData): Promise<void> {
 }
 
 export async function addToBotRelayHistory (
-  videoId: VideoId, comment: RelayedComment
+  videoId: VideoId, cmt: RelayedComment
 ): Promise<void> {
-  const history  = (await getBotData ()).relayHistory
-  const videoLog = history.get (videoId) ?? []
-  const update   = { relayHistory: history }
-  const query    = [{ _id }, update, { upsert: true, new: true }] as const
-  history.set (videoId, [...videoLog, comment])
+  const history    = (await getBotData ()).relayHistory
+  const cmts       = history.get (videoId) ?? []
+  const newHistory = history |> setKey (videoId, [...cmts, cmt])
+  const update     = { relayHistory: newHistory }
+  const query      = [{ _id }, update, { upsert: true, new: true }] as const
   await BotDataDb.findOneAndUpdate (...query)
 }
 

@@ -1,7 +1,8 @@
-import { getGuildRelayHistory, getSubbedGuilds } from "../../core/db/functions"
-import { debug, log } from "../../helpers"
-import { findTextChannel } from "../../helpers/discord"
-import { DexFrame, getFrameList, VideoId } from "../holodex/frames"
+import { deleteRelayHistory, getAllRelayHistories, getSettings } from "../../core/db/functions"
+import { RelayedComment } from "../../core/db/models/RelayedComment"
+import { debug, isNotNil, log} from "../../helpers"
+import { findTextChannel, send } from "../../helpers/discord"
+import { DexFrame, getFrameList, VideoId, YouTubeChannelId } from "../holodex/frames"
 import { deleteChatProcess } from "./chatProcesses"
 import { setupRelay } from "./chatRelayer"
 
@@ -19,24 +20,42 @@ export async function retryFiveTimesThenPostLog (
   } else {
     log (`${frame.status} ${frame.id} closed with exit code ${exitCode}`)
     delete retries[frame.id]
-    
-    const guilds = await getSubbedGuilds (frame.channel.id, 'relay')
-    guilds.forEach (async g => {
-      // TODO: get each entries eiether with getRelayEntries or check if history
-      // for this frame exists, but then what channel??
-      const blacklist   = g.blacklist.map (entry => entry.ytId)
-      const unwanted    = g.customBannedPatterns
-      const history     = await getGuildRelayHistory (g._id, frame.id)
-      const filteredLog = history
-        .filter (cmt => !blacklist.some (ytId => ytId === cmt.ytId))
-        .filter (cmt => !unwanted.some (pattern => cmt.body.includes (pattern)))
-        .map (cmt => `${cmt.timestamp} (${cmt.author}) ${cmt.body}`)
-        .join ('\n')
-      const ch = findTextChannel(g.)
-    })
+    sendAndForgetHistory (frame.id)
   }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
 const retries: Record<VideoId, number> = {}
+
+async function sendAndForgetHistory (videoId: VideoId): Promise<void> {
+  const relevantHistories = (await getAllRelayHistories ())
+    .map (history => history.get (videoId))
+    .filter (isNotNil)
+
+  relevantHistories.forEach (async (history: RelayedComment[], gid) => {
+    const g         = await getSettings (gid)
+    const blacklist = g.blacklist.map (entry => entry.ytId)
+    const unwanted  = g.customBannedPatterns
+    const ch        = findTextChannel (history[0].discordCh!)
+    const tlLog     = history
+      .filter (cmt => isNotBanned (cmt, unwanted, blacklist))
+      .map (cmt => `${cmt.timestamp} (${cmt.author}) ${cmt.body}`)
+      .join ('\n')
+
+    deleteRelayHistory (videoId, gid)
+    if (ch) send (ch, {
+      content: `Here is this stream's TL log. (${videoId})`,
+      files:   [{ attachment: Buffer.from (tlLog), name: `${videoId}.txt` }]
+    })
+  })
+}
+
+function isNotBanned (
+  cmt: RelayedComment, unwanted: string[], blacklist: YouTubeChannelId[]
+): boolean {
+  return blacklist.every (ytId => ytId !== cmt.ytId)
+      && unwanted.every (
+           p => !cmt.body.toLowerCase ().includes (p.toLowerCase ())
+         )
+}

@@ -130,6 +130,7 @@ function saveComment (
                        .substr (11, 8)
   addFn (frame.id, {
     msgId: msg?.id,
+    discordCh: msg?.channel.id,
     body: cmt.body,
     ytId: cmt.id,
     author: cmt.name,
