@@ -3,7 +3,8 @@ import { Message } from 'discord.js'
 import { inspect } from 'util'
 import { config } from '../../config'
 import { client } from '../lunaBotClient' // for eval scope
-import { getSettings, updateSettings } from '../db'
+import { getSettings, updateSettings } from '../db/functions'
+import { tryOrDefault } from '../../helpers/tryCatch'
 
 export const run: Command = {
   config: {
@@ -26,7 +27,7 @@ export const run: Command = {
 async function processCode (msg: Message, code: string[]): Promise<string> {
   // keep imports in eval scope via _
   const _ = { client, getSettings, updateSettings }
-  const evaled  = eval (code.join (' '))
+  const evaled  = tryOrDefault (() => eval (code.join (' ')), '')
   const awaited = await evaled
   const string  = toString (awaited)
   const cleaned = string

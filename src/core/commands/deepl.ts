@@ -1,6 +1,6 @@
 import { Command, createEmbedMessage, emoji, reply } from '../../helpers/discord'
 import { oneLine } from 'common-tags'
-import { getSettings, updateSettings } from '../db'
+import { getSettings, updateSettings } from '../db/functions'
 import { Message } from 'discord.js'
 
 export const deepl: Command = {

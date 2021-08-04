@@ -2,7 +2,7 @@ import { commands } from '../lunaBotClient'
 import { config } from '../../config'
 import { log, doNothing } from '../../helpers'
 import { Message } from 'discord.js'
-import { getPermLevel } from '../db'
+import { getPermLevel } from '../db/functions'
 import { isNil } from 'ramda'
 import { oneLine } from 'common-tags'
 import {

@@ -1,9 +1,8 @@
 import { Command, createEmbedMessage, reply } from '../../helpers/discord'
 import { oneLine } from 'common-tags'
-import { getSettings, updateSettings } from '../db'
+import { getSettings, updateSettings } from '../db/functions'
 import { Message } from 'discord.js'
-import { isEmpty } from 'ramda'
-import { head, init, last } from '../../helpers'
+import { head, init, last, isEmpty } from 'ramda'
 
 export const unblacklist: Command = {
   config: {
@@ -20,7 +19,7 @@ export const unblacklist: Command = {
   },
   callback: async (msg: Message, args: string[]): Promise<void> => {
     if (isEmpty (args)) unblacklistLastItem (msg)
-    else unblacklistItem (msg, head (args))
+    else unblacklistItem (msg, head (args)!)
   }
 }
 

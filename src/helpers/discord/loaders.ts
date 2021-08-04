@@ -4,7 +4,6 @@ import { Message } from 'discord.js'
 import { filter, map } from 'ramda'
 import { Map } from 'immutable'
 import path from 'path'
-import { throwIt, tryOrDie } from '../../helpers/language'
 
 export function loadCommand (cmdFile: string): Command {
   return loadModule ('commands', cmdFile)
@@ -47,10 +46,8 @@ type CommandName = string
 
 function loadModule (dir: string, moduleFile: string): Module {
   const exportName = path.basename (moduleFile, '.js')
-  const moduleObj  = tryOrDie (
-    ()  => require (`../../core/${dir}/${moduleFile}`)[exportName] as Module,
-    err => throwIt (`Failed to load ${dir}/${moduleFile}: ${err}`)
-  )
+  const modulePath = `../../core/${dir}/${moduleFile}`
+  const moduleObj  = require (modulePath)[exportName] as Module
 
   log (`Loaded ${dir}/${moduleFile}`)
 

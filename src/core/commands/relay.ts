@@ -1,9 +1,10 @@
-import { Command, emoji } from '../../helpers/discord'
+import { Command, validateRole } from '../../helpers/discord'
 import { oneLine } from 'common-tags'
 import { Message } from 'discord.js'
-import { validateInputAndModifyEntryList } from '../db/watchFeatures'
+import { validateInputAndModifyEntryList } from '../db/functions'
+import { init, last } from 'ramda'
 
-const usage = 'relay <add|remove> <streamer name>'
+const usage = 'relay <add|remove> <streamer name> <optional:roleID|mention>'
 
 export const relay: Command = {
   config: {
@@ -19,9 +20,10 @@ export const relay: Command = {
     `,
   },
   callback: async (msg: Message, [verb, ...name]: string[]): Promise<void> => {
-    const streamer = name.join (' ')
+    const role     = validateRole (msg.guild!, last (name))
+    const streamer = role ? init (name).join (' ') : name.join (' ')
     validateInputAndModifyEntryList ({
-      msg, verb, streamer, usage,
+      msg, verb, streamer, role, usage,
       feature: 'relay',
       add: {
         success: `:speech_balloon: Relaying TLs for`,

@@ -1,9 +1,10 @@
 import EventEmitter from 'events'
-import { getAllSettings } from '../../core/db'
-import { debug, log, removeDupes, sleep, tryOrDo } from '../../helpers'
+import { getAllSettings } from '../../core/db/functions'
+import { removeDupes, sleep } from '../../helpers'
 import { getLatestPost } from './getLatestPost'
 import { streamers } from '../../core/db/streamers/'
-import { getBotwideData, updateBotwideData } from '../../core/db/botwideData'
+import { getBotData, updateBotData } from '../../core/db/functions'
+import { asyncTryOrLog } from '../../helpers/tryCatch'
 
 export const communityEmitter = CommunityEmitter ()
 
@@ -24,10 +25,7 @@ async function continuouslyEmitNewPosts (emitter: EventEmitter): Promise<void> {
 
   for (const ytId of subs) {
     await sleep (2000)
-    await tryOrDo (
-      () => checkChannel (ytId, emitter),
-      (e: any) => debug (`community post fail ytId ${ytId}: ${e}`)
-    )
+    await asyncTryOrLog (() => checkChannel (ytId, emitter))
   }
 
   setTimeout (() => continuouslyEmitNewPosts (emitter), 2000)
@@ -36,7 +34,7 @@ async function continuouslyEmitNewPosts (emitter: EventEmitter): Promise<void> {
 async function checkChannel (
   ytId: string, emitter: EventEmitter
 ): Promise<void> {
-  const botData   = await getBotwideData ()
+  const botData   = await getBotData ()
   const lastPosts = botData.lastCommunityPosts
   const post      = await getLatestPost (ytId)
   const recorded  = lastPosts.get (ytId)
@@ -44,7 +42,6 @@ async function checkChannel (
   if (!post || post.url === recorded || !post.isToday) return
 
   lastPosts.set (ytId, post.url)
-  updateBotwideData ({ lastCommunityPosts: lastPosts })
-
+  updateBotData ({ lastCommunityPosts: lastPosts })
   emitter.emit ('post', post)
 }

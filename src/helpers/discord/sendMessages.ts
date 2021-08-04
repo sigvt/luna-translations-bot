@@ -7,12 +7,16 @@ import {
   MessageEmbedAuthor,
   MessageEmbedOptions,
   MessageEmbedThumbnail,
+  MessageOptions,
+  MessagePayload,
   TextChannel,
 } from 'discord.js'
 import { GuildSettings, WatchFeature } from '../../core/db/models'
 import { Streamer } from '../../core/db/streamers'
+import { debug } from '../logging'
+import { getSubbedGuilds } from '../../core/db/functions'
 
-export function reply (
+export async function reply (
   msg:    Message,
   embed?: MessageEmbed | MessageEmbed[],
   text?:  string,
@@ -23,7 +27,7 @@ export function reply (
     ...(text  ? { content: text }    : {}),
     ...(file  ? { files:   [file] }  : {}),
     failIfNotExists: false
-  })
+  }).catch (debug)
 }
 
 export function createEmbedMessage (
@@ -55,13 +59,16 @@ export function createTxtEmbed (
 
 export async function notifyDiscord (opts: NotifyOptions): Promise<void> {
   const { streamer, subbedGuilds, feature, embedBody, emoji } = opts
-  subbedGuilds.forEach (g => {
+
+  const guilds = subbedGuilds ?? await getSubbedGuilds (streamer?.name, feature)
+
+  guilds.forEach (g => {
     const entries  = g[feature].filter (ent => ent.streamer == streamer!.name)
     const guildObj = client.guilds.cache.find (guild => guild.id === g._id)
-    entries.forEach (({ discordChannel, roleToNotify }) => {
+    entries.forEach (({ discordCh, roleToNotify }) => {
       const ch = <TextChannel> guildObj?.channels.cache
-                    .find (ch => ch.id === discordChannel)
-      ch?.send ({
+                    .find (ch => ch.id === discordCh)
+      if (ch) send (ch, {
         content: `${roleToNotify ? emoji + ' <@&'+roleToNotify+'>' : ''} `,
         embeds: [createEmbed ({
           author: { name: streamer!.name, iconURL: streamer!.picture },
@@ -71,6 +78,13 @@ export async function notifyDiscord (opts: NotifyOptions): Promise<void> {
       })
     })
   })
+}
+
+export async function send (
+  channel: TextChannel, content: string | MessageOptions | MessagePayload
+): Promise<Message> {
+  return channel.send (content)
+                .catch (debug)
 }
 
 //// PRIVATE //////////////////////////////////////////////////////////////////
@@ -87,9 +101,9 @@ function getEmbedSelfThumbnail (): MessageEmbedThumbnail {
 }
 
 interface NotifyOptions {
-  subbedGuilds: GuildSettings[]
-  feature:      WatchFeature
-  streamer:     Streamer
-  embedBody:    string
-  emoji:        string
+  subbedGuilds?: GuildSettings[]
+  feature:       WatchFeature
+  streamer:      Streamer
+  embedBody:     string
+  emoji:         string
 }

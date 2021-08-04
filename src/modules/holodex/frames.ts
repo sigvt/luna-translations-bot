@@ -1,20 +1,27 @@
-import { debug, getJson, Params } from '../../helpers'
+import { range } from 'ramda'
+import { debug, getJson, Params, removeDupeObjects, sleep } from '../../helpers'
+import { asyncTryOrLog } from '../../helpers/tryCatch'
+const { max, ceil } = Math
 
 export async function getFrameList () {
-  const firstPg   = await getJson (framesUrl + Params (params)) as PaginatedResp
-  const total     = parseInt (firstPg.total)
+  const firstPg   = await getOneFramePage ()
+  const total     = parseInt (firstPg?.total ?? '0')
   const remaining = max (0, ceil (total / 50) - 1)
   const otherPgs  = await getFramePages ({ offset: 1, limit: remaining })
-  return [
-    ...firstPg.items,
-    ...otherPgs.flatMap?. (pg => pg.items)
-  ]
+  const frames    = otherPgs?.flatMap?. (pg => pg?.items)
+  const hasFailed = !firstPg || !otherPgs
+  return hasFailed ? [] : removeDupeObjects ([...firstPg!.items, ...frames!])
+}
+
+export function isPublic (frame: DexFrame): boolean {
+  return frame.topic_id !== 'Membersonly'
 }
 
 export interface DexFrame {
-  id:              string
+  id:              VideoId
   title:           string
   type:            'stream' | 'clip'
+  topic_id?:       string
   published_at:    DateTimeString
   available_at:    DateTimeString
   duration:        number
@@ -25,9 +32,10 @@ export interface DexFrame {
   channel:         DexChannel
 }
 
+export type VideoId = string
+
 ///////////////////////////////////////////////////////////////////////////////
 
-const { max, ceil } = Math
 const framesUrl = 'https://holodex.net/api/v2/live?'
 const params = {
   include: 'description',
@@ -36,14 +44,28 @@ const params = {
   max_upcoming_hours: '0n'
 }
 
-function getFramePages ({ offset = 0, limit = 0 }): Promise<PaginatedResp[]> {
-  const emptyArr = [...Array (limit)]
-  const getPage  = (page: number) => getJson (framesUrl + Params ({
-                     ...params,
-                     offset: (50 * page).toString ()
-                   }))
- return Promise.all (emptyArr.map ((_, i) => getPage (i + offset)))
-               .catch (e => debug (e))
+async function getOneFramePage (): Promise<PaginatedResp | undefined> {
+  const url = framesUrl + Params (params)
+  return asyncTryOrLog (() => getJson (url))
+}
+
+async function getFramePages (
+  { offset = 0, limit = 0 }
+): Promise<PaginatedResp[] | undefined> {
+  // Use an imperative loop to delay each call so as not to spam the API
+  try {
+    const pages = []
+    for (const page of range (offset, limit)) {
+      await sleep (1000)
+      pages.push (await getJson (
+        framesUrl + Params ({ ...params, offset: (50 * page).toString ()})
+      ))
+    }
+    return pages
+  } catch (e) {
+    debug (e)
+    return undefined
+  }
 }
 
 interface PaginatedResp {

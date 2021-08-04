@@ -1,10 +1,10 @@
 import WebSocket from 'ws'
 import { config } from '../config'
-import { getAllSettings } from '../core/db'
+import { getAllSettings } from '../core/db/functions'
 import { GuildSettings } from '../core/db/models'
 import { getTwitterUsername, Streamer, streamers } from '../core/db/streamers'
-import { doNothing, tryOrDo } from '../helpers'
 import { emoji, notifyDiscord } from '../helpers/discord'
+import { tryOrLog } from '../helpers/tryCatch'
 const { twitcastingId, twitcastingSecret } = config
 
 initTwitcast ()
@@ -19,7 +19,7 @@ function initTwitcast (): void {
 }
 
 async function processMessage (data: any): Promise<void> {
-  const json     = tryOrDo (() => JSON.parse (data as string), doNothing)
+  const json     = tryOrLog (() => JSON.parse (data as string))
   const lives    = json?.movies?.map (processPayloadEntry) as any[]
   const settings = await getAllSettings ()
   lives?.forEach (live => notifyLive (live, settings))

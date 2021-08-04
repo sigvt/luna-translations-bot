@@ -1,9 +1,10 @@
 import { commands } from '../lunaBotClient'
-import { getPermLevel, getSettings } from '../db'
+import { getPermLevel, getSettings } from '../db/functions'
 import { Message } from 'discord.js'
 import { Map, Set } from 'immutable'
 import { GuildSettings } from '../db/models'
-import { head, log, toTitleCase } from '../../helpers'
+import { log, toTitleCase } from '../../helpers'
+import { head } from 'ramda'
 import { Command, createEmbed, reply } from '../../helpers/discord'
 import { oneLine } from 'common-tags'
 

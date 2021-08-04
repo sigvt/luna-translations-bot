@@ -2,7 +2,7 @@
 import { Message } from 'discord.js'
 import { ciEquals, log } from '../../../helpers'
 import { createEmbed, reply } from '../../../helpers/discord'
-import { ValidatedOptions } from '../watchFeatures'
+import { ValidatedOptions } from '../functions'
 import { hololive } from './hololive'
 
 export const streamers = StreamerArray([
@@ -36,13 +36,16 @@ export function getTwitterUsername (streamer: StreamerName): StreamerTwitter {
   return streamers.find (x => x.name === streamer)!.twitter
 }
 
-
-export function showStreamerList (x: Message | ValidatedOptions): void {
+export function replyStreamerList (x: Message | ValidatedOptions): void {
   const msg = x instanceof Message ? x : x.msg
   reply (msg, createEmbed ({
     title: 'Supported channels',
     description: getStreamerList ()
   }))
+}
+
+export function isSupported (ytId: string): boolean {
+  return streamers.some (streamer => streamer.ytId === ytId)
 }
 
 export type Streamer = Readonly<{

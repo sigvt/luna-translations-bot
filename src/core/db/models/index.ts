@@ -1,2 +1,2 @@
 export * from './GuildSettings'
-export * from './BotwideData'
+export * from './BotData'

@@ -1,7 +1,7 @@
 import { oneLine } from 'common-tags'
 import { TextChannel } from 'discord.js'
 import { client } from '../../core'
-import { getAllSettings } from '../../core/db'
+import { getAllSettings } from '../../core/db/functions'
 import { GuildSettings } from '../../core/db/models'
 import { StreamerName, streamers } from '../../core/db/streamers'
 import { createEmbed } from '../../helpers/discord'
@@ -17,10 +17,10 @@ async function notifyPost (post: CommunityPost): Promise<void> {
 
   guilds.forEach (g => {
     const subs = g.community.filter (e => e.streamer === streamer!.name)
-    subs.forEach (({ streamer, discordChannel, roleToNotify }) => {
+    subs.forEach (({ streamer, discordCh, roleToNotify }) => {
       const guild = client.guilds.cache.find (gg => gg.id === g._id)
       const ch    = <TextChannel> guild?.channels.cache
-                      .find (ch => ch.id == discordChannel)
+                      .find (ch => ch.id == discordCh)
       ch?.send ({
         content: oneLine`
           :loudspeaker: ${roleToNotify ? '<@&' + roleToNotify + '>' : ''}

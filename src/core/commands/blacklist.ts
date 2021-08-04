@@ -1,6 +1,6 @@
 import { Command, createEmbed, createEmbedMessage, createTxtEmbed, reply, validateRole } from '../../helpers/discord'
 import { oneLine } from 'common-tags'
-import { getSettings, updateSettings } from '../db'
+import { getSettings, updateSettings } from '../db/functions'
 import { Message, Snowflake } from 'discord.js'
 import { config } from '../../config'
 

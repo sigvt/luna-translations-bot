@@ -7,7 +7,7 @@ export const emoji: Record<Name, EmojiCode> = {
   ping:    '<:WatamePing:864533105821220894>',
   tc:      '<:TwitCasting:832638929608900689>',
   yt:      '<:YouTube:832638929802493962>'
-}
+} as const
 
 ///////////////////////////////////////////////////////////////////////////////
 

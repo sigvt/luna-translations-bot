@@ -1,7 +1,12 @@
 /** @file Generic Discord.js helper functions applicable to any bot. */
 import { config } from '../../config'
-import { Guild, GuildMember, Message, Snowflake, } from 'discord.js'
+import { Guild, GuildMember, Message, Snowflake, TextChannel, } from 'discord.js'
 import { client } from '../../core'
+
+export function findTextChannel (id: Snowflake): TextChannel | undefined {
+  const ch = client.channels.cache.find(c => c.id === id)
+  return ch instanceof TextChannel ? ch : undefined
+}
 
 export function isGuild (scrutinee: any): scrutinee is Guild {
   return scrutinee instanceof Guild

@@ -1,8 +1,8 @@
 import { Command, emoji, validateRole } from '../../helpers/discord'
 import { oneLine } from 'common-tags'
 import { Message } from 'discord.js'
-import { validateInputAndModifyEntryList } from '../db/watchFeatures'
-import { init, last } from '../../helpers'
+import { validateInputAndModifyEntryList } from '../db/functions'
+import { init, last } from 'ramda'
 
 const usage = 'youtube <add|remove> <streamer name> <optional:roleID|mention>'
 

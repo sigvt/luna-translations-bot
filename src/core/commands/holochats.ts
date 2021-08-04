@@ -1,7 +1,7 @@
 import { Command, emoji } from '../../helpers/discord'
 import { oneLine } from 'common-tags'
 import { Message } from 'discord.js'
-import {validateInputAndModifyEntryList } from '../db/watchFeatures'
+import {validateInputAndModifyEntryList } from '../db/functions'
 
 const usage = 'holochats <add|remove> <streamer name>'
 

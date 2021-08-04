@@ -1,5 +1,5 @@
 import { Command, createEmbedMessage, reply } from '../../helpers/discord'
-import { getSettings, updateSettings } from '../db'
+import { getSettings, updateSettings } from '../db/functions'
 import { Message } from 'discord.js'
 
 export const mods: Command = {

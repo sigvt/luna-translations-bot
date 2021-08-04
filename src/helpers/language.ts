@@ -1,5 +1,7 @@
 /** @file General helpers wrapping around ECMAScript itself */
 
+import { equals, head, isEmpty, tail } from "ramda"
+
 /**
  * Match expression. Supply it a dictionary for patterns, or Map if you
  * need keys of other types than string.
@@ -51,52 +53,13 @@ export async function asyncFind <T> (
   haystack: T[],
   predicate: (scrutinee: T) => Promise<boolean> | boolean,
 ): Promise<T | undefined> {
-  const doesHeadQualify = await predicate (head (haystack))
-  return empty (haystack) ? undefined
-       : doesHeadQualify  ? head (haystack)
-                          : asyncFind (tail (haystack), predicate)
+    const checkHead = () => predicate (head (haystack)!)
+  return isEmpty (haystack) ? undefined
+       : await checkHead () ? head (haystack)
+                            : asyncFind (tail (haystack), predicate)
 }
 
 export function doNothing (): void {}
-
-export function tryOrDie <T> (
-  tryFn: () => T,
-  catchFn: (e: any) => never = throwIt
-): T {
-  try {
-    return tryFn ()
-  } catch (e) {
-    catchFn (e)
-  }
-}
-
-export function tryOrDo <T> (tryFn: () => T, catchFn: Fn): T | undefined {
-  try {
-    return tryFn ()
-  } catch (e) {
-    catchFn (e)
-  }
-}
-
-export function head <T> (arr: T[]): T {
-  return arr[0]
-}
-
-export function tail <T> (arr: T[]): T[] {
-  return arr.slice (1)
-}
-
-export function init <T> (arr: T[]): T[] {
-  return arr.slice (0, -1)
-}
-
-export function last <T> (arr: T[]): T {
-  return arr[arr.length-1]
-}
-
-export function empty (arr: any[]): boolean {
-  return arr.length === 0
-}
 
 export function iife (fn: Fn) {
   return fn ()
@@ -113,6 +76,12 @@ export function ciEquals (a: string, b: string) {
 export function removeDupes <T> (array: T[]): T[] {
   return [...new Set (array)]
 }
+
+export function removeDupeObjects <T extends object> (array: T[]): T[] {
+  return array.filter ((x, i) => i === array.findIndex (y => equals (x, y)))
+}
+
+
 
 /** Conveys a function has side-effects. Not enforced by compiler. Optional. */
 export type SideEffect = unknown

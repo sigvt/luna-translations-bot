@@ -1,6 +1,6 @@
 import { GuildMember, Intents, Message } from 'discord.js'
 import { isGuildOwner, isBotOwner, hasKickPerms } from './helpers/discord'
-import { isBlacklister, isAdmin } from './core/db'
+import { isBlacklister, isAdmin } from './core/db/functions'
 
 export const config: LunaBotConfig = {
   deeplKey: process.env.DEEPL_KEY,
@@ -22,21 +22,21 @@ export const config: LunaBotConfig = {
 }
 
 export interface PermLevel {
-  level: number,
-  name:  string,
+  level: number
+  name:  string
   check: (x: Message | GuildMember) => boolean | Promise<boolean>
 }
 
 //// PRIVATE ///////////////////////////////////////////////////////////////////
 
 interface LunaBotConfig {
-  deeplKey?:          string,
-  intents:            Intents,
-  logFile:            string,
-  ownerId:            string,
+  deeplKey?:          string
+  intents:            Intents
+  logFile:            string
+  ownerId:            string
   permLevels:         PermLevel[]
-  prefix:             string,
-  token?:             string,
-  twitcastingId?:     string,
+  prefix:             string
+  token?:             string
+  twitcastingId?:     string
   twitcastingSecret?: string
 }

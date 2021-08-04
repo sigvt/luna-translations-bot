@@ -11,9 +11,9 @@ export class WatchFeatureSettings {
   public streamer: StreamerName
 
   @prop ({ type: () => String, required: true })
-  public discordChannel: Snowflake
+  public discordCh: Snowflake
 
-  @prop ()
+  @prop ({ type: () => String })
   public roleToNotify?: Snowflake
 }
 

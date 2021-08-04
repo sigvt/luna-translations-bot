@@ -1,11 +1,14 @@
 import fetch, { RequestInit } from 'node-fetch'
+import { debug } from './logging'
 
 export async function getJson (
   endpoint: string,
   options?: RequestInit
 ): Promise<any> {
   const resp = await fetch (endpoint, options)
-  return resp.json ()
+  if (resp.status === 200) return resp.json ()
+  debug (await resp.text ())
+  throw new Error ('fetch error code non 200')
 }
 
 export async function getText (

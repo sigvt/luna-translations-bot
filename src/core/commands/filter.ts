@@ -1,5 +1,5 @@
-import { Command, createEmbed, createEmbedMessage, reply } from '../../helpers/discord'
-import { getSettings, updateSettings } from '../db'
+import { Command, createEmbed, reply } from '../../helpers/discord'
+import { getSettings, updateSettings } from '../db/functions'
 import { EmbedFieldData, Message } from 'discord.js'
 import { config } from '../../config'
 import { oneLine } from 'common-tags'
@@ -25,6 +25,7 @@ export const filter: Command = {
     const isPatternValid = str.length > 0
     const isValid        = isListValid && isVerbValid && isPatternValid
     const modifyIfValid  = isValid ? modifyList : showHelp
+
     modifyIfValid (msg, <ValidList> whichList, <ValidVerb> verb, str)
   }
 }
