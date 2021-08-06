@@ -3,7 +3,7 @@ import { config } from '../../config'
 import { log, doNothing } from '../../helpers'
 import { Message } from 'discord.js'
 import { getPermLevel } from '../db/functions'
-import { isNil } from 'ramda'
+import { isNil, head } from 'ramda'
 import { oneLine } from 'common-tags'
 import {
   isDm, createEmbed, emoji, Command, reply, mentionsMe, isBot
@@ -31,7 +31,7 @@ function lacksBotPrefix (msg: Message): boolean {
 }
 
 function isInvalidCommand (msg: Message): boolean {
-  return getCommandWords (msg) [0] |> findCommand |> isNil
+  return getCommandWords (msg) |> head |> findCommand |> isNil
 }
 
 function getCommandWords (msg: Message) {
@@ -40,9 +40,10 @@ function getCommandWords (msg: Message) {
                     .split (/ +/g)
 }
 
-function findCommand (cmd: string): Command | undefined {
-  return commands.get (cmd)
-      || commands.find (x => x.config.aliases.includes (cmd))
+function findCommand (cmd?: string): Command | undefined {
+  return isNil (cmd)
+    ? undefined
+    : commands.get (cmd) || commands.find (x => x.config.aliases.includes (cmd))
 }
 
 async function isAuthorTooLowLevel (msg: Message): Promise<boolean> {

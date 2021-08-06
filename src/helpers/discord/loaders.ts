@@ -1,9 +1,9 @@
 import { readdirSync } from 'fs'
 import { log } from '../../helpers'
 import { Message } from 'discord.js'
-import { filter, map } from 'ramda'
-import { Map } from 'immutable'
+import { Map as ImmutableMap } from 'immutable'
 import path from 'path'
+import { isNotNil } from '../language'
 
 export function loadCommand (cmdFile: string): Command {
   return loadModule ('commands', cmdFile)
@@ -13,11 +13,11 @@ export function loadEvent (evtFile: string): BotEvent {
   return loadModule ('events', evtFile)
 }
 
-export function loadAllCommands (): Map<CommandName, Command> {
+export function loadAllCommands (): ImmutableMap<CommandName, Command> {
   return loadAll ('commands')
 }
 
-export function loadAllEvents (): Map<EventName, BotEvent> {
+export function loadAllEvents (): ImmutableMap<EventName, BotEvent> {
   return loadAll ('events')
 }
 
@@ -54,17 +54,18 @@ function loadModule (dir: string, moduleFile: string): Module {
   return moduleObj
 }
 
-function loadAll (type: string): Map<string, Module> {
-  const modules = resolveRelativePath (`../../core/${type}`)
-    |> readdirSync
-    |> filter (isNotSourceMapFile)
-    |> map ((f: string) => [path.basename(f, '.js'), loadModule (type, f)])
-    |> Map
+function loadAll (type: string): ImmutableMap<string, Module> {
+  const files   = readdirSync (resolveRelativePath (`../../core/${type}`))
+  const modules = files
+    .filter (isNotSourceMapFile)
+    .map ((f: string) => [path.basename(f, '.js'), loadModule (type, f)])
+    .filter (isNotNil)
+    |> ImmutableMap
     |> filterUndefinedModules
 
-  log(`Loaded ${modules.size} ${type}.`)
+  log (`Loaded ${modules.size} ${type}.`)
 
-  return modules as Map<string, Module>
+  return modules as ImmutableMap<string, Module>
 }
 
 function isNotSourceMapFile (file: string) {
@@ -75,6 +76,8 @@ function resolveRelativePath (target: string) {
   return path.resolve(__dirname, target)
 }
 
-function filterUndefinedModules (m: Map<string, Module>): Map<string, Module> {
+function filterUndefinedModules (
+  m: ImmutableMap<string, Module>
+): ImmutableMap<string, Module> {
   return m.filter (module => module !== undefined)
 }

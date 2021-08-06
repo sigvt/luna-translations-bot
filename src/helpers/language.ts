@@ -16,7 +16,7 @@ export function match (
     ? patterns.get (scrutinee ?? 'default') ?? (() => undefined)
     : typeof scrutinee === 'string'
     ? (patterns[scrutinee] ?? 'default') ?? (() => undefined)
-    : new TypeError ('Invalid scrutinee type. Try using a Map.') |> throwIt
+    : throwIt (new TypeError ('Invalid scrutinee type. Try using a Map.'))
 }
 
 export function sleep (ms: number): Promise<void> {
@@ -41,10 +41,6 @@ export async function asyncFind <T> (
 
 export function doNothing (): void {}
 
-// export function iife (fn: Fn) {
-  // return fn ()
-// }
-
 export function toTitleCase (str: string): string {
   return str.toLowerCase ().replace (/\b(\w)/g, c => c.toUpperCase ())
 }
@@ -64,22 +60,5 @@ export function removeDupeObjects <T extends object> (array: T[]): T[] {
 export function isNotNil (scrutinee: unknown): boolean {
   return !isNil (scrutinee)
 }
-
-/**
- * Same as Map.prototype.set except it returns a new map (use with F# pipes)
- * Usage: oldMap |> setKey (key, value)
- * */
-export function setKey (
-  key: any, value: any
-): <K, V> (m: Map<K, V>) => Map<K, V> {
-  return <K, V> (oldMap: Map<K, V>) => {
-    const newMap = new Map (oldMap)
-    newMap.set (key, value)
-    return newMap
-  }
-}
-
-/** Conveys a function has side-effects. Not enforced by compiler. Optional. */
-export type SideEffect = unknown
 
 export type Fn = (...args: unknown[]) => unknown

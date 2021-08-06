@@ -8,7 +8,7 @@ import { emoji, findTextChannel, send } from '../../helpers/discord'
 import { Message, Snowflake, TextChannel } from 'discord.js'
 import { tl } from '../deepl'
 import { addToBotRelayHistory, addToGuildRelayHistory, getSubbedGuilds } from '../../core/db/functions'
-import { oneLine } from 'common-tags'
+import { oneLine, stripIndent } from 'common-tags'
 import { isBlacklisted, isHoloID, isStreamer, isTl } from './commentBooleans'
 import { GuildSettings, WatchFeature, WatchFeatureSettings } from '../../core/db/models'
 import { retryIfStillUpThenPostLog } from './closeHandler'
@@ -80,11 +80,10 @@ function relayHolochat (
   { discordCh, from, to, content, deepLTl, inStream }: HolochatRelayData
 ): void {
   const cleaned = content.replaceAll ('`', "'")
-  send (discordCh, `
-    ${emoji.holo} **${from}** in ${to}'s chat: \`${cleaned}\`
-    ${deepLTl ? `${emoji.deepl}**DeepL:** \`${deepLTl}\`` : ''}
-    \n<https://youtu.be/${inStream}>
-  `)
+  const line1 = `${emoji.holo} **${from}** in ${to}'s chat: \`${cleaned}\``
+  const line2 = deepLTl ? `\n${emoji.deepl}**DeepL:** \`${deepLTl}\`` : ''
+  const line3 = `\n<https://youtu.be/${inStream}>`
+  send (discordCh, line1 + line2 + line3)
 }
 
 function relayTlOrStreamerComment (

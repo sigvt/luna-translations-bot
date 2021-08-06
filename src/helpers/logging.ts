@@ -1,5 +1,5 @@
 import chalk from 'chalk'
-import { match, SideEffect } from './'
+import { match } from './'
 import fs from 'fs'
 import { config } from '../config'
 
@@ -25,7 +25,7 @@ export function debug (data: any) {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-function logger <T> (category: string, data: T): T & SideEffect {
+function logger <T> (category: string, data: T): T {
   const logFile = fs.createWriteStream (config.logFile, { flags: 'a' })
   const colorString = match (category, {
     log:   chalk.bgBlack,
@@ -36,8 +36,7 @@ function logger <T> (category: string, data: T): T & SideEffect {
 
   const timeYYYYMMDD = new Date ().toISOString ().substr (0, 10)
   const timeHHMM     = new Date ().toISOString ().substr (11, 5)
-
-  const label = ` ${category.toUpperCase ()} ` |> colorString
+  const label        = colorString (` ${category.toUpperCase ()} `)
 
   console.log   (`${timeHHMM} ${label} ${data}`)
   logFile.write (`${category} | ${timeYYYYMMDD} ${timeHHMM} | ${data}\n`)

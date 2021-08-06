@@ -3,7 +3,7 @@ import { getPermLevel, getSettings } from '../db/functions'
 import { EmbedField, Message } from 'discord.js'
 import { Map, Set } from 'immutable'
 import { GuildSettings, WatchFeatureSettings, WatchFeature } from '../db/models'
-import { debug, log, toTitleCase } from '../../helpers'
+import { debug, toTitleCase } from '../../helpers'
 import { head, isEmpty } from 'ramda'
 import { Command, createEmbed, emoji, reply } from '../../helpers/discord'
 import { oneLine } from 'common-tags'
@@ -63,7 +63,6 @@ function getCategoryHelp (category: string) {
 }
 
 function getMainHelp (categories: Set<string>, settings: GuildSettings) {
-  debug ('foobar')
   return createEmbed ({
     description:
       ':candy: I am the Cutest Genius Sexy Beautiful Professor! :candy:',

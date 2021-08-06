@@ -1,6 +1,6 @@
 import { DocumentType } from '@typegoose/typegoose'
 import { UpdateQuery } from 'mongoose'
-import { setKey } from '../../../helpers'
+import { setKey } from '../../../helpers/immutableES6MapFunctions'
 import { VideoId } from '../../../modules/holodex/frames'
 import { BotData, BotDataDb } from '../models'
 import { RelayedComment } from '../models/RelayedComment'
