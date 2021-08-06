@@ -1,7 +1,7 @@
 import chalk from 'chalk'
 import { match, SideEffect } from './'
 import fs from 'fs'
-// import { config } from '../config'
+import { config } from '../config'
 
 /** Logs formatted message to console and log file. */
 export function log (data: any) {
@@ -25,9 +25,8 @@ export function debug (data: any) {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-const logFile = fs.createWriteStream ('debug.log', { flags: 'a' })
-
 function logger <T> (category: string, data: T): T & SideEffect {
+  const logFile = fs.createWriteStream (config.logFile, { flags: 'a' })
   const colorString = match (category, {
     log:   chalk.bgBlack,
     warn:  chalk.black.bgYellowBright,

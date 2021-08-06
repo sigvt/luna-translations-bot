@@ -5,7 +5,7 @@ import { isBlacklister, isAdmin } from './core/db/functions'
 export const config: LunaBotConfig = {
   deeplKey: process.env.DEEPL_KEY,
   intents:  new Intents (["GUILDS","GUILD_MESSAGES","DIRECT_MESSAGES"]),
-  logFile:  'debug2.log',
+  logFile:  'debug3.log',
   ownerId:  '150696503428644864',
   permLevels: [
     { level: 0,  name: 'User',        check: () => true },

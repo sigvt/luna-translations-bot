@@ -1,12 +1,13 @@
 import { commands } from '../lunaBotClient'
 import { getPermLevel, getSettings } from '../db/functions'
-import { Message } from 'discord.js'
+import { EmbedField, Message } from 'discord.js'
 import { Map, Set } from 'immutable'
-import { GuildSettings } from '../db/models'
-import { log, toTitleCase } from '../../helpers'
-import { head } from 'ramda'
-import { Command, createEmbed, reply } from '../../helpers/discord'
+import { GuildSettings, WatchFeatureSettings, WatchFeature } from '../db/models'
+import { debug, log, toTitleCase } from '../../helpers'
+import { head, isEmpty } from 'ramda'
+import { Command, createEmbed, emoji, reply } from '../../helpers/discord'
 import { oneLine } from 'common-tags'
+import { config } from '../../config'
 
 
 export const help: Command = {
@@ -31,7 +32,6 @@ export const help: Command = {
                           : getMainHelp (categories, await getSettings (msg))
 
     reply (msg, helpToShow)
-    log (await getSettings (msg))
   }
 }
 
@@ -52,7 +52,7 @@ function getCategoryHelp (category: string) {
   const fields = commands
     .filter (cmd => cmd.help.category === category)
     .map (cmd => ({
-      name:   cmd.help.usage,
+      name:   config.prefix + cmd.help.usage,
       value:  cmd.help.description,
       inline: false
     }))
@@ -62,108 +62,73 @@ function getCategoryHelp (category: string) {
   return createEmbed ({ fields })
 }
 
-function getMainHelp (categories: Set<string>, settings?: GuildSettings) {
-  log ('not implemented')
-  return createEmbed ({  })
+function getMainHelp (categories: Set<string>, settings: GuildSettings) {
+  debug ('foobar')
+  return createEmbed ({
+    description:
+      ':candy: I am the Cutest Genius Sexy Beautiful Professor! :candy:',
+    fields: [
+      ...getCategoryFields (categories),
+      getSettingsField (settings),
+      getBotManagerField (settings)
+    ]
+  }, true)
 }
 
-// exports.run = (client, message, args, level) => {
+function getCategoryFields (categories: Set<string>): Set<EmbedField> {
+  return categories.map (category => ({
+    name: category,
+    value: `${config.prefix}help ${category.toLowerCase ()}`,
+    inline: true
+  }))
+}
 
-  // const showMainHelp = (categories) => {
-    // const sets = message.settings
-    // const hasRelay = sets.streamer && sets.streamChannel
-    // const hasYT = sets.youtubeStreamer && sets.youtubeChannel
-    // const hasTC = sets.twitcastingStreamer && sets.twitcastingChannel
-    // const hasStalk = sets.stalkStreamer && sets.stalkChannel
-    // const hasCommunity = sets.communityStreamer && sets.communityChannel
-    // const ytRoleObj = sets.youtubeRole
-    // const ytRole = ytRoleObj ? `<@&${ytRoleObj.id}>` : 'no one'
-    // const tcRoleObj = sets.twitcastingRole
-    // const tcRole = tcRoleObj ? `<@&${tcRoleObj.id}>` : 'no one'
-    // const communityRoleObj = sets.communityRole
-    // const communityRole = communityRoleObj ? `<@&${communityRoleObj.id}>` : 'no one'
+function getSettingsField (
+  { relay, holochats, community, youtube, twitcasting }: GuildSettings
+): EmbedField {
+  return {
+    name: 'Current settings', inline: false,
+    value: `
+      :speech_balloon: **Translation relay:** ${getWatchList ('relay', relay)}
+      ${emoji.holo} **Live chat cameos:** ${getWatchList ('holochats', holochats)}
+      :family_mmbb: **Community posts:** ${getWatchList ('community', community)}
+      ${emoji.yt} **YouTube lives:** ${getWatchList ('youtube', youtube)}
+      ${emoji.tc} **TwitCasting lives:** ${getWatchList ('twitcasting', twitcasting)}
+    `
+  }
+}
 
-    // const relayCurrent =
-      // ':speech_balloon: **Translation relay:** '
-      // + (hasRelay
-        // ? `${sets.streamer} in ${sets.streamChannel}`
-        // : 'No one yet. Run `tl.relay`')
-    // const stalkCurrent =
-      // '\n<:Hololive:832638929919803422> **Live chat cameos:** '
-      // + (hasStalk
-        // ? `${sets.stalkStreamer} in ${sets.stalkChannel}`
-        // : 'No one yet. Run `tl.holochats`')
-    // const communityCurrent =
-      // '\n :family_mmbb: **Community posts:** '
-      // + (hasCommunity
-        // ? `${sets.communityStreamer} in ${sets.communityChannel} @mentioning ${communityRole}.`
-        // : 'No one yet. Run `tl.community`')
-    // const ytCurrent =
-      // '\n <:YouTube:832638929802493962> **YouTube lives:** '
-      // + (hasYT
-        // ? `${sets.youtubeStreamer} in ${sets.youtubeChannel} @mentioning ${ytRole}.`
-        // : 'No one yet. Run `tl.youtube`')
-    // const tcCurrent =
-      // '\n<:TwitCasting:832638929608900689> **TwitCasting lives:** '
-      // + (hasTC
-        // ? `${sets.twitcastingStreamer} in ${sets.twitcastingChannel} @mentioning ${tcRole}.`
-        // : 'No one yet. Run `tl.twitcast`')
+function getBotManagerField (settings: GuildSettings): EmbedField {
+  return {
+    name: 'Bot managers', inline: false,
+    value: `
+      :tools: **Admins:** ${getRoleList ('admins', settings)}
+      :no_entry: **Blacklisters:** ${getRoleList ('blacklisters', settings)}
+    `,
+  }
+}
 
-    // const currentSettings =
-      // relayCurrent + stalkCurrent + communityCurrent + ytCurrent + tcCurrent
+function getWatchList (
+  feature: WatchFeature, entries: WatchFeatureSettings[]
+): string {
+  const first = head (entries)
+  const firstMention = first?.roleToNotify
+                       ? `mentioning <@&${first.roleToNotify}>`
+                       : ''
+  const templates = {
+    empty: `None. Run \`${config.prefix}.${feature}\``,
+    one: `${first!.streamer} in <#${first!.discordCh}> ${firstMention}`,
+    many: `Multiple. Run \`${config.prefix}${feature}\``
+  }
 
-    // const hasAdminRole = sets.adminRole
-    // const hasModRole = sets.modRole
-    // const botManagers =
-      // `:tools: **Admins:**`
-      // + (hasAdminRole ? `<@&${sets.adminRole.id}>`
-                      // : 'none yet. run `tl.admins` as server owner')
-      // +'\n:no_entry: **Blacklisters: **'
-      // + (hasModRole ? `<@&${sets.modRole.id}>`
-                    // : 'none yet. run `tl.blacklisters`')
+  return isEmpty (entries) ? templates.empty
+    : entries.length === 1 ? templates.one
+                           : templates.many
+}
 
-    // const embed = client.makeEmbed({
-      // 'description':
-        // ':candy: I am the Cutest Genius Sexy Beautiful Professor! :candy: ',
-      // 'fields': [
-        // ...categories.map(cat => ({
-          // 'name': cat,
-          // 'value': `\`tl.help ${cat.toLowerCase()}\``,
-          // 'inline': true,
-        // })),
-        // {
-          // 'name': 'Current settings',
-          // 'value': currentSettings
-        // },
-        // {
-          // 'name': 'Bot managers',
-          // 'value': botManagers
-        // },
-      // ]
-    // })
-
-    // return message.reply({embed})
-  // }
-
-  // const showCategoryHelp = (commands, category) => {
-    // const fields = commands.reduce((helpFields, cmd) => {
-      // const cmdCat = cmd.help.category.toLowerCase()
-      // if (cmdCat !== category) return helpFields
-      // return [
-        // ...helpFields,
-        // {
-          // 'name': cmd.help.usage,
-          // 'value': cmd.help.description,
-        // }
-      // ]
-    // }, [])
-
-    // const embed = client.makeEmbed({
-      // "fields": fields
-    // })
-
-    // return message.reply({embed})
-  // }
-
-  // main()
-// }
+function getRoleList (
+  type: 'admins' | 'blacklisters', settings: GuildSettings
+): string {
+  return settings[type].map (id => `<@&${id}>`).join ('')
+      || `None yet. run ${config.prefix}${type}`
+}

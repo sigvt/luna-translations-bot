@@ -15,17 +15,16 @@ import { retryIfStillUpThenPostLog } from './closeHandler'
 import { logCommentData } from './logging'
 
 frameEmitter.on ('frame', (frame: DexFrame) => {
-  debug (`emitted ${frame.channel.name}`)
   if (isPublic (frame) && isSupported (frame.channel.id)) setupRelay (frame)
 })
 
 export function setupRelay (frame: DexFrame): void {
   const chat = getChatProcess (frame.id)
 
-  chat.stdout.removeListener ('data', doNothing)
+  chat.stdout.removeAllListeners ('data')
   chat.stdout.on ('data', (data: string) => processComments (frame, data))
 
-  chat.removeListener ('close', doNothing)
+  chat.removeAllListeners ('close')
   chat.on ('close', exitCode => retryIfStillUpThenPostLog (frame, exitCode))
 }
 
@@ -70,7 +69,7 @@ function processComments (frame: DexFrame, data: string): void {
           if (isStreamer (cmt.id) && !cmt.isOwner)  {
             relayHolochat ({ ...data, to: streamer!.name, content: cmt.body, })
           }
-          relayTl ({...data, cmt, g, frame, })
+          relayTlOrStreamerComment ({...data, cmt, g, frame, })
         })
       })
     })
@@ -80,15 +79,15 @@ function processComments (frame: DexFrame, data: string): void {
 function relayHolochat (
   { discordCh, from, to, content, deepLTl, inStream }: HolochatRelayData
 ): void {
-  send (discordCh, oneLine`
-    ${emoji.holo} **${from}** in ${to}'s chat:
-    \`${content.replaceAll ('`', "''")}\`
-    ${deepLTl ? `\n\n${emoji.deepl}**DeepL:** \`${deepLTl}\`` : ''}
+  const cleaned = content.replaceAll ('`', "'")
+  send (discordCh, `
+    ${emoji.holo} **${from}** in ${to}'s chat: \`${cleaned}\`
+    ${deepLTl ? `${emoji.deepl}**DeepL:** \`${deepLTl}\`` : ''}
     \n<https://youtu.be/${inStream}>
   `)
 }
 
-function relayTl (
+function relayTlOrStreamerComment (
   { discordCh, from, inStream, deepLTl, cmt, g, frame }: TlRelayData
 ): void {
   const mustPost = cmt.isOwner
@@ -106,9 +105,10 @@ function relayTl (
 
   const author = isTl (cmt.body, g) ? `||${from}:||` : `**${from}:**`
   const text   = cmt.body.replaceAll ('`', "''")
+  const tl     = deepLTl ? `\n${emoji.deepl}**DeepL:** \`${deepLTl}\`` : ''
 
   if (mustPost) {
-    send (discordCh, `${premoji} ${author} \`${text}\`${url}`)
+    send (discordCh, `${premoji} ${author} \`${text}\`${tl}${url}`)
     .then (msg => saveComment (cmt, frame, 'guild', g._id, msg))
     .catch (debug)
   }

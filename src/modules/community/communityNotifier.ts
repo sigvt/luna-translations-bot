@@ -4,7 +4,7 @@ import { client } from '../../core'
 import { getAllSettings } from '../../core/db/functions'
 import { GuildSettings } from '../../core/db/models'
 import { StreamerName, streamers } from '../../core/db/streamers'
-import { createEmbed } from '../../helpers/discord'
+import { createEmbed, send } from '../../helpers/discord'
 import { communityEmitter } from './communityEmitter'
 import { CommunityPost } from './getLatestPost'
 
@@ -21,7 +21,7 @@ async function notifyPost (post: CommunityPost): Promise<void> {
       const guild = client.guilds.cache.find (gg => gg.id === g._id)
       const ch    = <TextChannel> guild?.channels.cache
                       .find (ch => ch.id == discordCh)
-      ch?.send ({
+      if (ch) send (ch, {
         content: oneLine`
           :loudspeaker: ${roleToNotify ? '<@&' + roleToNotify + '>' : ''}
           ${streamer} just published a community post!\n
