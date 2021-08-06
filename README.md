@@ -11,6 +11,14 @@ It is being used on over 50 servers with an average of over 11,000 users each.
 - Sending notifications for community posts, YouTube streams, TwitCasting streams
 - Easy translator blacklisting system 
 
+## Coding style (for recruiters)
+
+To get a feel for my programming style without knowing how Discord bots function, compare my "message received" event handler to the discord.js community guide's and to Discordeno's.
+
+- [Mine](https://github.com/luna-translations-bot/luna-translations-bot/blob/main/src/core/events/messageCreate.ts)
+- [Discord.js's community guide](https://github.com/AnIdiotsGuide/guidebot/blob/master/events/message.js)
+- [Discordeno's](https://github.com/discordeno/template/blob/main/src/events/message_create.ts)
+
 ## Screenshots
 
 ![image](https://user-images.githubusercontent.com/1331748/128500085-9126b768-8dc8-42d2-96e2-1c8e25b5b9c9.png)
