@@ -2,6 +2,7 @@ import merge from 'ts-deepmerge'
 import { client } from '../../core/'
 import {
   DMChannel,
+  PartialDMChannel,
   Message,
   MessageAttachment,
   MessageEmbed,
@@ -11,6 +12,7 @@ import {
   MessageOptions,
   MessagePayload,
   NewsChannel,
+  TextBasedChannels,
   TextChannel,
   ThreadChannel,
 } from 'discord.js'
@@ -102,14 +104,16 @@ export async function send (
 //// PRIVATE //////////////////////////////////////////////////////////////////
 
 function canBotPost (
-  channel: TextChannel | ThreadChannel | NewsChannel | DMChannel
+  channel: TextBasedChannels
 ): boolean {
-  if (channel instanceof NewsChannel || channel instanceof DMChannel) {
-    warn ('Tried to post in NewsChannel or DMChannel.')
+  const unsupported = [NewsChannel, DMChannel]
+  if (unsupported.some (type => channel instanceof type)) {
+    warn ('Tried to post in unsupported channel type.')
     return false
   }
-  return !!channel.guild.me
-      && channel.permissionsFor (channel.guild.me!).has ('SEND_MESSAGES')
+  const validated = <TextChannel | ThreadChannel> channel
+  return !!validated.guild.me
+      && validated.permissionsFor (validated.guild.me!).has ('SEND_MESSAGES')
 }
 
 function getEmbedSelfAuthor (): MessageEmbedAuthor {
