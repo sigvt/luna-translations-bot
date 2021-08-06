@@ -5,6 +5,7 @@ import { config } from '../../config'
 import { client } from '../lunaBotClient' // for eval scope
 import { getSettings, updateSettings } from '../db/functions'
 import { tryOrDefault } from '../../helpers/tryCatch'
+import { reply } from '../../helpers/discord/sendMessages'
 
 export const run: Command = {
   config: {
@@ -18,7 +19,7 @@ export const run: Command = {
   },
   callback: async (msg: Message, args: string[]): Promise<void> => {
     const output = await processCode (msg, args)
-    msg.reply('```' + output + '```')
+    reply (msg, undefined, '```' + output + '```')
   }
 }
 

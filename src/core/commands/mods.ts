@@ -14,8 +14,8 @@ export const mods: Command = {
   },
   callback: async (msg: Message): Promise<void> => {
     const settings   = await getSettings (msg)
-    const toggleMods = settings.deepl === true ? disableMods
-                                               : enableMods
+    const toggleMods = settings.modMessages === true ? disableMods
+                                                     : enableMods
     toggleMods (msg)
   }
 }

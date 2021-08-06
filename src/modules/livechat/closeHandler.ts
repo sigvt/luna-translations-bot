@@ -6,7 +6,7 @@ import { DexFrame, getFrameList, VideoId, YouTubeChannelId } from "../holodex/fr
 import { deleteChatProcess } from "./chatProcesses"
 import { setupRelay } from "./chatRelayer"
 
-export async function retryFiveTimesThenPostLog (
+export async function retryIfStillUpThenPostLog (
   frame: DexFrame, exitCode: number | null
 ): Promise<void> {
   const allFrames = await getFrameList ()

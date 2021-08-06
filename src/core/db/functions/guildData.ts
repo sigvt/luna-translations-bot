@@ -7,8 +7,8 @@ import { isGuild } from '../../../helpers/discord'
 import { deleteKey, setKey } from '../../../helpers/immutableES6MapFunctions'
 import { VideoId } from '../../../modules/holodex/frames'
 import { client } from '../../lunaBotClient'
-import { GuildData, GuildDataDb } from '../models/GuildData'
 import { RelayedComment } from '../models/RelayedComment'
+import { GuildData, GuildDataDb } from '../models/GuildData'
 
 export type ImmutableRelayHistory = ImmutableMap<VideoId, RelayedComment[]>
 
@@ -22,9 +22,23 @@ export async function getAllRelayHistories ()
 
 export async function getGuildRelayHistory (
   g: Guild | Snowflake, videoId: VideoId
-): Promise<RelayedComment[]> {
+): Promise<RelayedComment[]>
+export async function getGuildRelayHistory (
+  g: Guild | Snowflake
+): Promise<ImmutableRelayHistory>
+export async function getGuildRelayHistory (
+  g: Guild | Snowflake, videoId?: VideoId
+): Promise<RelayedComment[] | ImmutableRelayHistory> {
   const data = await getGuildData (g)
-  return data.relayHistory.get (videoId) ?? []
+  return videoId ? data.relayHistory.get (videoId) ?? []
+                 : ImmutableMap (data.relayHistory)
+}
+
+export async function getFlatGuildRelayHistory (
+  g: Guild | Snowflake
+): Promise<RelayedComment[]> {
+  const histories = await getGuildRelayHistory (g)
+  return histories.toList ().toArray ().flat ()
 }
 
 export async function addToGuildRelayHistory (
@@ -34,9 +48,7 @@ export async function addToGuildRelayHistory (
   const history    = (await getGuildData (g)).relayHistory
   const cmts       = history.get (videoId) ?? []
   const newHistory = history |> setKey (videoId, [...cmts, cmt])
-  const update     = { relayHistory: newHistory }
-  const query      = [{ _id }, update, { upsert: true, new: true }] as const
-  await GuildDataDb.findOneAndUpdate (...query)
+  updateGuildData (_id, { relayHistory: newHistory })
 }
 
 export async function deleteRelayHistory (
@@ -48,10 +60,10 @@ export async function deleteRelayHistory (
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-//
+
 export type NewData = UpdateQuery<DocumentType<GuildData>>
 
-async function updateGuildData (
+export async function updateGuildData (
   _id: Snowflake, update: NewData
 ): Promise<DocumentType<GuildData>> {
   return GuildDataDb

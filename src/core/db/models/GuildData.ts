@@ -11,10 +11,8 @@ export class GuildData {
   @prop ({ type: () => String })
   public _id: Snowflake
 
-  @prop({ type: () => RelayedComment, default: () => new Map () }, WhatIsIt.MAP)
-  relayHistory: RelayHistory
+  @prop({ type: () => [RelayedComment], default: () => new Map () }, WhatIsIt.MAP)
+  relayHistory: Map<VideoId, RelayedComment[]>
 }
-
-export type RelayHistory = Map<VideoId, RelayedComment[]>
 
 export const GuildDataDb = getModelForClass (GuildData)

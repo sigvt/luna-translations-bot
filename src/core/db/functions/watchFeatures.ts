@@ -23,10 +23,10 @@ export function validateInputAndModifyEntryList (
   const isVerbValid       = validVerbs.includes (verb as any)
   const validatedVerb     = <ValidVerb> verb
   const validatedStreamer = <StreamerName> findStreamerName (streamer)
-  const modifyIfValid     = !isVerbValid ? showHelp
-                          : !streamer    ? replyStreamerList
-                                         : modifyEntryList
-
+  const modifyIfValid     = !isVerbValid       ? showHelp
+                          : !validatedStreamer ? replyStreamerList
+                                               : modifyEntryList
+                                         
   modifyIfValid ({ msg, usage, feature, role, add, remove,
     verb: validatedVerb,
     streamer: validatedStreamer,

@@ -1,4 +1,4 @@
-import { debug } from '../../helpers'
+import { debug, doNothing } from '../../helpers'
 import { tryOrDefault } from '../../helpers/tryCatch'
 import { frameEmitter } from '../holodex/frameEmitter'
 import { DexFrame, isPublic, VideoId } from '../holodex/frames'
@@ -9,9 +9,9 @@ import { Message, Snowflake, TextChannel } from 'discord.js'
 import { tl } from '../deepl'
 import { addToBotRelayHistory, addToGuildRelayHistory, getSubbedGuilds } from '../../core/db/functions'
 import { oneLine } from 'common-tags'
-import { isHoloID, isStreamer, isTl } from './commentBooleans'
+import { isBlacklisted, isHoloID, isStreamer, isTl } from './commentBooleans'
 import { GuildSettings, WatchFeature, WatchFeatureSettings } from '../../core/db/models'
-import { retryFiveTimesThenPostLog } from './closeHandler'
+import { retryIfStillUpThenPostLog } from './closeHandler'
 import { logCommentData } from './logging'
 
 frameEmitter.on ('frame', frame => {
@@ -21,8 +21,11 @@ frameEmitter.on ('frame', frame => {
 export function setupRelay (frame: DexFrame): void {
   const chat = getChatProcess (frame.id)
 
+  chat.stdout.removeListener ('data', doNothing)
   chat.stdout.on ('data', (data: string) => processComments (frame, data))
-  chat.on ('close', exitCode => retryFiveTimesThenPostLog (frame, exitCode))
+
+  chat.removeListener ('close', doNothing)
+  chat.on ('close', exitCode => retryIfStillUpThenPostLog (frame, exitCode))
 }
 
 export interface ChatComment {
@@ -41,9 +44,8 @@ function processComments (frame: DexFrame, data: string): void {
     const features: WatchFeature[] = ['relay', 'holochats']
     const guilds     = await getSubbedGuilds (frame.channel.id, features)
     const streamer   = streamers.find (s => s.ytId === frame.channel.id)
-    const author     = streamers.find (s => s.ytId === cmt.id)?.name
     const mustDeepL  = guilds.some (g => g.deepl)
-                    || isStreamer (cmt.id) && !isHoloID (streamer)
+                    && isStreamer (cmt.id) && !isHoloID (streamer)
     const deepLTl    = mustDeepL ? await tl (cmt.body) : undefined
     const mustShowTl = mustDeepL && deepLTl !== cmt.body
 
@@ -55,7 +57,7 @@ function processComments (frame: DexFrame, data: string): void {
           const discordCh = findTextChannel (e.discordCh)
           const data: RelayData = {
             discordCh: discordCh!,
-            from:      author!,
+            from:      cmt.name,
             inStream:  frame.id,
             deepLTl:   mustShowTl ? deepLTl : undefined,
           }
@@ -64,12 +66,10 @@ function processComments (frame: DexFrame, data: string): void {
             debug (`Problem with watch entry ${g._id} / ${e.discordCh}`)
             return
           }
-          if (isStreamer (cmt.id))  {
+          if (isStreamer (cmt.id) && !cmt.isOwner)  {
             relayHolochat ({ ...data, to: streamer!.name, content: cmt.body, })
           }
-          if (isTl (cmt.body, g)) {
-            relayTl ({...data, cmt, g, frame, })
-          }
+          relayTl ({...data, cmt, g, frame, })
         })
       })
     })
@@ -82,7 +82,7 @@ function relayHolochat (
   send (discordCh, oneLine`
     ${emoji.holo} **${from}** in ${to}'s chat:
     \`${content.replaceAll ('`', "''")}\`
-    ${deepLTl ? `\n${emoji.deepl}**DeepL:** \`${deepLTl}\`` : ''}
+    ${deepLTl ? `\n\n${emoji.deepl}**DeepL:** \`${deepLTl}\`` : ''}
     \n<https://youtu.be/${inStream}>
   `)
 }
@@ -91,7 +91,7 @@ function relayTl (
   { discordCh, from, inStream, deepLTl, cmt, g, frame }: TlRelayData
 ): void {
   const mustPost = cmt.isOwner
-                || isTl (cmt.body, g)
+                || (isTl (cmt.body, g) && !isBlacklisted (cmt.id, g))
                 || isStreamer (cmt.id)
                 || (cmt.isMod && g.modMessages)
 
@@ -100,8 +100,8 @@ function relayTl (
                                       : ':tools:'
 
   const url = frame.status === 'live' ? ''
-            : deepLTl                 ? `| https://youtu.be/${inStream}`
-                                      : `\nhttps://youtu.be/${inStream}`
+            : deepLTl                 ? `| <https://youtu.be/${inStream}>`
+                                      : `\n<https://youtu.be/${inStream}>`
 
   const author = isTl (cmt.body, g) ? `||${from}:||` : `**${from}:**`
   const text   = cmt.body.replaceAll ('`', "''")

@@ -14,9 +14,9 @@ export function logCommentData (
     cameo: `Cameo: ${cmt.name} | ${frame.channel.name} (${frame.id})`
   }
 
-  if (cmt.isOwner)         log (templates.owner)
-  if (cmt.isMod)           log (templates.mod)
-  if (isTl (cmt.body))     log (templates.tl)
-  if (isStreamer (cmt.id)) log (templates.cameo)
+  if (cmt.isOwner)         return log (templates.owner)
+  if (isStreamer (cmt.id)) return log (templates.cameo)
+  if (cmt.isMod)           return log (templates.mod)
+  if (isTl (cmt.body))     return log (templates.tl)
 }
 

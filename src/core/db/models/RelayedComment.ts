@@ -27,4 +27,3 @@ export class RelayedComment {
   @prop ({ required: true })
   public absoluteTime: number
 }
-

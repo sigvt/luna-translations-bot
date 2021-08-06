@@ -6,12 +6,12 @@ import { RelayedComment } from './RelayedComment'
 
 export class BotData {
   @prop({ type: () => [String], default: [] })
-  public notifiedYtLives: YouTubeVideoId[]
+  public notifiedYtLives: VideoId[]
 
   @prop({ type: String, default: () => new Map () }, WhatIsIt.MAP)
   lastCommunityPosts: Map<YouTubeChannelId, CommunityPostURL>
 
-  @prop({ type: () => RelayedComment, default: () => new Map () }, WhatIsIt.MAP)
+  @prop({ type: () => [RelayedComment], default: () => new Map () }, WhatIsIt.MAP)
   relayHistory: Map<VideoId, RelayedComment[]>
 }
 
@@ -22,4 +22,3 @@ export type YouTubeChannelId = string
 ///////////////////////////////////////////////////////////////////////////////
 
 type CommunityPostURL = string
-type YouTubeVideoId   = string

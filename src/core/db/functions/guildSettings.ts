@@ -2,7 +2,7 @@
 
 import { Guild, GuildMember, Message, Snowflake } from 'discord.js'
 import { isGuild, hasRole, getGuildId } from '../../../helpers/discord'
-import { GuildSettings, GuildSettingsDb } from '../models'
+import { GuildSettings, GuildSettingsDb, BlacklistItem } from '../models'
 import { config, PermLevel } from '../../../config'
 import { asyncFind } from '../../../helpers'
 import { UpdateQuery } from 'mongoose'
@@ -23,6 +23,14 @@ export function getSettings (
 export function getAllSettings (): Promise<GuildSettings[]> {
   return Promise.all (client.guilds.cache.map (getSettings))
 }
+
+export async function addBlacklisted (
+  g: Guild | Snowflake, item: BlacklistItem
+): Promise<void> {
+  const settings  = await getSettings (g)
+  updateSettings (g, { blacklist: [...settings.blacklist, item] })
+}
+
 
 export async function updateSettings (
   x: Message | Guild | GuildMember | Snowflake, update: NewSettings

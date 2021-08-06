@@ -9,7 +9,9 @@ export async function tl (text: string): Promise<string> {
   })
   const respText = await resp.text ()
   const tlObject = JSON.parse (respText)
-  const wasEng   = tlObject.translations[0].detected_source_language === 'EN'
+  const hasTl    = tlObject.translations !== undefined
+  const wasEng   = tlObject.translations?.[0].detected_source_language === 'EN'
 
-  return wasEng ? text : tlObject.translations[0].text
+  return 'dummy tl'
+  // return (wasEng && hasTl) ? text : tlObject.translations[0].text
 }

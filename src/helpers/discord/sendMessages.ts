@@ -1,6 +1,7 @@
 import merge from 'ts-deepmerge'
 import { client } from '../../core/'
 import {
+  DMChannel,
   Message,
   MessageAttachment,
   MessageEmbed,
@@ -9,25 +10,32 @@ import {
   MessageEmbedThumbnail,
   MessageOptions,
   MessagePayload,
+  NewsChannel,
   TextChannel,
+  ThreadChannel,
 } from 'discord.js'
 import { GuildSettings, WatchFeature } from '../../core/db/models'
 import { Streamer } from '../../core/db/streamers'
-import { debug } from '../logging'
+import { warn } from '../logging'
 import { getSubbedGuilds } from '../../core/db/functions'
+const { isArray } = Array
 
 export async function reply (
   msg:    Message,
   embed?: MessageEmbed | MessageEmbed[],
   text?:  string,
   file?:  MessageAttachment,
-): Promise<(Message | Message[])> {
-  return msg.reply ({
-    ...(embed ? { embeds:  Array.isArray (embed) ? embed : [embed] } : {}),
-    ...(text  ? { content: text }    : {}),
-    ...(file  ? { files:   [file] }  : {}),
-    failIfNotExists: false
-  }).catch (debug)
+): Promise<(Message | Message[] | undefined)> {
+  if (canBotPost (msg.channel)) {
+    return msg.reply ({
+      ...(embed ? { embeds:  isArray (embed) ? embed : [embed] } : {}),
+      ...(text  ? { content: text }    : {}),
+      ...(file  ? { files:   [file] }  : {}),
+      failIfNotExists: false
+    }).catch (warn)
+  } else {
+    warn (`Missing posting perms in ${msg.guild?.id}/${msg.channel?.id}`)
+  }
 }
 
 export function createEmbedMessage (
@@ -82,12 +90,27 @@ export async function notifyDiscord (opts: NotifyOptions): Promise<void> {
 
 export async function send (
   channel: TextChannel, content: string | MessageOptions | MessagePayload
-): Promise<Message> {
-  return channel.send (content)
-                .catch (debug)
+): Promise<Message | undefined> {
+  if (canBotPost (channel)) {
+    return channel.send (content)
+                  .catch (e => warn (`${channel.guild.id}/${channel.id} ${e}`))
+  } else {
+    warn (`Missing posting perms in channel ${channel.guild.id}/${channel.id}`)
+  }
 }
 
 //// PRIVATE //////////////////////////////////////////////////////////////////
+
+function canBotPost (
+  channel: TextChannel | ThreadChannel | NewsChannel | DMChannel
+): boolean {
+  if (channel instanceof NewsChannel || channel instanceof DMChannel) {
+    warn ('Tried to post in NewsChannel or DMChannel.')
+    return false
+  }
+  return !!channel.guild.me
+      && channel.permissionsFor (channel.guild.me!).has ('SEND_MESSAGES')
+}
 
 function getEmbedSelfAuthor (): MessageEmbedAuthor {
   return {

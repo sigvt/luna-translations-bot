@@ -14,7 +14,7 @@ export async function getFrameList () {
 }
 
 export function isPublic (frame: DexFrame): boolean {
-  return frame.topic_id !== 'Membersonly'
+  return frame.topic_id !== 'membersonly'
 }
 
 export interface DexFrame {

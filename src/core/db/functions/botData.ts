@@ -23,9 +23,7 @@ export async function addToBotRelayHistory (
   const history    = (await getBotData ()).relayHistory
   const cmts       = history.get (videoId) ?? []
   const newHistory = history |> setKey (videoId, [...cmts, cmt])
-  const update     = { relayHistory: newHistory }
-  const query      = [{ _id }, update, { upsert: true, new: true }] as const
-  await BotDataDb.findOneAndUpdate (...query)
+  updateBotData ({ relayHistory: newHistory })
 }
 
 type NewData = UpdateQuery<DocumentType<BotData>>
