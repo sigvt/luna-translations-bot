@@ -14,7 +14,8 @@ import { GuildSettings, WatchFeature, WatchFeatureSettings } from '../../core/db
 import { retryIfStillUpThenPostLog } from './closeHandler'
 import { logCommentData } from './logging'
 
-frameEmitter.on ('frame', frame => {
+frameEmitter.on ('frame', (frame: DexFrame) => {
+  debug (`emitted ${frame.channel.name}`)
   if (isPublic (frame) && isSupported (frame.channel.id)) setupRelay (frame)
 })
 

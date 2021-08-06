@@ -16,7 +16,7 @@ export function logCommentData (
 
   if (cmt.isOwner)         return log (templates.owner)
   if (isStreamer (cmt.id)) return log (templates.cameo)
-  if (cmt.isMod)           return log (templates.mod)
   if (isTl (cmt.body))     return log (templates.tl)
+  if (cmt.isMod)           return log (templates.mod)
 }
 

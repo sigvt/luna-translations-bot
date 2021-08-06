@@ -17,17 +17,18 @@
   "author": "tam <m.tam.carre@gmail.com>",
   "license": "MIT",
   "dependencies": {
-    "@typegoose/typegoose": "^7.6.0",
+    "@typegoose/typegoose": "^8.1.1",
     "@types/common-tags": "^1.8.0",
     "@types/node": "^15.6.0",
     "@types/node-fetch": "^2.5.11",
     "@types/ramda": "^0.27.40",
     "@types/ws": "^7.4.4",
     "better-sqlite3": "^6.0.1",
+    "buffer-from": "^1.1.2",
     "chalk": "^4.0.0",
     "common-tags": "^1.8.0",
     "cross-spawn": "^7.0.3",
-    "discord.js": "^13.0.0-dev.1dcad05.1626091387",
+    "discord.js": "^13.0.0-dev.30a58dc.1627430624",
     "dotenv": "^10.0.0",
     "enmap": "^5.2.4",
     "fp-ts": "^2.10.5",
@@ -41,6 +42,7 @@
     "ws": "^7.4.4"
   },
   "devDependencies": {
+    "@types/buffer-from": "^1.1.0",
     "@types/mongoose": "^5.10.5",
     "mongodb-memory-server": "^6.9.6",
     "tsconfig-paths": "^3.9.0",
