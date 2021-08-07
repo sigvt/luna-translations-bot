@@ -6,7 +6,7 @@ import {
   createEmbed, createEmbedMessage, emoji, reply
 } from '../../../helpers/discord'
 import { getSettings, updateSettings } from './'
-import { Message, Snowflake } from 'discord.js'
+import { EmbedFieldData, Message, Snowflake } from 'discord.js'
 import { config } from '../../../config'
 import {
   findStreamerName, replyStreamerList, StreamerName, streamers
@@ -15,6 +15,7 @@ import {
   WatchFeatureSettings, WatchFeature, GuildSettings
 } from '../../db/models'
 import { getAllSettings } from './guildSettings'
+import { splitEvery } from 'ramda'
 const { isArray } = Array
 
 export function validateInputAndModifyEntryList (
@@ -54,11 +55,16 @@ async function showHelp (
   { msg, feature, usage }: ValidatedOptions
 ): Promise<void> {
   const settings = await getSettings (msg.guild!)
-  reply (msg, createEmbedMessage (`
-    **Usage:** \`${config.prefix}${usage}\`
-    **Currently relayed:**\n${getEntryList (settings[feature])}
-  `))
+  const embeds = getEntryList (settings[feature], 60)
+    .map ((list, i) => createEmbedMessage (
+      i > 0 ? '' : `**Usage:** \`${config.prefix}${usage}\n\n\``
+      + `**Currently relayed:**\n${list}`
+    ))
+
+  reply (msg, embeds)
 }
+
+
 async function modifyEntryList (opts: ValidatedOptions): Promise<void> {
   const applyModification = opts.verb === 'add' ? addEntry : removeEntry
   applyModification (opts)
@@ -90,17 +96,14 @@ async function addEntry (
       name:  `${emoji.ping} @mentioning`,
       value: `<@&${role}>`,
       inline: true
-    }] : []), {
-      name:   'Currently relayed',
-      value:  getEntryList (newEntries),
-      inline: false
-    }]}, false))
+    }] : []),
+      ...getEntryFields (newEntries)
+    ]}, false))
   } else {
-    reply (msg, createEmbed ({ fields: [{
-      name:   add.failure,
-      value:  getEntryList (settings[feature]),
-      inline: false
-    }]}, false))
+    reply (msg, createEmbed ( {
+      description: add.failure,
+      fields: getEntryFields (settings[feature])
+    }, false))
   }
 }
 
@@ -116,37 +119,51 @@ async function removeEntry (
       r => r.discordCh !== msg.channel.id || r.streamer !== streamer
     )
     updateSettings (msg, { [feature]: newEntries })
-    reply (msg, createEmbed ({ fields: [{
-      name:   remove.success,
-      value:  streamer,
-      inline: true
-    }, {
-      name:  `${emoji.discord} In channel`,
-      value: `<#${msg.channel.id}>`,
-      inline: true
-    }, {
-      name:   'Currently relayed',
-      value:  getEntryList (newEntries),
-      inline: false
-    }]}, false))
+    reply (msg, createEmbed ({ fields: [
+      {
+        name:   remove.success,
+        value:  streamer,
+        inline: true
+      },
+      {
+        name:  `${emoji.discord} In channel`,
+        value: `<#${msg.channel.id}>`,
+        inline: true
+      },
+      ...getEntryFields (newEntries)
+    ]}, false))
   } else {
-    reply (msg, createEmbed ({ fields: [{
-      name:   'Error',
-      value:  remove.failure,
-      inline: false
-    }, {
-      name:   'Currently relayed',
-      value:  getEntryList (settings[feature]) || 'No one',
-      inline: false
-    }]}, false))
+    reply (msg, createEmbed ({ fields: [
+      {
+        name:   'Error',
+        value:  remove.failure,
+        inline: false
+      },
+      ...getEntryFields (settings[feature])
+    ]}, false))
   }
 }
 
-function getEntryList (entries: WatchFeatureSettings[]): string {
-  return entries.map (x => x.roleToNotify
+function getEntryFields (entries: WatchFeatureSettings[]): EmbedFieldData[] {
+  return getEntryList (entries)
+  .map (list => ({
+    name: 'Currently relayed',
+    value: list || 'No one',
+    inline: false
+  }))
+}
+
+/** Returns an array of embed-sized strings */
+function getEntryList (
+  entries: WatchFeatureSettings[], linesPerChunk: number = 20
+): string[] {
+  const lines = entries.map (x => x.roleToNotify
     ? `${x.streamer} in <#${x.discordCh}> @mentioning <@&${x.roleToNotify}>`
     : `${x.streamer} in <#${x.discordCh}>`
-  ).join ('\n')
+  )
+  const chunks = lines |> splitEvery (linesPerChunk)
+
+  return chunks.map (chunk => chunk.join ('\n'))
 }
 
 function getSubs (g: GuildSettings, fs: WatchFeature[]): StreamerName[] {
