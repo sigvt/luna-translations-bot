@@ -97,9 +97,9 @@ function relayGossip (
   if (isGossip (data.content, streamer!, frame)) relayHolochat (data, true)
 }
 
-function relayTlOrStreamerComment (
+async function relayTlOrStreamerComment (
   { discordCh, from, inStream, deepLTl, cmt, g, frame }: TlRelayData
-): void {
+): Promise<void> {
   const mustPost = cmt.isOwner
                 || (isTl (cmt.body, g) && !isBlacklisted (cmt.id, g))
                 || isStreamer (cmt.id)
@@ -118,7 +118,7 @@ function relayTlOrStreamerComment (
   const tl     = deepLTl ? `\n${emoji.deepl}**DeepL:** \`${deepLTl}\`` : ''
 
   if (mustPost) {
-    announceIfNotDone (frame, g._id)
+    await announceIfNotDone (frame, g._id)
     const thread = g.threads ? findFrameThread (frame.id, discordCh) : undefined
     send (thread ?? discordCh, `${premoji} ${author} \`${text}\`${tl}${url}`)
     .then (msg => saveComment (cmt, frame, 'guild', g._id, msg))

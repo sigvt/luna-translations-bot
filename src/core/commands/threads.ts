@@ -36,6 +36,8 @@ function disableThreads (msg: Message): void {
 function enableThreads (msg: Message): void {
   updateSettings (msg, { threads: true })
   reply (msg, createEmbedMessage (`
-    :hash: I will now relay translations in a thread. This requires permissions.
+    :hash: I will now relay translations in a thread.
+    This requires "Public Threads" permissions.
+    If given "Manage Messages" permissions, I will pin each thread for a day.
   `))
 }

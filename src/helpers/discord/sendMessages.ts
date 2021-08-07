@@ -83,15 +83,15 @@ export async function notifyDiscord (opts: NotifyOptions): Promise<void> {
 
 export function notifyOneGuild (
   g: GuildSettings, opts: NotifyOptions
-): void {
+): Promise<void[]> {
   const { streamer, feature, embedBody, emoji } = opts
 
   const entries  = g[feature].filter (ent => ent.streamer == streamer!.name)
   const guildObj = client.guilds.cache.find (guild => guild.id === g._id)
-  entries.forEach (({ discordCh, roleToNotify }) => {
+  return Promise.all (entries.map (({ discordCh, roleToNotify }) => {
     const ch = <TextChannel> guildObj?.channels.cache
                   .find (ch => ch.id === discordCh)
-    send (ch, {
+    return send (ch, {
       content: `${roleToNotify ? emoji + ' <@&'+roleToNotify+'>' : ''} `,
       embeds: [createEmbed ({
         author: { name: streamer!.name, iconURL: streamer!.picture },
@@ -108,9 +108,15 @@ export function notifyOneGuild (
           startMessage: msg,
           autoArchiveDuration: 1440
         })
+        .then (thread => {
+          if (thread && canBot ('MANAGE_MESSAGES')) {
+            msg.pin ()
+            setTimeout (msg.unpin, 86400)
+          }
+        })
       }
     })
-  })
+  }))
 }
 
 export async function send (
