@@ -68,6 +68,9 @@ export class GuildSettings {
   @prop ({ type: () => WatchFeatureSettings, default: [] })
   public relay: WatchFeatureSettings[]
 
+  @prop ({ default: false })
+  public threads: boolean
+
   @prop ({ type: () => WatchFeatureSettings, default: [] })
   public twitcasting: WatchFeatureSettings[]
 

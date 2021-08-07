@@ -4,11 +4,11 @@ import { Map as ImmutableMap } from 'immutable'
 import { UpdateQuery } from 'mongoose'
 import { zip } from 'ramda'
 import { isGuild } from '../../../helpers/discord'
-import { deleteKey, setKey } from '../../../helpers/immutableES6MapFunctions'
+import { deleteKey, setKey, toES6 } from '../../../helpers/immutableES6MapFunctions'
 import { VideoId } from '../../../modules/holodex/frames'
 import { client } from '../../lunaBotClient'
 import { RelayedComment } from '../models/RelayedComment'
-import { GuildData, Notice, GuildDataDb } from '../models/GuildData'
+import { GuildData, BlacklistNotice, GuildDataDb } from '../models/GuildData'
 import { YouTubeChannelId } from '../../../modules/holodex/frames'
 
 export type ImmutableRelayHistory = ImmutableMap<VideoId, RelayedComment[]>
@@ -33,6 +33,21 @@ export async function getGuildRelayHistory (
   const data = await getGuildData (g)
   return videoId ? data.relayHistory.get (videoId) ?? []
                  : ImmutableMap (data.relayHistory)
+}
+
+export async function getRelayNotices (
+  g: Guild | Snowflake
+): Promise<ImmutableMap<VideoId, Snowflake>> {
+  const data = await getGuildData (g)
+  return ImmutableMap (data.relayNotices)
+}
+
+export async function addRelayNotice (
+  g: Guild | Snowflake, videoId: VideoId, msgId: Snowflake
+): Promise<void> {
+  const data = await getGuildData (g)
+  const newNotices = data.relayNotices |> setKey (videoId, msgId)
+  updateGuildData (g, { relayNotices: newNotices })
 }
 
 export async function findVidIdAndCulpritByMsgId (
@@ -80,7 +95,7 @@ export async function addBlacklistNotice (
 
 export async function getNoticeFromMsgId (
   g: Guild | Snowflake, msgId: Snowflake
-): Promise<Notice | undefined> {
+): Promise<BlacklistNotice | undefined> {
   return (await getGuildData (g)).blacklistNotices.get (msgId)
 }
 

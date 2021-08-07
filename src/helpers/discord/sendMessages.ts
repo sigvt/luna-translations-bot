@@ -26,7 +26,8 @@ import {
 import { GuildSettings, WatchFeature } from '../../core/db/models'
 import { Streamer } from '../../core/db/streamers'
 import { warn } from '../logging'
-import { getSubbedGuilds } from '../../core/db/functions'
+import { addRelayNotice, getSubbedGuilds } from '../../core/db/functions'
+import { VideoId } from '../../modules/holodex/frames'
 const { isArray } = Array
 
 export async function reply (
@@ -75,24 +76,39 @@ export function createTxtEmbed (
 }
 
 export async function notifyDiscord (opts: NotifyOptions): Promise<void> {
-  const { streamer, subbedGuilds, feature, embedBody, emoji } = opts
-
+  const { streamer, subbedGuilds, feature } = opts
   const guilds = subbedGuilds ?? await getSubbedGuilds (streamer?.name, feature)
+  guilds.forEach (g => notifyOneGuild (g, opts))
+}
 
-  guilds.forEach (g => {
-    const entries  = g[feature].filter (ent => ent.streamer == streamer!.name)
-    const guildObj = client.guilds.cache.find (guild => guild.id === g._id)
-    entries.forEach (({ discordCh, roleToNotify }) => {
-      const ch = <TextChannel> guildObj?.channels.cache
-                    .find (ch => ch.id === discordCh)
-      send (ch, {
-        content: `${roleToNotify ? emoji + ' <@&'+roleToNotify+'>' : ''} `,
-        embeds: [createEmbed ({
-          author: { name: streamer!.name, iconURL: streamer!.picture },
-          thumbnail: { url: streamer!.picture },
-          description: embedBody
-        })]
-      })
+export function notifyOneGuild (
+  g: GuildSettings, opts: NotifyOptions
+): void {
+  const { streamer, feature, embedBody, emoji } = opts
+
+  const entries  = g[feature].filter (ent => ent.streamer == streamer!.name)
+  const guildObj = client.guilds.cache.find (guild => guild.id === g._id)
+  entries.forEach (({ discordCh, roleToNotify }) => {
+    const ch = <TextChannel> guildObj?.channels.cache
+                  .find (ch => ch.id === discordCh)
+    send (ch, {
+      content: `${roleToNotify ? emoji + ' <@&'+roleToNotify+'>' : ''} `,
+      embeds: [createEmbed ({
+        author: { name: streamer!.name, iconURL: streamer!.picture },
+        thumbnail: { url: streamer!.picture },
+        description: embedBody
+      })]
+    })
+    .then (msg => {
+      if (msg && feature === 'relay') {
+        const ch = msg.channel as TextChannel
+        addRelayNotice (g._id, opts.videoId!, msg.id)
+        if (canBot ('USE_PUBLIC_THREADS', ch)) ch.threads.create ({
+          name: `Translation relay ${opts.videoId}`,
+          startMessage: msg,
+          autoArchiveDuration: 1440
+        })
+      }
     })
   })
 }
@@ -157,4 +173,5 @@ interface NotifyOptions {
   streamer:      Streamer
   embedBody:     string
   emoji:         string
+  videoId?:      VideoId
 }

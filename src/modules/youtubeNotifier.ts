@@ -21,7 +21,7 @@ async function notifyFrame (frame: DexFrame): Promise<void> {
       feature: 'youtube',
       streamer: streamer as Streamer,
       embedBody: `I am live on YouTube!\nhttps://youtu.be/${frame.id}`,
-      emoji: emoji.yt
+      emoji: emoji.yt,
     })
 
     notifyDiscord ({
@@ -31,7 +31,8 @@ async function notifyFrame (frame: DexFrame): Promise<void> {
         I will now relay translations from live translators.
         https://youtu.be/${frame.id}
       `,
-      emoji: emoji.holo
+      emoji: emoji.holo,
+      videoId: frame.id
     })
 
     updateBotData ({ notifiedYtLives: [ ...botData.notifiedYtLives, frame.id ]})

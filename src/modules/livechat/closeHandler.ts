@@ -1,10 +1,10 @@
-import { deleteRelayHistory, filterAndStringifyHistory, getAllRelayHistories } from "../../core/db/functions"
+import { deleteRelayHistory, filterAndStringifyHistory, getAllRelayHistories, getSettings } from "../../core/db/functions"
 import { RelayedComment } from "../../core/db/models/RelayedComment"
 import { debug, isNotNil, log} from "../../helpers"
 import { findTextChannel, send } from "../../helpers/discord"
 import { DexFrame, getFrameList, VideoId } from "../holodex/frames"
 import { deleteChatProcess } from "./chatProcesses"
-import { setupRelay } from "./chatRelayer"
+import { findFrameThread, setupRelay } from "./chatRelayer"
 
 export async function retryIfStillUpThenPostLog (
   frame: DexFrame, exitCode: number | null
@@ -34,11 +34,13 @@ async function sendAndForgetHistory (videoId: VideoId): Promise<void> {
     .filter (isNotNil)
 
   relevantHistories.forEach (async (history: RelayedComment[], gid) => {
-    const ch    = findTextChannel (history[0].discordCh!)
-    const tlLog = await filterAndStringifyHistory (gid, history)
+    const g      = await getSettings (gid)
+    const ch     = findTextChannel (history[0].discordCh!)
+    const thread = g.threads ? findFrameThread (videoId, ch) : undefined
+    const tlLog  = await filterAndStringifyHistory (gid, history)
 
     deleteRelayHistory (videoId, gid)
-    send (ch, {
+    send (thread ?? ch, {
       content: `Here is this stream's TL log. <https://youtu.be/${videoId}>`,
       files:   [{ attachment: Buffer.from (tlLog), name: `${videoId}.txt` }]
     })

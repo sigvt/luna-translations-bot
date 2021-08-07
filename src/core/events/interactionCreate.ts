@@ -2,7 +2,7 @@ import { Interaction, ButtonInteraction, Snowflake } from 'discord.js'
 import { doNothing, debug, match, removeDupes, isNotNil } from '../../helpers'
 import { createEmbedMessage, findTextChannel } from '../../helpers/discord'
 import { getNoticeFromMsgId, removeBlacklisted, excludeLine, getGuildRelayHistory } from '../db/functions'
-import { Notice } from '../db/models/GuildData'
+import { BlacklistNotice } from '../db/models/GuildData'
 import { oneLine } from 'common-tags'
 import { last } from 'ramda'
 
@@ -26,7 +26,7 @@ async function processButton (btn: ButtonInteraction): Promise<void> {
 }
 
 async function cancelBlacklisting (
-  btn: ButtonInteraction, notice: Notice
+  btn: ButtonInteraction, notice: BlacklistNotice
 ): Promise<void> {
   removeBlacklisted (btn.guild!, notice.ytId)
   .then (success => btn.update ({ components: [], embeds: [
@@ -38,7 +38,7 @@ async function cancelBlacklisting (
 }
 
 async function cancelBlacklistingAndExcludeLine (
-  btn: ButtonInteraction, notice: Notice
+  btn: ButtonInteraction, notice: BlacklistNotice
 ): Promise<void> {
   removeBlacklisted (btn.guild!, notice.ytId)
   excludeLine (btn.guild!, notice.videoId, notice.originalMsgId)
@@ -49,7 +49,7 @@ async function cancelBlacklistingAndExcludeLine (
 }
 
 async function clearAuthorTls (
-  btn: ButtonInteraction, notice: Notice
+  btn: ButtonInteraction, notice: BlacklistNotice
 ): Promise<void> {
   const vidLog = await getGuildRelayHistory (btn.guild!, notice.videoId)
   const cmts   = vidLog.filter (cmt => cmt.ytId === notice.ytId)

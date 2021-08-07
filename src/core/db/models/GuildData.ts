@@ -11,14 +11,17 @@ export class GuildData {
   @prop ({ type: () => String })
   public _id: Snowflake
 
+  @prop({ type: () => String, default: () => new Map () }, WhatIsIt.MAP)
+  relayNotices: Map<VideoId, Snowflake>
+
   @prop({ type: () => [RelayedComment], default: () => new Map () }, WhatIsIt.MAP)
   relayHistory: Map<VideoId, RelayedComment[]>
 
-  @prop ({ type: () => Notice, default: () => new Map () }, WhatIsIt.MAP)
-  blacklistNotices: Map<MessageId, Notice>
+  @prop ({ type: () => BlacklistNotice, default: () => new Map () }, WhatIsIt.MAP)
+  blacklistNotices: Map<MessageId, BlacklistNotice>
 }
 
-export class Notice {
+export class BlacklistNotice {
   @prop ({ type: () => String })
   ytId: YouTubeChannelId
 

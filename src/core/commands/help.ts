@@ -3,7 +3,7 @@ import { getPermLevel, getSettings } from '../db/functions'
 import { EmbedField, Message } from 'discord.js'
 import { Map, Set } from 'immutable'
 import { GuildSettings, WatchFeatureSettings, WatchFeature } from '../db/models'
-import { debug, toTitleCase } from '../../helpers'
+import { toTitleCase } from '../../helpers'
 import { head, isEmpty } from 'ramda'
 import { Command, createEmbed, emoji, reply } from '../../helpers/discord'
 import { oneLine } from 'common-tags'
@@ -84,13 +84,14 @@ function getCategoryFields (categories: Set<string>): Set<EmbedField> {
 }
 
 function getSettingsField (
-  { relay, holochats, community, youtube, twitcasting }: GuildSettings
+  { relay, gossip, holochats, community, youtube, twitcasting }: GuildSettings
 ): EmbedField {
   return {
     name: 'Current settings', inline: false,
     value: `
       :speech_balloon: **Translation relay:** ${getWatchList ('relay', relay)}
       ${emoji.holo} **Live chat cameos:** ${getWatchList ('holochats', holochats)}
+      ${emoji.peek} **Gossip:** ${getWatchList ('gossip', gossip)}
       :family_mmbb: **Community posts:** ${getWatchList ('community', community)}
       ${emoji.yt} **YouTube lives:** ${getWatchList ('youtube', youtube)}
       ${emoji.tc} **TwitCasting lives:** ${getWatchList ('twitcasting', twitcasting)}
