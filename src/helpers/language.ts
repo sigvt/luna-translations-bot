@@ -13,9 +13,9 @@ export function match (
   patterns: Map<any, Fn> | Record<string | symbol, Fn>
 ): Fn {
   return patterns instanceof Map
-    ? patterns.get (scrutinee ?? 'default') ?? (() => undefined)
+    ? patterns.get (scrutinee ?? 'default') ?? doNothing
     : typeof scrutinee === 'string'
-    ? (patterns[scrutinee] ?? 'default') ?? (() => undefined)
+    ? (patterns[scrutinee] ?? 'default') ?? doNothing
     : throwIt (new TypeError ('Invalid scrutinee type. Try using a Map.'))
 }
 

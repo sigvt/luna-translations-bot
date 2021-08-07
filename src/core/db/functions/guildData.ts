@@ -8,7 +8,8 @@ import { deleteKey, setKey } from '../../../helpers/immutableES6MapFunctions'
 import { VideoId } from '../../../modules/holodex/frames'
 import { client } from '../../lunaBotClient'
 import { RelayedComment } from '../models/RelayedComment'
-import { GuildData, GuildDataDb } from '../models/GuildData'
+import { GuildData, Notice, GuildDataDb } from '../models/GuildData'
+import { YouTubeChannelId } from '../../../modules/holodex/frames'
 
 export type ImmutableRelayHistory = ImmutableMap<VideoId, RelayedComment[]>
 
@@ -34,6 +35,17 @@ export async function getGuildRelayHistory (
                  : ImmutableMap (data.relayHistory)
 }
 
+export async function findVidIdAndCulpritByMsgId (
+  g: Guild | Snowflake | null, msgId: Snowflake
+): Promise<[VideoId | undefined, RelayedComment | undefined]> {
+  const histories = g ? await getGuildRelayHistory (g) : undefined
+  const predicate = (cs: RelayedComment[]) => cs.some (c => c.msgId === msgId)
+  const vidId     = histories?.findKey (predicate)
+  const history   = histories?.find (predicate)
+  const culprit   = history?.find (c => c.msgId === msgId)
+  return [vidId, culprit]
+}
+
 export async function getFlatGuildRelayHistory (
   g: Guild | Snowflake
 ): Promise<RelayedComment[]> {
@@ -44,34 +56,68 @@ export async function getFlatGuildRelayHistory (
 export async function addToGuildRelayHistory (
   videoId: VideoId, cmt: RelayedComment, g: Guild | Snowflake
 ): Promise<void> {
-  const _id        = isGuild (g) ? g.id : g
   const history    = (await getGuildData (g)).relayHistory
   const cmts       = history.get (videoId) ?? []
   const newHistory = history |> setKey (videoId, [...cmts, cmt])
-  updateGuildData (_id, { relayHistory: newHistory })
+  updateGuildData (g, { relayHistory: newHistory })
 }
 
 export async function deleteRelayHistory (
   videoId: VideoId, g: Guild | Snowflake
 ): Promise<void> {
-  const _id = isGuild (g) ? g.id : g
   const history = (await getGuildData (g)).relayHistory
-  updateGuildData (_id, { relayHistory: (history |> deleteKey (videoId)) })
+  updateGuildData (g, { relayHistory: (history |> deleteKey (videoId)) })
 }
 
-///////////////////////////////////////////////////////////////////////////////
+export async function addBlacklistNotice (
+  { g, msgId, ytId, videoId, originalMsgId }: NewBlacklistNoticeProps
+): Promise<void> {
+  const notices = (await getGuildData (g)).blacklistNotices
+  updateGuildData (g, { blacklistNotices: (notices |> setKey (msgId, {
+    ytId, videoId, originalMsgId
+  }))})
+}
+
+export async function getNoticeFromMsgId (
+  g: Guild | Snowflake, msgId: Snowflake
+): Promise<Notice | undefined> {
+  return (await getGuildData (g)).blacklistNotices.get (msgId)
+}
+
+export async function excludeLine (
+  g: Guild | Snowflake, videoId: VideoId, msgId: Snowflake
+): Promise<void> {
+  const history = (await getGuildData (g)).relayHistory
+  const vidLog  = history.get (videoId)
+  const culprit = vidLog?.findIndex (cmt => cmt.msgId === msgId)
+  if (vidLog) updateGuildData (g, { relayHistory: (history |> setKey (videoId, [
+    ...vidLog.slice (0, culprit), ...vidLog.slice (culprit)
+  ]))})
+}
 
 export type NewData = UpdateQuery<DocumentType<GuildData>>
 
 export async function updateGuildData (
-  _id: Snowflake, update: NewData
+  g: Guild | Snowflake, update: NewData
 ): Promise<DocumentType<GuildData>> {
+  const _id = isGuild (g) ? g.id : g
   return GuildDataDb
     .findOneAndUpdate ({ _id }, update, {upsert: true, new: true })
 }
 
-async function getGuildData (g: Guild | Snowflake): Promise<GuildData> {
+export async function getGuildData (g: Guild | Snowflake): Promise<GuildData> {
   const _id = isGuild (g) ? g.id : g
   const query = [{ _id }, { _id }, { upsert: true, new: true }] as const
   return GuildDataDb.findOneAndUpdate (...query)
 }
+
+///////////////////////////////////////////////////////////////////////////////
+
+interface NewBlacklistNoticeProps {
+  g: Guild | Snowflake,
+  msgId: Snowflake | undefined,
+  ytId: YouTubeChannelId,
+  videoId: VideoId,
+  originalMsgId: Snowflake,
+}
+

@@ -56,8 +56,11 @@ export class GuildSettings {
   @prop ({ type: () => WatchFeatureSettings, default: [] })
   public holochats: WatchFeatureSettings[]
 
+  @prop ({ type: () => String })
+  public logChannel?: Snowflake
+
   @prop ({ type: () => WatchFeatureSettings, default: [] })
-  public mentions: WatchFeatureSettings[]
+  public gossip: WatchFeatureSettings[]
 
   @prop ({ default: true })
   public modMessages: boolean
@@ -76,8 +79,8 @@ export const GuildSettingsDb = getModelForClass (GuildSettings)
 
 export type WatchFeature =
   | 'community'
+  | 'gossip'
   | 'holochats'
-  | 'mentions'
   | 'relay'
   | 'twitcasting'
   | 'youtube'

@@ -1,8 +1,8 @@
-import { deleteRelayHistory, getAllRelayHistories, getSettings } from "../../core/db/functions"
+import { deleteRelayHistory, filterAndStringifyHistory, getAllRelayHistories } from "../../core/db/functions"
 import { RelayedComment } from "../../core/db/models/RelayedComment"
 import { debug, isNotNil, log} from "../../helpers"
 import { findTextChannel, send } from "../../helpers/discord"
-import { DexFrame, getFrameList, VideoId, YouTubeChannelId } from "../holodex/frames"
+import { DexFrame, getFrameList, VideoId } from "../holodex/frames"
 import { deleteChatProcess } from "./chatProcesses"
 import { setupRelay } from "./chatRelayer"
 
@@ -34,28 +34,13 @@ async function sendAndForgetHistory (videoId: VideoId): Promise<void> {
     .filter (isNotNil)
 
   relevantHistories.forEach (async (history: RelayedComment[], gid) => {
-    const g         = await getSettings (gid)
-    const blacklist = g.blacklist.map (entry => entry.ytId)
-    const unwanted  = g.customBannedPatterns
-    const ch        = findTextChannel (history[0].discordCh!)
-    const tlLog     = history
-      .filter (cmt => isNotBanned (cmt, unwanted, blacklist))
-      .map (cmt => `${cmt.timestamp} (${cmt.author}) ${cmt.body}`)
-      .join ('\n')
+    const ch    = findTextChannel (history[0].discordCh!)
+    const tlLog = await filterAndStringifyHistory (gid, history)
 
     deleteRelayHistory (videoId, gid)
-    if (ch) send (ch, {
-      content: `Here is this stream's TL log. (${videoId})`,
+    send (ch, {
+      content: `Here is this stream's TL log. <https://youtu.be/${videoId}>`,
       files:   [{ attachment: Buffer.from (tlLog), name: `${videoId}.txt` }]
     })
   })
-}
-
-function isNotBanned (
-  cmt: RelayedComment, unwanted: string[], blacklist: YouTubeChannelId[]
-): boolean {
-  return blacklist.every (ytId => ytId !== cmt.ytId)
-      && unwanted.every (
-           p => !cmt.body.toLowerCase ().includes (p.toLowerCase ())
-         )
 }

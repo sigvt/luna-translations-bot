@@ -1,12 +1,14 @@
 /** @file Exports main streamer list and streamer-related utility functions */
 import { Message } from 'discord.js'
-import { ciEquals, log } from '../../../helpers'
+import { ciEquals } from '../../../helpers'
 import { createEmbed, reply } from '../../../helpers/discord'
 import { ValidatedOptions } from '../functions'
 import { hololive } from './hololive'
+import { indies } from './indies'
 
 export const streamers = StreamerArray([
-  ...hololive
+  ...hololive,
+  ...indies
 ] as const)
 
 export const names    = streamers.map (x => x.name)

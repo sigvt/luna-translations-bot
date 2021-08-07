@@ -58,6 +58,7 @@ function getCategoryHelp (category: string) {
     }))
     .toList () // discards keys
     .toArray ()
+    .sort ((fa, fb) => fa.name.localeCompare (fb.name))
 
   return createEmbed ({ fields })
 }

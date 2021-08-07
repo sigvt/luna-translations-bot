@@ -1,6 +1,6 @@
 import { Command, createEmbedMessage, reply } from '../../helpers/discord'
 import { oneLine } from 'common-tags'
-import { getSettings, updateSettings } from '../db/functions'
+import { getSettings, updateSettings, removeBlacklisted } from '../db/functions'
 import { Message } from 'discord.js'
 import { head, init, last, isEmpty } from 'ramda'
 
@@ -39,12 +39,9 @@ async function unblacklistLastItem (msg: Message): Promise<void> {
 }
 
 async function unblacklistItem (msg: Message, ytId: string): Promise<void> {
-  const { blacklist } = await getSettings (msg)
-  const target       = blacklist.find (entry => entry.ytId === ytId)
-  const newBlacklist = blacklist.filter (entry => entry.ytId !== ytId)
-  const replyContent = target
+  removeBlacklisted (msg.guild!, ytId)
+  .then (success => reply (msg, createEmbedMessage (success
     ? `:white_check_mark: Successfully unblacklisted ${ytId}.`
     : `:warning: YouTube channel ID ${ytId} was not found.`
-  if (target) updateSettings (msg, { blacklist: newBlacklist })
-  reply (msg, createEmbedMessage (replyContent))
+  )))
 }

@@ -1,21 +1,20 @@
-import { debug, doNothing } from '../../helpers'
+import { debug } from '../../helpers'
 import { tryOrDefault } from '../../helpers/tryCatch'
 import { frameEmitter } from '../holodex/frameEmitter'
 import { DexFrame, isPublic, VideoId } from '../holodex/frames'
 import { getChatProcess } from './chatProcesses'
-import { isSupported, StreamerName, streamers } from '../../core/db/streamers'
+import { isSupported, Streamer, StreamerName, streamers } from '../../core/db/streamers'
 import { emoji, findTextChannel, send } from '../../helpers/discord'
 import { Message, Snowflake, TextChannel } from 'discord.js'
 import { tl } from '../deepl'
 import { addToBotRelayHistory, addToGuildRelayHistory, getSubbedGuilds } from '../../core/db/functions'
-import { oneLine, stripIndent } from 'common-tags'
 import { isBlacklisted, isHoloID, isStreamer, isTl } from './commentBooleans'
 import { GuildSettings, WatchFeature, WatchFeatureSettings } from '../../core/db/models'
 import { retryIfStillUpThenPostLog } from './closeHandler'
 import { logCommentData } from './logging'
 
 frameEmitter.on ('frame', (frame: DexFrame) => {
-  if (isPublic (frame) && isSupported (frame.channel.id)) setupRelay (frame)
+  if (isPublic (frame)) setupRelay (frame)
 })
 
 export function setupRelay (frame: DexFrame): void {
@@ -41,7 +40,7 @@ export interface ChatComment {
 
 function processComments (frame: DexFrame, data: string): void {
   extractComments (data).forEach (async cmt => {
-    const features: WatchFeature[] = ['relay', 'holochats']
+    const features: WatchFeature[] = ['relay', 'holochats', 'gossip']
     const guilds     = await getSubbedGuilds (frame.channel.id, features)
     const streamer   = streamers.find (s => s.ytId === frame.channel.id)
     const mustDeepL  = guilds.some (g => g.deepl)
@@ -66,10 +65,17 @@ function processComments (frame: DexFrame, data: string): void {
             debug (`Problem with watch entry ${g._id} / ${e.discordCh}`)
             return
           }
-          if (isStreamer (cmt.id) && !cmt.isOwner)  {
+          if (f === 'holochats' && isStreamer (cmt.id) && !cmt.isOwner)  {
             relayHolochat ({ ...data, to: streamer!.name, content: cmt.body, })
           }
-          relayTlOrStreamerComment ({...data, cmt, g, frame, })
+          if (f === 'gossip' && isStreamer (cmt.id)) {
+            relayGossip (e, frame, {
+              ...data, to: streamer!.name, content: cmt.body
+            })
+          }
+          if (f === 'relay') {
+            relayTlOrStreamerComment ({...data, cmt, g, frame, })
+          }
         })
       })
     })
@@ -77,13 +83,22 @@ function processComments (frame: DexFrame, data: string): void {
 }
 
 function relayHolochat (
-  { discordCh, from, to, content, deepLTl, inStream }: HolochatRelayData
+  { discordCh, from, to, content, deepLTl, inStream }: HolochatRelayData,
+  isGossip?: boolean
 ): void {
   const cleaned = content.replaceAll ('`', "'")
-  const line1 = `${emoji.holo} **${from}** in ${to}'s chat: \`${cleaned}\``
+  const emj   = isGossip ? emoji.peek : emoji.holo
+  const line1 = `${emj} **${from}** in **${to}**'s chat: \`${cleaned}\``
   const line2 = deepLTl ? `\n${emoji.deepl}**DeepL:** \`${deepLTl}\`` : ''
   const line3 = `\n<https://youtu.be/${inStream}>`
   send (discordCh, line1 + line2 + line3)
+}
+
+function relayGossip (
+  e: WatchFeatureSettings, frame: DexFrame, data: HolochatRelayData
+): void {
+  const streamer = streamers.find (s => s.name === e.streamer)
+  if (isGossip (data.content, streamer!, frame)) relayHolochat (data, true)
 }
 
 function relayTlOrStreamerComment (
@@ -92,15 +107,15 @@ function relayTlOrStreamerComment (
   const mustPost = cmt.isOwner
                 || (isTl (cmt.body, g) && !isBlacklisted (cmt.id, g))
                 || isStreamer (cmt.id)
-                || (cmt.isMod && g.modMessages)
+                || (cmt.isMod && g.modMessages && !isBlacklisted (cmt.id, g))
 
   const premoji = isTl (cmt.body, g)  ? ':speech_balloon:'
                 : isStreamer (cmt.id) ? emoji.holo
                                       : ':tools:'
 
   const url = frame.status === 'live' ? ''
-            : deepLTl                 ? `| <https://youtu.be/${inStream}>`
-                                      : `\n<https://youtu.be/${inStream}>`
+            : deepLTl                 ? `\n<https://youtu.be/${inStream}>`
+                                      : ` | <https://youtu.be/${inStream}>`
 
   const author = isTl (cmt.body, g) ? `||${from}:||` : `**${from}:**`
   const text   = cmt.body.replaceAll ('`', "''")
@@ -151,8 +166,26 @@ function extractComments (jsonl: string): ChatComment[] {
 function getRelayEntries (
   g: GuildSettings, f: WatchFeature, streamer?: StreamerName
 ): WatchFeatureSettings[] {
-  return g[f].filter (entry => entry.streamer === streamer)
+  return f === 'gossip' ? g[f] : g[f]
+    .filter (entry => entry.streamer === streamer || entry.streamer === 'all')
 }
+
+function isGossip (text: string, streamer: Streamer, frame: DexFrame): boolean {
+  const isOwnChannel    = frame.channel.id === streamer.ytId
+  const isCollab        = frame.description.includes (streamer.twitter)
+  const mentionsWatched = text
+    .toLowerCase ()
+    .split (' ')
+    .some (w => streamer.aliases.some (a => a === w))
+  
+  if (text === 'kusa') {
+    debug (isOwnChannel)
+    debug (isCollab)
+    debug (mentionsWatched)
+  }
+  return !isOwnChannel && !isCollab && mentionsWatched
+}
+
 
 interface RelayData {
   discordCh: TextChannel

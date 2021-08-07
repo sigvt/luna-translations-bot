@@ -8,6 +8,8 @@ import { asyncFind } from '../../../helpers'
 import { UpdateQuery } from 'mongoose'
 import { DocumentType } from '@typegoose/typegoose'
 import { client } from '../../lunaBotClient'
+import { YouTubeChannelId } from '../../../modules/holodex/frames'
+import { RelayedComment } from '../models/RelayedComment'
 
 /**
  * Returns guild settings from the DB or creates them if they don't exist.
@@ -31,6 +33,17 @@ export async function addBlacklisted (
   updateSettings (g, { blacklist: [...settings.blacklist, item] })
 }
 
+export async function removeBlacklisted (
+  g: Guild | Snowflake, ytId?: YouTubeChannelId
+): Promise<boolean> {
+  const { blacklist } = await getSettings (g)
+  const isValid       = blacklist.some (entry => entry.ytId === ytId)
+  const newBlacklist  = blacklist.filter (entry => entry.ytId !== ytId)
+
+  if (isValid) updateSettings (g, { blacklist: newBlacklist })
+
+  return isValid
+}
 
 export async function updateSettings (
   x: Message | Guild | GuildMember | Snowflake, update: NewSettings
@@ -59,6 +72,19 @@ export async function getPermLevel (x: Message | GuildMember): Promise<PermLevel
   return userPerm!
 }
 
+export async function filterAndStringifyHistory (
+  guild: Message | Guild | GuildMember | Snowflake,
+  history: RelayedComment[]
+): Promise<string> {
+  const g         = await getSettings (guild)
+  const blacklist = g.blacklist.map (entry => entry.ytId)
+  const unwanted  = g.customBannedPatterns
+  return history
+    .filter (cmt => isNotBanned (cmt, unwanted, blacklist))
+    .map (cmt => `${cmt.timestamp} (${cmt.author}) ${cmt.body}`)
+    .join ('\n')
+}
+
 export type PrivilegedRole = 'admins' | 'blacklisters'
 
 export type NewSettings = UpdateQuery<DocumentType<GuildSettings>>
@@ -85,3 +111,9 @@ async function hasPerms (
   return <boolean> roles!.some (role => hasRole (x, role))
 }
 
+function isNotBanned (
+  cmt: RelayedComment, unwanted: string[], blacklist: YouTubeChannelId[]
+): boolean {
+  return blacklist.every (ytId => ytId !== cmt.ytId)
+  && unwanted.every (p => !cmt.body.toLowerCase ().includes (p.toLowerCase ()))
+}

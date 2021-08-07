@@ -136,7 +136,7 @@ async function removeEntry (
       inline: false
     }, {
       name:   'Currently relayed',
-      value:  getEntryList (settings.relay),
+      value:  getEntryList (settings[feature]) || 'No one',
       inline: false
     }]}, false))
   }

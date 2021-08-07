@@ -12,6 +12,14 @@ export async function getBotData (): Promise<BotData> {
   return BotDataDb.findOneAndUpdate (...query)
 }
 
+export async function getRelayHistory (
+  videoId?: VideoId
+): Promise<RelayedComment[] | undefined> {
+  const botData = await getBotData ()
+  const hists   = botData.relayHistory
+  return hists.get (videoId ?? '')
+}
+
 export async function updateBotData (update: NewData): Promise<void> {
   const query = [{ _id }, update, { upsert: true, new: true }] as const
   await BotDataDb.findOneAndUpdate (...query)

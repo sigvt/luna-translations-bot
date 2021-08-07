@@ -39,17 +39,17 @@ async function blacklistTl (msg: Message, reason: string): Promise<void> {
       msg.guild!, { ytId: culprit.ytId, name: culprit.author, reason }
     )
     reply (msg, createEmbed ({ fields: [{
-      'name':  ':no_entry: Blacklister',
-      'value': msg.author.toString (),
-      'inline': true,
+      name:  ':no_entry: Blacklister',
+      value: msg.author.toString (),
+      inline: true,
     }, {
-      'name':  ':clown: Blacklisted channel',
-      'value': culprit.author,
-      'inline': true,
+      name:  ':clown: Blacklisted channel',
+      value: culprit.author,
+      inline: true,
     }, {
-      'name':  ':bookmark_tabs: Reason',
-      'value': reason,
-      'inline': true,
+      name:  ':bookmark_tabs: Reason',
+      value: reason,
+      inline: true,
     }]}))
   } else {
     reply (msg, createEmbedMessage (':warning: Translator data not found.'))
@@ -76,49 +76,3 @@ async function showHelp (msg: Message): Promise<void> {
     inline: false
   }]}), '', createTxtEmbed ('blacklist.txt', list))
 }
-
-  // const guildLog = client.tlLog.get(message.guild.id)
-  // const culprit = Object.values(guildLog).flat().find(el => el.msgId == reference.messageID)
-
-  // if (!culprit) {
-    // const embed = client.makeEmbed({
-      // 'description': ':warning: Information about this translator not found.'
-    // }, false, false)
-    // return message.reply({embed})
-  // }
-
-  // if (previousBlacklist.find(x => x.channel === culprit.channel)) {
-    // const embed = client.makeEmbed({
-      // 'description': ':warning: Already in blacklist.'
-    // }, false, false)
-    // return message.reply({embed})
-  // }
-
-  // client.settings.set(message.guild.id, [...previousBlacklist, {
-    // channel: culprit.channel,
-    // name: culprit.name,
-    // reason: reason
-  // }], 'blacklist');
-
-    // const embed = client.makeEmbed({
-      // 'fields': [
-        // {
-          // 'name':  ':no_entry: Blacklister',
-          // 'value': message.author.toString(),
-          // 'inline': true,
-        // },
-        // {
-          // 'name':  ':clown: Blacklisted channel',
-          // 'value': culprit.name,
-          // 'inline': true,
-        // },
-        // {
-          // 'name':  ':bookmark_tabs: Reason',
-          // 'value': reason,
-          // 'inline': true,
-        // },
-      // ]
-    // }, false, false)
-
-  // return message.channel.send({embed})
-// }

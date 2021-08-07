@@ -57,7 +57,7 @@ export const hololive = [
     name: 'Nakiri Ayame', ytId: 'UC7fk0CB07ly8oSl0aqKkqFg',
     picture: 'https://yt3.ggpht.com/ytc/AAUvwnh66ZORNcVma4Pn-Qic23kU3Kl4ZkHM3asCWjDh=s800-c-k-c0x00ffffff-no-rj',
     groups: ['2nd Generation'], twitter: 'nakiriayame',
-    aliases: ['ayame', 'nakiri']
+    aliases: ['ayame', 'nakiri', 'あやめ']
   },
   {
     name: 'Rikkaroid', ytId: 'UC9mf_ZVpouoILRY9NUIaK-w',
@@ -75,7 +75,7 @@ export const hololive = [
     name: 'Yukoku Roberu', ytId: 'UCANDOlYTJT7N5jlRC3zfzVA',
     picture: 'https://yt3.ggpht.com/ytc/AAUvwngPbWJ4YAEgQiAMkgMwLh_0AV_I7SbRhW-s4h_p=s800-c-k-c0x00ffffff-no-rj',
     groups: ['Holostars 2nd Generation'], twitter: 'yukokuroberu',
-    aliases: ['winning son', 'roberu']
+    aliases: ['winning son', 'roberu', 'ロベル']
   },
   {
     name: 'Airani Iofifteen', ytId: 'UCAoy6rzhSf4ydcYjJw3WoVg',
@@ -99,25 +99,25 @@ export const hololive = [
     name: 'Yozora Mel', ytId: 'UCD8HOxPs4Xvsm8H0ZxXGiBw',
     picture: 'https://yt3.ggpht.com/ytc/AAUvwnj5J44v4_Ua9qGrh_n8IR0Dp-r2yj0Nl0mv4lkR=s800-c-k-c0x00ffffff-no-rj',
     groups: ['1st Generation'], twitter: 'yozoramel',
-    aliases: ['mel']
+    aliases: ['mel', 'メル']
   },
   {
     name: 'Shirakami Fubuki', ytId: 'UCdn5BQ06XqgXoAxIhbqw5Rg',
     picture: 'https://yt3.ggpht.com/ytc/AAUvwniEQsukDZoC-l8zchhRzpraxcH7Fyq9amrj2980Aw=s800-c-k-c0x00ffffff-no-rj',
     groups: ['1st Generation'], twitter: 'shirakamifubuki',
-    aliases: ['fubuki', 'fbk']
+    aliases: ['fubuki', 'fbk', 'フブキ']
   },
   {
     name: 'Roboco-san', ytId: 'UCDqI2jOz0weumE8s7paEk6g',
     picture: 'https://yt3.ggpht.com/ytc/AAUvwnhx_THxk2jgqmEGA-cliO482QCna3lnmCBFvCdtBg=s800-c-k-c0x00ffffff-no-rj',
     groups: ['0th Generation'], twitter: 'robocosan',
-    aliases: ['roboco']
+    aliases: ['roboco', 'ロボ子']
   },
   {
     name: 'Shirogane Noel', ytId: 'UCdyqAaZDKHXg4Ahi7VENThQ',
     picture: 'https://yt3.ggpht.com/ytc/AAUvwnijLF2X1YBVQo3rClt7ub29cYM7OzpmRmliaGbw=s800-c-k-c0x00ffffff-no-rj',
     groups: ['3rd Generation'], twitter: 'shiroganenoel',
-    aliases: ['noel']
+    aliases: ['noel', 'ノエル', 'danchou', '団長']
   },
   {
     name: 'Yukihana Lamy', ytId: 'UCFKOVgVbGmX65RxO3EtH3iw',
@@ -135,19 +135,19 @@ export const hololive = [
     name: 'Aki Rosenthal', ytId: 'UCFTLzh12_nrtzqBPsTCqenA',
     picture: 'https://yt3.ggpht.com/ytc/AAUvwnhPGqWt_E_8rBXpKUTgHCuyTq0Zz7TXlkRtiIww=s800-c-k-c0x00ffffff-no-rj',
     groups: ['1st Generation'], twitter: 'akirosenthal',
-    aliases: []
+    aliases: ['aki', 'アキ']
   },
   {
     name: 'Kishido Temma', ytId: 'UCGNI4MENvnsymYjKiZwv9eg',
     picture: 'https://yt3.ggpht.com/ytc/AAUvwnjek7CeN83n90k6OaFaezz0vdgXe5RYaxl_nPaX=s800-c-k-c0x00ffffff-no-rj',
     groups: ['Holostars 2nd Generation'], twitter: 'kishidotemma',
-    aliases: []
+    aliases: ['temma', '天真', 'てんま']
   },
   {
     name: 'Inugami Korone', ytId: 'UChAnqc_AY5_I3Px5dig3X1Q',
     picture: 'https://yt3.ggpht.com/ytc/AAUvwnj7QwmJ9YhyKY-9SkOKhKIzTKDMJp0HX2vAdQUVdw=s800-c-k-c0x00ffffff-no-rj',
     groups: ['GAMERS'], twitter: 'inugamikorone',
-    aliases: []
+    aliases: ['korone', 'korosan', 'ころね', 'ころさん']
   },
   {
     name: 'Pavolia Reine', ytId: 'UChgTyjG-pdNvxxhdsXfHQ5Q',
@@ -159,19 +159,19 @@ export const hololive = [
     name: 'Sakura Miko', ytId: 'UC-hM6YJuNYVAmUWxeIr9FeA',
     picture: 'https://yt3.ggpht.com/ytc/AAUvwniR0ijvAPNICEVzF8Pz0kSkuhBLKXd31oc5yO-0AQ=s800-c-k-c0x00ffffff-no-rj',
     groups: ['0th Generation'], twitter: 'sakuramiko35',
-    aliases: []
+    aliases: ['miko', 'mikoti', 'mikocchi', 'みこ', 'みこっち']
   },
   {
     name: 'Kageyama Shien', ytId: 'UChSvpZYRPh0FvG4SJGSga3g',
     picture: 'https://yt3.ggpht.com/ytc/AAUvwnjvoMWzRyWOvk4jbneB4C0O97oCXrLUDV9twwsN=s800-c-k-c0x00ffffff-no-rj',
     groups: ['Holostars 3rd Gen'], twitter: 'kageyamashien',
-    aliases: []
+    aliases: ['shien', 'シエン']
   },
   {
     name: 'Takanashi Kiara', ytId: 'UCHsx4Hqa-1ORjQTh9TYDhww',
     picture: 'https://yt3.ggpht.com/ytc/AAUvwnh1s1xECXk9_DaR77i4LBBWkTY-nOi_O0-fPoX8=s800-c-k-c0x00ffffff-no-rj',
     groups: ['English 1st Gen'], twitter: 'takanashikiara',
-    aliases: []
+    aliases: ['kiara', 'tenchou', 'きあら', 'キアラ', '店長']
   },
   {
     name: 'Hololive VTuber Group', ytId: 'UCJFZiqLMntJufDCHc6bQixg',
@@ -183,43 +183,43 @@ export const hololive = [
     name: 'Omaru Polka', ytId: 'UCK9V2B22uJYu3N7eR_BT9QA',
     picture: 'https://yt3.ggpht.com/ytc/AAUvwnh-sak3t15svmMDNF8w_uxnNEChOL7C1DKAO-Ht=s800-c-k-c0x00ffffff-no-rj',
     groups: ['5th Generation'], twitter: 'omarupolka',
-    aliases: ['polka', 'omaru', 'ポル', 'おまる', /POL/]
+    aliases: ['polka', 'omaru', 'ポル', 'おまる']
   },
   {
     name: 'Arurandeisu', ytId: 'UCKeAhJvy8zgXWbh9duVjIaQ',
     picture: 'https://yt3.ggpht.com/ytc/AAUvwnjIqTphTjcWJLTftb3ppGk71CVwCYaH2M5KkmZOAQ=s800-c-k-c0x00ffffff-no-rj',
     groups: ['Holostars 1st Gen'], twitter: 'arurandeisu',
-    aliases: []
+    aliases: ['aruran']
   },
   {
     name: 'Uruha Rushia', ytId: 'UCl_gCybOJRIgOXw6Qb4qJzQ',
     picture: 'https://yt3.ggpht.com/ytc/AAUvwngKVHYXNDzaEG9KIXm9lK0nBxHkA-NxlE88dLtl=s800-c-k-c0x00ffffff-no-rj',
     groups: ['3rd Generation'], twitter: 'uruharushia',
-    aliases: []
+    aliases: ['rushia', 'るしあ']
   },
   {
     name: 'Mori Calliope', ytId: 'UCL_qhgtOy0dy1Agp8vkySQg',
     picture: 'https://yt3.ggpht.com/ytc/AAUvwniY6zzRc3nUO1zLCBlmaAxeLNDoVWjw0hKGztvJ=s800-c-k-c0x00ffffff-no-rj-mo',
     groups: ['English 1st Gen'], twitter: 'moricalliope',
-    aliases: []
+    aliases: ['calliope', 'calli', 'mori']
   },
   {
     name: 'Ninomae Ina’nis', ytId: 'UCMwGHR0BTZuLsmjY_NT5Pwg',
     picture: 'https://yt3.ggpht.com/ytc/AAUvwng37V0l-NwF3bu7QA4XmOP5EZFwk5zJE-78OHP9=s800-c-k-c0x00ffffff-no-rj',
     groups: ['English 1st Gen'], twitter: 'ninomaeinanis',
-    aliases: []
+    aliases: ['ina']
   },
   {
     name: 'Astel Leda', ytId: 'UCNVEsYbiZjH5QLmGeSgTSzg',
     picture: 'https://yt3.ggpht.com/ytc/AAUvwngMQoYWdT6G-GUOnGKmzbFoLBTdsjb2G5rS8ZbH=s800-c-k-c0x00ffffff-no-rj',
     groups: ['Holostars 2nd Generation'], twitter: 'astelleda',
-    aliases: []
+    aliases: ['astel', 'アステル']
   },
   {
     name: 'Gawr Gura', ytId: 'UCoSrY_IQQVpmIRZ9Xf-y93g',
     picture: 'https://yt3.ggpht.com/ytc/AAUvwnhSSaF3Q-PyyTSis4EH6Cu8FZ32LNvkxI9Gl_rn=s800-c-k-c0x00ffffff-no-rj',
     groups: ['English 1st Gen'], twitter: 'gawrgura',
-    aliases: []
+    aliases: ['gura']
   },
   {
     name: 'Hololive English', ytId: 'UCotXwY6s8pWmuWd_snKYjhg',
@@ -243,25 +243,25 @@ export const hololive = [
     name: 'Ookami Mio', ytId: 'UCp-5t9SrOQwXMU7iIjQfARg',
     'picture': 'https://yt3.ggpht.com/ytc/AAUvwng30Wmfu39r1PLrF05pvAafn2a2Ex90ok2C6CTBmg=s800-c-k-c0x00ffffff-no-rj',
     groups: ['GAMERS'], twitter: 'ookamimio',
-    aliases: []
+    aliases: ['mio', 'みお']
   },
   {
     name: 'Tokino Sora', ytId: 'UCp6993wxpyDPHUpavwDFqgg',
     picture: 'https://yt3.ggpht.com/ytc/AAUvwngZmr_qbKhGIvHaHwLRmKhKxdeFfM7ZbK316vFNSw=s800-c-k-c0x00ffffff-no-rj',
     groups: ['0th Generation'], twitter: 'tokino_sora',
-    aliases: []
+    aliases: ['sora', 'そら']
   },
   {
     name: 'Natsuiro Matsuri', ytId: 'UCQ0UDLQCjY0rmuxCDE38FGg',
     picture: 'https://yt3.ggpht.com/ytc/AAUvwni8cjtyc08E7rocvO9_gR1b5BhO1O6O1VreDxMW=s800-c-k-c0x00ffffff-no-rj',
     groups: ['1st Generation'], twitter: 'natsuiromatsuri',
-    aliases: []
+    aliases: ['matsuri', 'まつり']
   },
   {
     name: 'Tsunomaki Watame', ytId: 'UCqm3BQLlJfvkTsX_hvm0UmA',
     picture: 'https://yt3.ggpht.com/ytc/AAUvwnitWcmmZK60TDG8y5aUeQfZlmH9YlBNJ4D1ZSFI=s800-c-k-c0x00ffffff-no-rj',
     groups: ['4th Generation'], twitter: 'tsunomakiwatame',
-    aliases: []
+    aliases: ['watame', 'わため']
   },
   {
     name: 'Kiryu Coco', ytId: 'UCS9uQI-jC3DE0L4IpXyvr6w',
@@ -273,19 +273,19 @@ export const hololive = [
     name: 'Shishiro Botan', ytId: 'UCUKD-uaobj9jiqB-VXt71mA',
     picture: 'https://yt3.ggpht.com/ytc/AAUvwngRC-JqguPnj9ljVH3UulyfdlyQzLYzLeSrhvD6=s800-c-k-c0x00ffffff-no-rj',
     groups: ['5th Generation'], twitter: 'shishirobotan',
-    aliases: []
+    aliases: ['botan', 'ぼたん']
   },
   {
     name: 'Nekomata Okayu', ytId: 'UCvaTdHTWBGv3MKj3KVqJVCw',
     picture: 'https://yt3.ggpht.com/ytc/AAUvwnjXQ3Gt3t3SdUMZHBhhEb_c1jqThHfDaVNJF_LJ=s800-c-k-c0x00ffffff-no-rj',
     groups: ['GAMERS'], twitter: 'nekomataokayu',
-    aliases: []
+    aliases: ['okayu', 'おかゆ']
   },
   {
     name: 'Shiranui Flare', ytId: 'UCvInZx9h3jC2JzsIzoOebWg',
     picture: 'https://yt3.ggpht.com/ytc/AAUvwngtkUgGkgWTz57Er3GSzuMUR07HISM_yDhKQFnR_A=s800-c-k-c0x00ffffff-no-rj',
     groups: ['3rd Generation'], twitter: 'shiranuiflare',
-    aliases: []
+    aliases: ['flare', 'フレア']
   },
   {
     name: 'Oozora Subaru', ytId: 'UCvzGlP9oQwU--Y0r9id_jnA',
@@ -297,25 +297,25 @@ export const hololive = [
     name: 'Aragami Oga', ytId: 'UCwL7dgTxKo8Y4RFIKWaf8gA',
     picture: 'https://yt3.ggpht.com/ytc/AAUvwnie3tYJpu_RdoJWWMjNkj-mUS7-F4QtE1nNY8N_=s800-c-k-c0x00ffffff-no-rj',
     groups: ['Holostars 3rd Gen'], twitter: 'aragamioga',
-    aliases: []
+    aliases: ['oga']
   },
   {
     name: 'Holostars Official', ytId: 'UCWsfcksUUpoEvhia0_ut0bA',
     picture: 'https://yt3.ggpht.com/ytc/AAUvwnjwFEptYg7ed7Ze1nWT7Bj4bbXiOoNwzeM9-4g=s800-c-k-c0x00ffffff-no-rj',
-    groups: ['0th Generation'], twitter: '',
+    groups: ['0th Generation'], twitter: 'holostarstv',
     aliases: []
   },
   {
     name: 'Murasaki Shion', ytId: 'UCXTpFs_3PqI41qX2d9tL2Rw',
     picture: 'https://yt3.ggpht.com/ytc/AAUvwni5CHNTkw8RlOj-78oqDbWS6sEdH4VQR_c06B6s6Q=s800-c-k-c0x00ffffff-no-rj',
     groups: ['2nd Generation'], twitter: 'murasakishionch',
-    aliases: []
+    aliases: ['shion', 'シオン', 'kusogaki', 'クソガキ']
   },
   {
     name: 'Watson Amelia', ytId: 'UCyl1z3jo3XHR1riLFKG5UAg',
     picture: 'https://yt3.ggpht.com/ytc/AAUvwngni7uCVYUaj_uiNnA9t1cR1PfIz-rE-GvAVeN_=s800-c-k-c0x00ffffff-no-rj',
     groups: ['English 1st Gen'], twitter: 'watsonameliaen',
-    aliases: []
+    aliases: ['amelia', 'ame']
   },
   {
     name: 'Kureiji Ollie', ytId: 'UCYz_5n-uDuChHtLo7My1HnQ',
@@ -327,13 +327,13 @@ export const hololive = [
     name: 'Kanade Izuru', ytId: 'UCZgOv3YDEs-ZnZWDYVwJdmA',
     picture: 'https://yt3.ggpht.com/ytc/AAUvwnhNA5NPSYpFiMba_lmeNqYZJ4bVtZKf-5g5YlxGcA=s800-c-k-c0x00ffffff-no-rj',
     groups: ['Holostars 1st Gen'], twitter: 'kanadeizuru',
-    aliases: []
+    aliases: ['izuru']
   },
   {
     name: 'Amane Kanata', ytId: 'UCZlDXzGoo7d44bwdNObFacg',
     picture: 'https://yt3.ggpht.com/ytc/AAUvwniXUgLD1FepLsMoqO7HnhlgwbxGmPeqKWGv1JsO=s800-c-k-c0x00ffffff-no-rj',
     groups: ['4th Generation'], twitter: 'amanekanatach',
-    aliases: ['kanata', 'かなた', /PPT([ .!$,]|$)/, 'pp tenshi', 'かなごり']
+    aliases: ['kanata', 'かなた', 'pp tenshi', 'かなごり']
   },
   {
     name: 'IRyS', ytId: 'UC8rcEBzJSleTkf_-agPM20g',

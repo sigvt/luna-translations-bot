@@ -1,6 +1,7 @@
 import EventEmitter from 'events'
 import { isEmpty, isNil } from 'ramda'
 import { DexFrame, getFrameList } from './frames'
+import { isSupported } from '../../core/db/streamers'
 
 export const frameEmitter = FrameEmitter ()
 
@@ -21,7 +22,9 @@ async function continuouslyEmitNewFrames (
     ?.filter (frame => isNew (frame, previousFrames))
     ?? []
 
-  newFrames.forEach (frame => emitter.emit ('frame', frame))
+    newFrames.forEach (frame => {
+      if (isSupported (frame.channel.id)) emitter.emit ('frame', frame)
+    })
 
   const currentFrames = isEmpty (allFrames) ? previousFrames : allFrames
   setTimeout (() => continuouslyEmitNewFrames (emitter, currentFrames), 30000)

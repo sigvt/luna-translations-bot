@@ -21,7 +21,7 @@ async function notifyPost (post: CommunityPost): Promise<void> {
       const guild = client.guilds.cache.find (gg => gg.id === g._id)
       const ch    = <TextChannel> guild?.channels.cache
                       .find (ch => ch.id == discordCh)
-      if (ch) send (ch, {
+      send (ch, {
         content: oneLine`
           :loudspeaker: ${roleToNotify ? '<@&' + roleToNotify + '>' : ''}
           ${streamer} just published a community post!\n

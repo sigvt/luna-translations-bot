@@ -15,6 +15,13 @@ import {
   TextBasedChannels,
   TextChannel,
   ThreadChannel,
+  EmojiIdentifierResolvable,
+  MessageReaction,
+  PermissionResolvable,
+  MessageButtonOptions,
+  MessageButton,
+  MessageActionRow,
+  MessageActionRowComponentResolvable,
 } from 'discord.js'
 import { GuildSettings, WatchFeature } from '../../core/db/models'
 import { Streamer } from '../../core/db/streamers'
@@ -28,7 +35,7 @@ export async function reply (
   text?:  string,
   file?:  MessageAttachment,
 ): Promise<(Message | Message[] | undefined)> {
-  if (canBotPost (msg.channel)) {
+  if (canBot ('SEND_MESSAGES', msg.channel)) {
     return msg.reply ({
       ...(embed ? { embeds:  isArray (embed) ? embed : [embed] } : {}),
       ...(text  ? { content: text }    : {}),
@@ -78,7 +85,7 @@ export async function notifyDiscord (opts: NotifyOptions): Promise<void> {
     entries.forEach (({ discordCh, roleToNotify }) => {
       const ch = <TextChannel> guildObj?.channels.cache
                     .find (ch => ch.id === discordCh)
-      if (ch) send (ch, {
+      send (ch, {
         content: `${roleToNotify ? emoji + ' <@&'+roleToNotify+'>' : ''} `,
         embeds: [createEmbed ({
           author: { name: streamer!.name, iconURL: streamer!.picture },
@@ -91,29 +98,46 @@ export async function notifyDiscord (opts: NotifyOptions): Promise<void> {
 }
 
 export async function send (
-  channel: TextChannel, content: string | MessageOptions | MessagePayload
+  channel: TextBasedChannels | undefined,
+  content: string | MessageOptions | MessagePayload
 ): Promise<Message | undefined> {
-  if (canBotPost (channel)) {
-    return channel.send (content)
-                  .catch (e => warn (`${channel.guild.id}/${channel.id} ${e}`))
+  if (canBot ('SEND_MESSAGES', channel)) {
+    return channel?.send (content)
+                   .catch (e => warn (`${channel.id} ${e}`))
   } else {
-    warn (`Missing posting perms in channel ${channel.guild.id}/${channel.id}`)
+    warn (`Missing posting perms in channel ${channel?.id}`)
   }
+}
+
+export async function react (
+  msg: Message | undefined, emj: EmojiIdentifierResolvable
+): Promise<MessageReaction | undefined> {
+  if (canBot ('ADD_REACTIONS', msg?.channel)) {
+    return msg?.react (emj)
+  }
+}
+
+export function ButtonRow (
+  buttons: MessageButtonOptions[]
+): MessageActionRow {
+  return new MessageActionRow ({
+    components: buttons.map (opts => new MessageButton (opts))
+  })
 }
 
 //// PRIVATE //////////////////////////////////////////////////////////////////
 
-function canBotPost (
-  channel: TextBasedChannels
+function canBot (
+  perm: PermissionResolvable, channel?: TextBasedChannels
 ): boolean {
   const unsupported = [NewsChannel, DMChannel]
   if (unsupported.some (type => channel instanceof type)) {
     warn ('Tried to post in unsupported channel type.')
     return false
   }
-  const validated = <TextChannel | ThreadChannel> channel
-  return !!validated.guild.me
-      && validated.permissionsFor (validated.guild.me!).has ('SEND_MESSAGES')
+  const validated = <TextChannel | ThreadChannel | undefined> channel
+  return !!validated?.guild.me
+      && validated.permissionsFor (validated.guild.me!).has (perm)
 }
 
 function getEmbedSelfAuthor (): MessageEmbedAuthor {
