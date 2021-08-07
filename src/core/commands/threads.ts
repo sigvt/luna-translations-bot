@@ -20,7 +20,7 @@ export const threads: Command = {
     const settings      = await getSettings (msg)
     const toggleThreads = settings.threads === true ? disableThreads
                                                     : enableThreads
-      toggleThreads (msg)
+    toggleThreads (msg)
   }
 }
 
