@@ -7,7 +7,7 @@ import { match } from '../../../helpers'
 
 interface RoleModifyOptions {
   type: RoleSetting
-  msg: Message
+  msg:  Message
   verb: string
   role: string
 }
@@ -23,7 +23,7 @@ export function validateInputAndModifyRoleList (opts: RoleModifyOptions): void {
   const isValid       = isVerbValid && validatedRole !== undefined
   const modifyIfValid = isValid ? modifyRoleList : showHelp
 
-  modifyIfValid (opts as RoleModifyValidatedOptions)
+  modifyIfValid ({ ...opts, role: validatedRole } as RoleModifyValidatedOptions)
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -68,7 +68,7 @@ async function removeRole (opts: RoleModifyValidatedOptions): Promise<void> {
   const g = await getSettings (opts.msg)
   if (g[opts.type].includes (opts.role)) {
     const newRoles = g[opts.type].filter (id => id !== opts.role)
-    updateSettings (opts.msg, { [opts.role]: newRoles })
+    updateSettings (opts.msg, { [opts.type]: newRoles })
     reply (opts.msg, createEmbedMessage (`
       :white_check_mark: <@&${opts.role}> was removed from the ${opts.type} list.
       ${getRoleList (newRoles)}
