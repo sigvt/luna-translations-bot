@@ -1,10 +1,11 @@
 import EventEmitter from 'events'
 import { getAllSettings } from '../../core/db/functions'
-import { removeDupes, sleep } from '../../helpers'
-import { getLatestPost } from './getLatestPost'
+import { doNothing, removeDupes, sleep } from '../../helpers'
+import { CommunityPost, getLatestPost } from './getLatestPost'
 import { streamers } from '../../core/db/streamers/'
 import { getBotData, updateBotData } from '../../core/db/functions'
 import { asyncTryOrLog } from '../../helpers/tryCatch'
+import { setKey } from '../../helpers/immutableES6MapFunctions'
 
 export const communityEmitter = CommunityEmitter ()
 
@@ -38,10 +39,17 @@ async function checkChannel (
   const lastPosts = botData.lastCommunityPosts
   const post      = await getLatestPost (ytId)
   const recorded  = lastPosts.get (ytId)
+  const newPosts  = lastPosts |> setKey (ytId, post?.url)
+  const mustEmit  = !post || post.url === recorded || !post.isToday
+  const callback  = mustEmit ? saveAndEmit : doNothing
+  callback (newPosts, emitter, post!)
+}
 
-  if (!post || post.url === recorded || !post.isToday) return
-
-  lastPosts.set (ytId, post.url)
-  updateBotData ({ lastCommunityPosts: lastPosts })
+function saveAndEmit (
+  newCommunityPostMap: Map<string, string>,
+  emitter: EventEmitter,
+  post: CommunityPost
+): void {
+  updateBotData ({ lastCommunityPosts: newCommunityPostMap })
   emitter.emit ('post', post)
 }

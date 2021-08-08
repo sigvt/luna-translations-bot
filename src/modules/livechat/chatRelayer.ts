@@ -136,13 +136,15 @@ export async function findFrameThread (
 
 async function announceIfNotDone (
   frame: DexFrame, gid: Snowflake
-): Promise<void> {
-  const notices  = await getRelayNotices (gid)
-  const announce = notices.get (frame.id)
-  const g        = await getSettings (gid)
-  if (!announce && frame.status === 'live') await notifyOneGuild (g, {
+): Promise<void[]> {
+  const notices    = await getRelayNotices (gid)
+  const announce   = notices.get (frame.id)
+  const g          = await getSettings (gid)
+  const mustNotify = !announce && frame.status === 'live'
+
+  return mustNotify ? notifyOneGuild (g, {
     subbedGuilds: [g], ...getRelayNotifyProps (frame)
-  })
+  }) : []
 }
 
 

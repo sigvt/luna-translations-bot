@@ -22,10 +22,10 @@ export async function notifyOneGuild (
   const notices  = await getRelayNotices (g._id)
   const announce = notices.get (opts.videoId ?? '')
 
-  return Promise.all (entries.map (({ discordCh, roleToNotify }) => {
+  return announce ? Promise.all (entries.map (({ discordCh, roleToNotify }) => {
     const ch = <TextChannel> guildObj?.channels.cache
                   .find (ch => ch.id === discordCh)
-    if (!announce) return send (ch, {
+    return send (ch, {
       content: `${roleToNotify ? emoji + ' <@&'+roleToNotify+'>' : ''} `,
       embeds: [createEmbed ({
         author: { name: streamer!.name, iconURL: streamer!.picture },
@@ -51,7 +51,7 @@ export async function notifyOneGuild (
         })
       }
     })
-  }))
+  })) : []
 }
 
 export interface NotifyOptions {
