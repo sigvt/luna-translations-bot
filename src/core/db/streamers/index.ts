@@ -5,9 +5,11 @@ import { createEmbed, reply } from '../../../helpers/discord'
 import { ValidatedOptions } from '../functions'
 import { hololive } from './hololive'
 import { indies } from './indies'
+import { nijisanji } from './nijisanji'
 
 export const streamers = StreamerArray([
   ...hololive,
+  ...nijisanji,
   ...indies
 ] as const)
 
