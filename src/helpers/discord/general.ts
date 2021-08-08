@@ -1,11 +1,14 @@
 /** @file Generic Discord.js helper functions applicable to any bot. */
 import { config } from '../../config'
-import { Guild, GuildMember, Message, Snowflake, TextChannel, } from 'discord.js'
+import { Guild, GuildMember, Message, Snowflake, TextBasedChannels, TextChannel, PermissionResolvable,NewsChannel, DMChannel, ThreadChannel } from 'discord.js'
 import { client } from '../../core'
 
-export function findTextChannel (id: Snowflake): TextChannel | undefined {
-  const ch = client.channels.cache.find(c => c.id === id)
-  return ch instanceof TextChannel ? ch : undefined
+export function findTextChannel (
+  id: Snowflake
+): TextChannel | ThreadChannel | undefined {
+  const ch    = client.channels.cache.find(c => c.id === id)
+  const valid = [TextChannel, ThreadChannel].some (type => ch instanceof type)
+  return valid ? <TextChannel | ThreadChannel> ch : undefined
 }
 
 export function isGuild (scrutinee: any): scrutinee is Guild {
@@ -74,4 +77,15 @@ export function validateRole (
   g: Guild, role: string | undefined
 ): Snowflake | undefined {
   return g.roles.cache.get (role?.replace (/[<@&>]/g, '') as any)?.id
+}
+
+export function canBot (
+  perm: PermissionResolvable, channel?: TextBasedChannels
+): boolean {
+  const unsupported = [NewsChannel, DMChannel]
+  const isSupported = unsupported.every (type => !(channel instanceof type))
+  const validated = <TextChannel | ThreadChannel | undefined> channel
+  return isSupported
+      && !!validated?.guild.me
+      && validated.permissionsFor (validated.guild.me!).has (perm)
 }

@@ -1,7 +1,7 @@
-import { Command, createEmbedMessage, emoji, reply } from '../../helpers/discord'
-import { oneLine } from 'common-tags'
-import { getSettings, updateSettings } from '../db/functions'
+import { toggleSetting } from '../db/functions'
 import { Message } from 'discord.js'
+import { Command, emoji } from '../../helpers/discord'
+import { oneLine } from 'common-tags'
 
 export const deepl: Command = {
   config: {
@@ -16,27 +16,16 @@ export const deepl: Command = {
       (Also affects tl.holochats)
     `,
   },
-  callback: async (msg: Message): Promise<void> => {
-    const settings    = await getSettings (msg)
-    const toggleDeepL = settings.deepl === true ? disableDeepL
-                                                : enableDeepL
-    toggleDeepL (msg)
+  callback: (msg: Message): void => {
+    toggleSetting ({
+      msg, setting: 'deepl',
+      enable: `
+        ${emoji.deepl} I will now translate Hololive members' chats with DeepL.
+      `,
+      disable: `
+        ${emoji.deepl} I will no longer translate Hololive members' chats
+        with DeepL.
+      `
+    })
   }
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
-function disableDeepL (msg: Message): void {
-  updateSettings (msg, { deepl: false })
-  reply (msg, createEmbedMessage (oneLine`
-    ${emoji.deepl} I will no longer translate Hololive members' chats
-    with DeepL.
-  `))
-}
-
-function enableDeepL (msg: Message): void {
-  updateSettings (msg, { deepl: true })
-  reply (msg, createEmbedMessage (`
-    ${emoji.deepl} I will now translate Hololive members' chats with DeepL.
-  `))
 }

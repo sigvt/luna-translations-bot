@@ -1,6 +1,6 @@
-import { Command, createEmbedMessage, reply } from '../../helpers/discord'
-import { getSettings, updateSettings } from '../db/functions'
+import { toggleSetting } from '../db/functions'
 import { Message } from 'discord.js'
+import { Command } from '../../helpers/discord'
 
 export const mods: Command = {
   config: {
@@ -12,27 +12,14 @@ export const mods: Command = {
     usage:    'mods',
     description: 'Toggles the relaying of mod messages serverwide.'
   },
-  callback: async (msg: Message): Promise<void> => {
-    const settings   = await getSettings (msg)
-    const toggleMods = settings.modMessages === true ? disableMods
-                                                     : enableMods
-    toggleMods (msg)
+  callback: (msg: Message): void => {
+    toggleSetting ({
+      msg, setting: 'modMessages',
+      enable:  `:tools: I will now relay mod messages.`,
+      disable: `
+        :tools: I will no longer relay mod messages.
+        (Channel owner and other Hololive members will still be relayed.)
+      `
+    })
   }
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
-function disableMods (msg: Message): void {
-  updateSettings (msg, { modMessages: false })
-  reply (msg, createEmbedMessage (`
-   :tools: I will no longer relay mod messages.
-   (Channel owner and other Hololive members will still be relayed.)
-  `))
-}
-
-function enableMods (msg: Message): void {
-  updateSettings (msg, { modMessages: true })
-  reply (msg, createEmbedMessage (`
-    :tools: I will now relay mod messages.
-  `))
 }

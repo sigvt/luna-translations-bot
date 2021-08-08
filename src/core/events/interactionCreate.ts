@@ -1,5 +1,5 @@
 import { Interaction, ButtonInteraction, Snowflake } from 'discord.js'
-import { doNothing, debug, match, removeDupes, isNotNil } from '../../helpers'
+import { doNothing, debug, match, isNotNil } from '../../helpers'
 import { createEmbedMessage, findTextChannel } from '../../helpers/discord'
 import { getNoticeFromMsgId, removeBlacklisted, excludeLine, getGuildRelayHistory } from '../db/functions'
 import { BlacklistNotice } from '../db/models/GuildData'
@@ -43,7 +43,7 @@ async function cancelBlacklistingAndExcludeLine (
   removeBlacklisted (btn.guild!, notice.ytId)
   excludeLine (btn.guild!, notice.videoId, notice.originalMsgId)
   btn.update ({ components: [], embeds: [createEmbedMessage (oneLine`
-    ${notice?.ytId}'s blacklisting has been cancelled but this message
+    ${notice?.ytId}'s blacklisting has been cancelled but the deleted message
     will not be in the final log.
   `)]})
 }

@@ -3,8 +3,9 @@ import { config } from '../config'
 import { getAllSettings } from '../core/db/functions'
 import { GuildSettings } from '../core/db/models'
 import { getTwitterUsername, Streamer, streamers } from '../core/db/streamers'
-import { emoji, notifyDiscord } from '../helpers/discord'
+import { emoji } from '../helpers/discord'
 import { tryOrLog } from '../helpers/tryCatch'
+import { notifyDiscord } from './notify'
 const { twitcastingId, twitcastingSecret } = config
 
 initTwitcast ()

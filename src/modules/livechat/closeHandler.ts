@@ -36,7 +36,7 @@ async function sendAndForgetHistory (videoId: VideoId): Promise<void> {
   relevantHistories.forEach (async (history: RelayedComment[], gid) => {
     const g      = await getSettings (gid)
     const ch     = findTextChannel (history[0].discordCh!)
-    const thread = g.threads ? findFrameThread (videoId, ch) : undefined
+    const thread = await findFrameThread (videoId, g, ch)
     const tlLog  = await filterAndStringifyHistory (gid, history)
 
     deleteRelayHistory (videoId, gid)

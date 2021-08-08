@@ -1,7 +1,8 @@
 import { getBotData, updateBotData } from '../core/db/functions'
 import { Streamer, streamers } from '../core/db/streamers'
 import { log } from '../helpers'
-import { emoji, notifyDiscord } from '../helpers/discord'
+import { emoji } from '../helpers/discord'
+import { notifyDiscord, NotifyOptions } from './notify'
 import { frameEmitter } from './holodex/frameEmitter'
 import { DexFrame } from './holodex/frames'
 
@@ -24,17 +25,22 @@ async function notifyFrame (frame: DexFrame): Promise<void> {
       emoji: emoji.yt,
     })
 
-    notifyDiscord ({
-      feature: 'relay',
-      streamer: streamer as Streamer,
-      embedBody: `
-        I will now relay translations from live translators.
-        https://youtu.be/${frame.id}
-      `,
-      emoji: emoji.holo,
-      videoId: frame.id
-    })
+    notifyDiscord (getRelayNotifyProps (frame))
 
     updateBotData ({ notifiedYtLives: [ ...botData.notifiedYtLives, frame.id ]})
+  }
+}
+
+export function getRelayNotifyProps (frame: DexFrame): NotifyOptions {
+  return {
+    feature: 'relay',
+    streamer: streamers.find (s => s.ytId === frame.channel.id)!,
+    embedBody: `
+      I will now relay translations from live translators.
+      ${frame.title}
+      https://youtu.be/${frame.id}
+    `,
+    emoji: emoji.holo,
+    videoId: frame.id
   }
 }

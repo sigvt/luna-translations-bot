@@ -87,3 +87,8 @@ export type WatchFeature =
   | 'relay'
   | 'twitcasting'
   | 'youtube'
+
+export type SettingToggle =
+  | 'deepl'
+  | 'modMessages'
+  | 'threads'
