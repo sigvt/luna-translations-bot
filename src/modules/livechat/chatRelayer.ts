@@ -66,7 +66,7 @@ function processComments (frame: DexFrame, data: string): void {
           if (f === 'cameos' && isStreamer (cmt.id) && !cmt.isOwner)  {
             relayCameo ({ ...data, to: streamer!.name, content: cmt.body, })
           }
-          if (f === 'gossip' && isStreamer (cmt.id)) {
+          if (f === 'gossip' && (isStreamer (cmt.id) || isTl (cmt.body))) {
             relayGossip (e, frame, {
               ...data, to: streamer!.name, content: cmt.body
             })
