@@ -1,4 +1,4 @@
-import { debug } from '../../helpers'
+import { ciEquals, debug } from '../../helpers'
 import { tryOrDefault } from '../../helpers/tryCatch'
 import { frameEmitter } from '../holodex/frameEmitter'
 import { DexFrame, isPublic, VideoId } from '../holodex/frames'
@@ -196,9 +196,8 @@ function isGossip (text: string, streamer: Streamer, frame: DexFrame): boolean {
   const isOwnChannel    = frame.channel.id === streamer.ytId
   const isCollab        = frame.description.includes (streamer.twitter)
   const mentionsWatched = text
-    .toLowerCase ()
     .split (' ')
-    .some (w => streamer.aliases.some (a => a === w))
+    .some (w => streamer.aliases.some (a => ciEquals (a, w)))
   
   return !isOwnChannel && !isCollab && mentionsWatched
 }

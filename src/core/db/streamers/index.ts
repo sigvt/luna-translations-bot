@@ -52,7 +52,7 @@ export function isSupported (ytId: string): boolean {
 }
 
 export type Streamer = Readonly<{
-  aliases: readonly stringOrRegex[]
+  aliases: readonly string[]
   groups:  readonly string[]
   name:    string
   picture: string
@@ -70,4 +70,4 @@ function StreamerArray <T extends readonly Streamer[]> (arr: T) {
   return arr
 }
 
-type stringOrRegex = string | RegExp
+// type stringOrRegex = string | RegExp
