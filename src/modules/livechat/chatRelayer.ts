@@ -78,8 +78,7 @@ function processComments (frame: DexFrame, data: string): void {
 }
 
 function relayCameo (
-  { discordCh, to, cmt, deepLTl, frame }: RelayData,
-  isGossip?: boolean
+  { discordCh, to, cmt, deepLTl, frame }: RelayData, isGossip?: boolean
 ): void {
   const cleaned = cmt.body.replaceAll ('`', "'")
   const emj     = isGossip ? emoji.peek : emoji.holo
