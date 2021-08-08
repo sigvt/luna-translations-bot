@@ -8,7 +8,7 @@ import { RelayedComment } from '../db/models/RelayedComment'
 
 export async function messageDelete (msg: Message): Promise<void> {
   const [vidId, culprit] = await findVidIdAndCulpritByMsgId (msg.guild, msg.id)
-  const isNew            = ! await isBlacklisted (culprit?.ytId, msg.guild!.id)
+  const isNew            = msg.guild && !await isBlacklisted (culprit?.ytId, msg.guild!.id)
   const callback         = culprit && isNew ? blacklistAndNotify : doNothing
 
   callback (msg, culprit!, vidId!)
