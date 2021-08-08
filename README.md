@@ -13,7 +13,7 @@ It is being used on over 50 servers with an average of over 11,000 users each.
 
 ## Coding style (for recruiters)
 
-To get a feel for my programming style without knowing how Discord bots function, compare my "message received" event handler to the discord.js community guide's and to Discordeno's.
+To get a feel for my coding style, compare my "message received" event handler to the two main public templates: the community guide of discord.js's and Discordeno's.
 
 - [Mine](https://github.com/luna-translations-bot/luna-translations-bot/blob/main/src/core/events/messageCreate.ts)
 - [Discord.js's community guide](https://github.com/AnIdiotsGuide/guidebot/blob/master/events/message.js)
