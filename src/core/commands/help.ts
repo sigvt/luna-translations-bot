@@ -84,13 +84,13 @@ function getCategoryFields (categories: Set<string>): Set<EmbedField> {
 }
 
 function getSettingsField (
-  { relay, gossip, holochats, community, youtube, twitcasting }: GuildSettings
+  { relay, gossip, cameos, community, youtube, twitcasting }: GuildSettings
 ): EmbedField {
   return {
     name: 'Current settings', inline: false,
     value: `
       :speech_balloon: **Translation relay:** ${getWatchList ('relay', relay)}
-      ${emoji.holo} **Live chat cameos:** ${getWatchList ('holochats', holochats)}
+      ${emoji.holo} **Live chat cameos:** ${getWatchList ('cameos', cameos)}
       ${emoji.peek} **Gossip:** ${getWatchList ('gossip', gossip)}
       :family_mmbb: **Community posts:** ${getWatchList ('community', community)}
       ${emoji.yt} **YouTube lives:** ${getWatchList ('youtube', youtube)}

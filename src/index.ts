@@ -14,4 +14,3 @@ mongoose.connect ('mongodb://localhost/luna', {
   useUnifiedTopology: true,
   useFindAndModify: false,
 })
-

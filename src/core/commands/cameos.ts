@@ -3,11 +3,11 @@ import { oneLine } from 'common-tags'
 import { Message } from 'discord.js'
 import {validateInputAndModifyEntryList } from '../db/functions'
 
-const usage = 'holochats <add|remove> <streamer name>'
+const usage = 'cameos <add|remove> <streamer name>'
 
-export const holochats: Command = {
+export const cameos: Command = {
   config: {
-    aliases:   ['vchats', 'cameos'],
+    aliases:   ['holochats'],
     permLevel: 2
   },
   help: {
@@ -22,7 +22,7 @@ export const holochats: Command = {
     const streamer = name.join (' ')
     validateInputAndModifyEntryList ({
       msg, verb, streamer, usage,
-      feature: 'holochats',
+      feature: 'cameos',
       add: {
         success: `${emoji.holo} Relaying cameos in other chats`,
         failure: oneLine`

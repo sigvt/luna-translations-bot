@@ -35,12 +35,13 @@ async function sendAndForgetHistory (videoId: VideoId): Promise<void> {
 
   relevantHistories.forEach (async (history: RelayedComment[], gid) => {
     const g      = await getSettings (gid)
+    const setCh  = findTextChannel (g.logChannel)
     const ch     = findTextChannel (history[0].discordCh!)
     const thread = await findFrameThread (videoId, g, ch)
     const tlLog  = await filterAndStringifyHistory (gid, history)
 
     deleteRelayHistory (videoId, gid)
-    send (thread ?? ch, {
+    send (setCh ?? thread ?? ch, {
       content: `Here is this stream's TL log. <https://youtu.be/${videoId}>`,
       files:   [{ attachment: Buffer.from (tlLog), name: `${videoId}.txt` }]
     })

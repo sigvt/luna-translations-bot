@@ -5,6 +5,7 @@
 import {
   createEmbed, createEmbedMessage, emoji, reply
 } from '../../../helpers/discord'
+import { match } from '../../../helpers/language'
 import { getSettings, updateSettings } from './'
 import { EmbedFieldData, Message, Snowflake } from 'discord.js'
 import { config } from '../../../config'
@@ -15,7 +16,7 @@ import {
   WatchFeatureSettings, WatchFeature, GuildSettings
 } from '../../db/models'
 import { getAllSettings } from './guildSettings'
-import { splitEvery } from 'ramda'
+import { isEmpty, splitEvery } from 'ramda'
 const { isArray } = Array
 
 export function validateInputAndModifyEntryList (
@@ -24,9 +25,10 @@ export function validateInputAndModifyEntryList (
   const isVerbValid       = validVerbs.includes (verb as any)
   const validatedVerb     = <ValidVerb> verb
   const validatedStreamer = <StreamerName> findStreamerName (streamer)
-  const modifyIfValid     = !isVerbValid       ? showHelp
-                          : !validatedStreamer ? replyStreamerList
-                                               : modifyEntryList
+  const mustShowList      = verb !== 'clear' && !validatedStreamer
+  const modifyIfValid     = !isVerbValid ? showHelp
+                          : mustShowList ? replyStreamerList
+                                         : modifyEntryList
                                          
   modifyIfValid ({ msg, usage, feature, role, add, remove,
     verb: validatedVerb,
@@ -48,14 +50,15 @@ export async function getSubbedGuilds (
 
 ///////////////////////////////////////////////////////////////////////////////
 
-const validVerbs = ['add', 'remove'] as const
+const validVerbs = ['add', 'remove', 'clear'] as const
 type ValidVerb   = typeof validVerbs[number]
 
 async function showHelp (
   { msg, feature, usage }: ValidatedOptions
 ): Promise<void> {
   const settings = await getSettings (msg.guild!)
-  const embeds = getEntryList (settings[feature], 60)
+  const list     = getEntryList (settings[feature], 60)
+  const embeds   = (isEmpty (list) ? [''] : list)
     .map ((list, i) => createEmbedMessage (
       i > 0 ? '' : `**Usage:** \`${config.prefix}${usage}\n\n\``
       + `**Currently relayed:**\n${list}`
@@ -66,7 +69,12 @@ async function showHelp (
 
 
 async function modifyEntryList (opts: ValidatedOptions): Promise<void> {
-  const applyModification = opts.verb === 'add' ? addEntry : removeEntry
+  const applyModification = match (opts.verb, {
+    add:    addEntry,
+    remove: removeEntry,
+    clear:  clearEntries
+  })
+
   applyModification (opts)
 }
 
@@ -144,6 +152,13 @@ async function removeEntry (
   }
 }
 
+async function clearEntries (
+  { feature, msg }: ValidatedOptions
+): Promise<void> {
+  updateSettings (msg, { [feature]: [] })
+  reply (msg, createEmbedMessage (`Cleared all entries for ${feature}.`))
+}
+
 function getEntryFields (entries: WatchFeatureSettings[]): EmbedFieldData[] {
   return getEntryList (entries)
   .map (list => ({
@@ -172,27 +187,27 @@ function getSubs (g: GuildSettings, fs: WatchFeature[]): StreamerName[] {
 
 interface ValidateFnOptions {
   msg:      Message,
-  verb:     string,
-  streamer: string,
-  role?:    Snowflake,
-  usage:    string,
-  feature:  WatchFeature,
-  add:      AttemptResultMessages,
+  verb:     string
+  streamer: string
+  role?:    Snowflake
+  usage:    string
+  feature:  WatchFeature
+  add:      AttemptResultMessages
   remove:   AttemptResultMessages
 }
 
 export interface ValidatedOptions {
   msg:      Message,
-  verb:     ValidVerb,
-  streamer: StreamerName,
-  role?:    Snowflake,
-  usage:    string,
-  feature:  WatchFeature,
-  add:      AttemptResultMessages,
+  verb:     ValidVerb
+  streamer: StreamerName
+  role?:    Snowflake
+  usage:    string
+  feature:  WatchFeature
+  add:      AttemptResultMessages
   remove:   AttemptResultMessages
 }
 
 interface AttemptResultMessages {
-  success: string,
+  success: string
   failure: string
 }

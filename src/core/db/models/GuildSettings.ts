@@ -42,6 +42,9 @@ export class GuildSettings {
   public blacklisters: Snowflake[]
 
   @prop ({ type: () => WatchFeatureSettings, default: [] })
+  public cameos: WatchFeatureSettings[]
+
+  @prop ({ type: () => WatchFeatureSettings, default: [] })
   public community: WatchFeatureSettings[]
 
   @prop ({ type: () => [String], default: [] })
@@ -52,9 +55,6 @@ export class GuildSettings {
 
   @prop ({ default: true })
   public deepl: boolean
-
-  @prop ({ type: () => WatchFeatureSettings, default: [] })
-  public holochats: WatchFeatureSettings[]
 
   @prop ({ type: () => String })
   public logChannel?: Snowflake
@@ -80,10 +80,12 @@ export class GuildSettings {
 
 export const GuildSettingsDb = getModelForClass (GuildSettings)
 
+export type RoleSetting = 'admins' | 'blacklisters'
+
 export type WatchFeature =
   | 'community'
   | 'gossip'
-  | 'holochats'
+  | 'cameos'
   | 'relay'
   | 'twitcasting'
   | 'youtube'

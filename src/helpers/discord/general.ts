@@ -4,7 +4,7 @@ import { Guild, GuildMember, Message, Snowflake, TextBasedChannels, TextChannel,
 import { client } from '../../core'
 
 export function findTextChannel (
-  id: Snowflake
+  id: Snowflake | undefined
 ): TextChannel | ThreadChannel | undefined {
   const ch    = client.channels.cache.find(c => c.id === id)
   const valid = [TextChannel, ThreadChannel].some (type => ch instanceof type)

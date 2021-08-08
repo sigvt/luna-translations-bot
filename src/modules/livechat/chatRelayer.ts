@@ -42,7 +42,7 @@ export interface ChatComment {
 
 function processComments (frame: DexFrame, data: string): void {
   extractComments (data).forEach (async cmt => {
-    const features: WatchFeature[] = ['relay', 'holochats', 'gossip']
+    const features: WatchFeature[] = ['relay', 'cameos', 'gossip']
     const guilds     = await getSubbedGuilds (frame.channel.id, features)
     const streamer   = streamers.find (s => s.ytId === frame.channel.id)
     const mustDeepL  = guilds.some (g => g.deepl)
@@ -63,8 +63,8 @@ function processComments (frame: DexFrame, data: string): void {
             deepLTl:   mustShowTl ? deepLTl : undefined,
           }
 
-          if (f === 'holochats' && isStreamer (cmt.id) && !cmt.isOwner)  {
-            relayHolochat ({ ...data, to: streamer!.name, content: cmt.body, })
+          if (f === 'cameos' && isStreamer (cmt.id) && !cmt.isOwner)  {
+            relayCameo ({ ...data, to: streamer!.name, content: cmt.body, })
           }
           if (f === 'gossip' && isStreamer (cmt.id)) {
             relayGossip (e, frame, {
@@ -80,23 +80,23 @@ function processComments (frame: DexFrame, data: string): void {
   })
 }
 
-function relayHolochat (
-  { discordCh, from, to, content, deepLTl, inStream }: HolochatRelayData,
+function relayCameo (
+  { discordCh, from, to, content, deepLTl, inStream }: CameoRelayData,
   isGossip?: boolean
 ): void {
   const cleaned = content.replaceAll ('`', "'")
-  const emj   = isGossip ? emoji.peek : emoji.holo
-  const line1 = `${emj} **${from}** in **${to}**'s chat: \`${cleaned}\``
-  const line2 = deepLTl ? `\n${emoji.deepl}**DeepL:** \`${deepLTl}\`` : ''
-  const line3 = `\n<https://youtu.be/${inStream}>`
+  const emj     = isGossip ? emoji.peek : emoji.holo
+  const line1   = `${emj} **${from}** in **${to}**'s chat: \`${cleaned}\``
+  const line2   = deepLTl ? `\n${emoji.deepl}**DeepL:** \`${deepLTl}\`` : ''
+  const line3   = `\n<https://youtu.be/${inStream}>`
   send (discordCh, line1 + line2 + line3)
 }
 
 function relayGossip (
-  e: WatchFeatureSettings, frame: DexFrame, data: HolochatRelayData
+  e: WatchFeatureSettings, frame: DexFrame, data: CameoRelayData
 ): void {
   const streamer = streamers.find (s => s.name === e.streamer)
-  if (isGossip (data.content, streamer!, frame)) relayHolochat (data, true)
+  if (isGossip (data.content, streamer!, frame)) relayCameo (data, true)
 }
 
 async function relayTlOrStreamerComment (
@@ -211,7 +211,7 @@ interface RelayData {
   deepLTl?: string
 }
 
-interface HolochatRelayData extends RelayData {
+interface CameoRelayData extends RelayData {
   to: StreamerName
   content: string
 }

@@ -18,9 +18,9 @@ export const indies = [
     aliases: ['uto']
   },
   {
-    name: 'tam [REMOVE_ME]', ytId: 'UCVTRz4yxAm0m3jo_4tpEcZw',
-    picture: 'https://yt3.ggpht.com/ytc/AKedOLRiH9abVaCAvKnsx38YBzLxCZtDOWqe7Lc_q-bK=s88-c-k-c0x00ffffff-no-rj',
-    groups: ['indies'], twitter: 'tam_ykk',
-    aliases: ['tam']
+    name: 'Discord',ytId: "UCZ5XnGb-3t7jCkXdawN2tkA",
+    picture: 'https://yt3.ggpht.com/ytc/AKedOLQc1OCf9gztVmcVnmI_41uN9axrRP8wd4a-GflFRQ=s88-c-k-c0x00ffffff-no-rj',
+    groups: ['indies'], twitter: 'discord',
+    aliases: ['discord']
   },
 ] as const

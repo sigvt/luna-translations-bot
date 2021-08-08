@@ -15,7 +15,7 @@ export const mods: Command = {
   callback: (msg: Message): void => {
     toggleSetting ({
       msg, setting: 'modMessages',
-      enable:  `:tools: I will now relay mod messages.`,
+      enable: `:tools: I will now relay mod messages.`,
       disable: `
         :tools: I will no longer relay mod messages.
         (Channel owner and other Hololive members will still be relayed.)

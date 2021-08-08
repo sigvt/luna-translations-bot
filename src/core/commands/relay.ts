@@ -4,7 +4,7 @@ import { Message } from 'discord.js'
 import { validateInputAndModifyEntryList } from '../db/functions'
 import { init, last } from 'ramda'
 
-const usage = 'relay <add|remove> <streamer name> <optional:roleID|mention>'
+const usage = 'relay <add|remove|clear> <streamer name> <optional:roleID|mention>'
 
 export const relay: Command = {
   config: {
