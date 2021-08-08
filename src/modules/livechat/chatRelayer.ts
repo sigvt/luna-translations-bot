@@ -45,6 +45,8 @@ function processComments (frame: DexFrame, data: string): void {
     const features: WatchFeature[] = ['relay', 'cameos', 'gossip']
     const guilds     = await getSubbedGuilds (frame.channel.id, features)
     const streamer   = streamers.find (s => s.ytId === frame.channel.id)
+    const author     = streamers.find (s => s.ytId === cmt.id)
+    const isCameo    = isStreamer (cmt.id) && !cmt.isOwner
     const mustDeepL  = guilds.some (g => g.deepl)
                     && isStreamer (cmt.id) && !isHoloID (streamer)
     const deepLTl    = mustDeepL ? await tl (cmt.body) : undefined
@@ -63,7 +65,7 @@ function processComments (frame: DexFrame, data: string): void {
             deepLTl:   mustShowTl ? deepLTl : undefined,
           }
 
-          if (f === 'cameos' && isStreamer (cmt.id) && !cmt.isOwner)  {
+          if (f === 'cameos' && isCameo && author?.name === e.streamer)  {
             relayCameo ({ ...data, to: streamer!.name, content: cmt.body, })
           }
           if (f === 'gossip' && (isStreamer (cmt.id) || isTl (cmt.body))) {
