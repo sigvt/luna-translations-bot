@@ -57,7 +57,6 @@ function processComments (frame: DexFrame, data: string): void {
     guilds.forEach (g => {
       features.forEach (f => {
         getRelayEntries (g, f, streamer?.name).forEach (e => {
-          const discordCh       = findTextChannel (e.discordCh)
           const mustRelayCameo  = isCameo && author?.name === e.streamer
           const mustRelayGossip = isStreamer (cmt.id) || isTl (cmt.body)
           const relayCmt        = match (f, {
@@ -68,7 +67,7 @@ function processComments (frame: DexFrame, data: string): void {
 
           relayCmt ({
             e, cmt, frame, g,
-            discordCh: discordCh!,
+            discordCh: findTextChannel (e.discordCh)!,
             deepLTl:   mustShowTl ? deepLTl : undefined,
             to:        streamer?.name ?? 'Discord',
           })
