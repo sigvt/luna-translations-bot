@@ -34,7 +34,7 @@ export function findStreamerName (name: string): StreamerName | undefined {
 }
 
 export function getTwitterUsername (streamer: StreamerName): StreamerTwitter {
-  return streamers.find (x => x.name === streamer)!.twitter
+  return streamers.find (x => x.name === streamer)?.twitter ?? 'discord'
 }
 
 export function replyStreamerList (x: Message | ValidatedOptions): void {
