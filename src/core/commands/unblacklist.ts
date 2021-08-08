@@ -36,8 +36,8 @@ async function unblacklistLastItem (msg: Message): Promise<void> {
     `
     : ':warning: No items in blacklist.'
 
-  if (lastBlacklisted) updateSettings (msg, { blacklist: init (blacklist) })
   reply (msg, createEmbedMessage (replyContent))
+  if (lastBlacklisted) updateSettings (msg, { blacklist: init (blacklist) })
 }
 
 async function unblacklistItem (msg: Message, ytId: string): Promise<void> {
