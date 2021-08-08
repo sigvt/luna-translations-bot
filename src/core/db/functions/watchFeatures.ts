@@ -19,18 +19,19 @@ import { getAllSettings } from './guildSettings'
 import { isEmpty, splitEvery } from 'ramda'
 const { isArray } = Array
 
-export function validateInputAndModifyEntryList (
-  { msg, verb, streamer, role, usage, feature, add, remove }: ValidateFnOptions
-) {
+export async function validateInputAndModifyEntryList ({
+  msg, verb, streamer, role, usage, feature, add, remove
+}: WatchFeatureModifyOptions): Promise<void> {
   const isVerbValid       = validVerbs.includes (verb as any)
   const validatedVerb     = <ValidVerb> verb
   const validatedStreamer = <StreamerName> findStreamerName (streamer)
   const mustShowList      = verb !== 'clear' && !validatedStreamer
+  const g                 = await getSettings (msg.guild!)
   const modifyIfValid     = !isVerbValid ? showHelp
                           : mustShowList ? replyStreamerList
                                          : modifyEntryList
                                          
-  modifyIfValid ({ msg, usage, feature, role, add, remove,
+  modifyIfValid ({ g, msg, usage, feature, role, add, remove,
     verb: validatedVerb,
     streamer: validatedStreamer,
   })
@@ -43,6 +44,7 @@ export async function getSubbedGuilds (
   const streamer = streamers.find (s => s.ytId === nameOrChannelId)?.name
                 ?? streamers.find (s => s.name === nameOrChannelId)?.name as any
   const feats    = isArray (features) ? features : [features]
+
   return guilds.filter (
     g => getSubs (g, feats).some (sub => [streamer, 'all'].includes (sub))
   )
@@ -67,89 +69,85 @@ async function showHelp (
   reply (msg, embeds)
 }
 
-
 async function modifyEntryList (opts: ValidatedOptions): Promise<void> {
+  const g     = await getSettings (opts.msg)
+  const isNew = g[opts.feature].every (
+    r => r.discordCh != opts.msg.channel.id || r.streamer != opts.streamer
+  )
   const applyModification = match (opts.verb, {
-    add:    addEntry,
-    remove: removeEntry,
+    add:    isNew  ? addEntry    : notifyNotNew,
+    remove: !isNew ? removeEntry : notifyNotFound,
     clear:  clearEntries
   })
 
   applyModification (opts)
 }
 
-async function addEntry (
-  { feature, msg, streamer, role, add }: ValidatedOptions
-): Promise<void> {
-  const settings = await getSettings (msg)
-  const isNew = settings[feature].every (
-    r => r.discordCh != msg.channel.id || r.streamer != streamer
-  )
-  if (isNew) {
-    const newEntries = [...settings[feature], {
-      streamer,
-      discordCh: msg.channel.id,
-      ...(role ? { roleToNotify: role } : {})
-    }]
-    updateSettings (msg, { [feature]: newEntries })
-    reply (msg, createEmbed ({ fields: [{
-      name:   add.success,
+function addEntry (
+  { g, feature, msg, streamer, role, add }: ValidatedOptions
+): void {
+  const newEntries = [...g[feature], {
+    streamer,
+    discordCh: msg.channel.id,
+    ...(role ? { roleToNotify: role } : {})
+  }]
+
+  updateSettings (msg, { [feature]: newEntries })
+  reply (msg, createEmbed ({ fields: [{
+    name:   add.success,
+    value:  streamer,
+    inline: true
+  }, {
+    name:  `${emoji.discord} In channel`,
+    value: `<#${msg.channel.id}>`,
+    inline: true
+  }, ...( role ? [{
+    name:  `${emoji.ping} @mentioning`,
+    value: `<@&${role}>`,
+    inline: true
+  }] : []),
+    ...getEntryFields (newEntries)
+  ]}, false))
+}
+
+function removeEntry (
+  { feature, msg, streamer, remove, g }: ValidatedOptions
+): void {
+  const newEntries = g[feature]
+    .filter (r => r.discordCh !== msg.channel.id || r.streamer !== streamer)
+
+  updateSettings (msg, { [feature]: newEntries })
+  reply (msg, createEmbed ({ fields: [
+    {
+      name:   remove.success,
       value:  streamer,
       inline: true
-    }, {
+    },
+    {
       name:  `${emoji.discord} In channel`,
       value: `<#${msg.channel.id}>`,
       inline: true
-    }, ...( role ? [{
-      name:  `${emoji.ping} @mentioning`,
-      value: `<@&${role}>`,
-      inline: true
-    }] : []),
-      ...getEntryFields (newEntries)
-    ]}, false))
-  } else {
-    reply (msg, createEmbed ( {
-      description: add.failure,
-      fields: getEntryFields (settings[feature])
-    }, false))
-  }
+    },
+    ...getEntryFields (newEntries)
+  ]}, false))
 }
 
-async function removeEntry (
-  { feature, msg, streamer, remove }: ValidatedOptions
-): Promise<void> {
-  const settings = await getSettings (msg)
-  const entry = settings[feature].find (
-    r => r.discordCh === msg.channel.id && r.streamer === streamer
-  )
-  if (entry !== undefined) {
-    const newEntries = settings[feature].filter (
-      r => r.discordCh !== msg.channel.id || r.streamer !== streamer
-    )
-    updateSettings (msg, { [feature]: newEntries })
-    reply (msg, createEmbed ({ fields: [
-      {
-        name:   remove.success,
-        value:  streamer,
-        inline: true
-      },
-      {
-        name:  `${emoji.discord} In channel`,
-        value: `<#${msg.channel.id}>`,
-        inline: true
-      },
-      ...getEntryFields (newEntries)
-    ]}, false))
-  } else {
-    reply (msg, createEmbed ({ fields: [
-      {
-        name:   'Error',
-        value:  remove.failure,
-        inline: false
-      },
-      ...getEntryFields (settings[feature])
-    ]}, false))
-  }
+function notifyNotNew ({ msg, add, g, feature }: ValidatedOptions): void {
+  reply (msg, createEmbed ({
+    description: add.failure, fields: getEntryFields (g[feature])
+  }, false))
+}
+
+
+function notifyNotFound ({msg, remove, g, feature}: ValidatedOptions): void {
+  reply (msg, createEmbed ({ fields: [
+    {
+      name:   'Error',
+      value:  remove.failure,
+      inline: false
+    },
+    ...getEntryFields (g[feature])
+  ]}, false))
 }
 
 async function clearEntries (
@@ -185,7 +183,7 @@ function getSubs (g: GuildSettings, fs: WatchFeature[]): StreamerName[] {
   return fs.flatMap (f => g[f].map (entry => entry.streamer))
 }
 
-interface ValidateFnOptions {
+interface WatchFeatureModifyOptions {
   msg:      Message,
   verb:     string
   streamer: string
@@ -196,15 +194,10 @@ interface ValidateFnOptions {
   remove:   AttemptResultMessages
 }
 
-export interface ValidatedOptions {
-  msg:      Message,
+export interface ValidatedOptions extends WatchFeatureModifyOptions {
+  g:        GuildSettings
   verb:     ValidVerb
   streamer: StreamerName
-  role?:    Snowflake
-  usage:    string
-  feature:  WatchFeature
-  add:      AttemptResultMessages
-  remove:   AttemptResultMessages
 }
 
 interface AttemptResultMessages {

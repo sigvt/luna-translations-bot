@@ -1,8 +1,11 @@
-import { Command, createEmbed, createEmbedMessage, createTxtEmbed, reply } from '../../helpers/discord'
+import {
+  Command, createEmbed, createEmbedMessage, createTxtEmbed, reply
+} from '../../helpers/discord'
 import { oneLine } from 'common-tags'
 import { getFlatGuildRelayHistory, addBlacklisted, getSettings } from '../db/functions'
 import { Message } from 'discord.js'
 import { isBlacklisted } from '../../modules/livechat/commentBooleans'
+import { RelayedComment } from '../db/models/RelayedComment'
 
 export const blacklist: Command = {
   config: {
@@ -18,49 +21,35 @@ export const blacklist: Command = {
     `,
   },
   callback: async (msg: Message, args: string[]): Promise<void> => {
-    const reason  = args.join (' ').trim () || 'No reason provided.'
-    const isReply = msg.reference != null
+    const reason     = args.join (' ').trim () || 'No reason provided.'
+    const isReply    = msg.reference != null
+    const processMsg = isReply ? blacklistTl : showHelp
 
-    if (isReply) blacklistTl (msg, reason)
-    else showHelp (msg)
+    processMsg (msg, reason)
   }
 }
 
-async function blacklistTl (msg: Message, reason: string): Promise<void> {
-  const settings = await getSettings (msg.guild!)
-  const refId    = msg.reference!.messageId
-  const history  = await getFlatGuildRelayHistory (msg.guild!)
-  const culprit  = history.find (cmt => cmt.msgId === refId)
+//////////////////////////////////////////////////////////////////////////////
 
-  if (culprit && isBlacklisted (culprit.ytId, settings)) {
-    reply (msg, createEmbedMessage (':warning: Already blacklisted'))
-  } else if (culprit) {
-    addBlacklisted (
-      msg.guild!, { ytId: culprit.ytId, name: culprit.author, reason }
-    )
-    reply (msg, createEmbed ({ fields: [{
-      name:  ':no_entry: Blacklister',
-      value: msg.author.toString (),
-      inline: true,
-    }, {
-      name:  ':clown: Blacklisted channel',
-      value: culprit.author,
-      inline: true,
-    }, {
-      name:  ':bookmark_tabs: Reason',
-      value: reason,
-      inline: true,
-    }]}))
-  } else {
-    reply (msg, createEmbedMessage (':warning: Translator data not found.'))
-  }
+async function blacklistTl (msg: Message, reason: string): Promise<void> {
+  const settings  = await getSettings (msg.guild!)
+  const refId     = msg.reference!.messageId
+  const history   = await getFlatGuildRelayHistory (msg.guild!)
+  const culprit   = history.find (cmt => cmt.msgId === refId)
+  const duplicate = culprit && isBlacklisted (culprit.ytId, settings)
+  const callback  = duplicate ? notifyDuplicate
+                  : culprit   ? addBlacklistedAndConfirm
+                              : notifyTranslatorNotFound
+
+  callback (msg, culprit!, reason)
 }
 
 async function showHelp (msg: Message): Promise<void> {
-  const settings = await getSettings (msg)
-  const list = 'Channel ID               | Name (Reason)\n'
-    + settings.blacklist.map (el => `${el.ytId} | ${el.name} (${el.reason})`)
-                        .join ('\n')
+  const g       = await getSettings (msg)
+  const header  = 'Channel ID               | Name (Reason)\n'
+  const entries = g.blacklist.map (e => `${e.ytId} | ${e.name} (${e.reason})`)
+                             .join ('\n')
+  const list    = header + entries
 
   reply (msg, createEmbed ({ fields: [{
     name: ':no_entry: Blacklisting someone',
@@ -75,4 +64,31 @@ async function showHelp (msg: Message): Promise<void> {
     `,
     inline: false
   }]}), '', createTxtEmbed ('blacklist.txt', list))
+}
+
+function notifyDuplicate (msg: Message): void {
+  reply (msg, createEmbedMessage (':warning: Already blacklisted'))
+}
+
+function addBlacklistedAndConfirm (
+  msg: Message, { ytId, author }: RelayedComment, reason: string
+): void {
+  addBlacklisted (msg.guild!, { ytId: ytId, name: author, reason })
+  reply (msg, createEmbed ({ fields: [{
+    name:  ':no_entry: Blacklister',
+    value: msg.author.toString (),
+    inline: true,
+  }, {
+    name:  ':clown: Blacklisted channel',
+    value: author,
+    inline: true,
+  }, {
+    name:  ':bookmark_tabs: Reason',
+    value: reason,
+    inline: true,
+  }]}))
+}
+
+function notifyTranslatorNotFound (msg: Message): void {
+  reply (msg, createEmbedMessage (':warning: Translator data not found.'))
 }

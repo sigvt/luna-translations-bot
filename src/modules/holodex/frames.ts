@@ -45,7 +45,7 @@ const params = {
   max_upcoming_hours: '0n'
 }
 
-async function getOneFramePage (): Promise<PaginatedResp | undefined> {
+function getOneFramePage (): Promise<PaginatedResp | undefined> {
   const url = framesUrl + Params (params)
   return asyncTryOrLog (() => getJson (url))
 }

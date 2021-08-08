@@ -17,9 +17,10 @@ export const unblacklist: Command = {
       If none specified, unblacklists last item.
     `,
   },
-  callback: async (msg: Message, args: string[]): Promise<void> => {
-    if (isEmpty (args)) unblacklistLastItem (msg)
-    else unblacklistItem (msg, head (args)!)
+  callback: (msg: Message, args: string[]): void => {
+    const processMsg = isEmpty (args) ? unblacklistLastItem
+                                      : unblacklistItem
+    processMsg (msg, head (args)!)
   }
 }
 
@@ -34,6 +35,7 @@ async function unblacklistLastItem (msg: Message): Promise<void> {
       ${lastBlacklisted.ytId} (${lastBlacklisted.name}).
     `
     : ':warning: No items in blacklist.'
+
   if (lastBlacklisted) updateSettings (msg, { blacklist: init (blacklist) })
   reply (msg, createEmbedMessage (replyContent))
 }

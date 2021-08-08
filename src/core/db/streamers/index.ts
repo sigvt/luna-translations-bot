@@ -11,9 +11,8 @@ export const streamers = StreamerArray([
   ...indies
 ] as const)
 
-export const names    = streamers.map (x => x.name)
-export const twitters = streamers.map (x => x.twitter)
-
+export const names          = streamers.map (x => x.name)
+export const twitters       = streamers.map (x => x.twitter)
 export type StreamerName    = typeof names[number] | 'all'
 export type StreamerTwitter = typeof twitters[number]
 
@@ -51,19 +50,21 @@ export function isSupported (ytId: string): boolean {
 }
 
 export type Streamer = Readonly<{
-  aliases: readonly stringOrRegex[],
-  groups: readonly string[],
-  name: string,
-  picture: string,
-  twitter: string,
-  ytId: string,
+  aliases: readonly stringOrRegex[]
+  groups:  readonly string[]
+  name:    string
+  picture: string
+  twitter: string
+  ytId:    string
 }>
+
+//////////////////////////////////////////////////////////////////////////////
 
 /**
  * This constrained identity function validates array without typing it
  * so that we may use 'as const' on the array
  **/
-export function StreamerArray <T extends readonly Streamer[]> (arr: T) {
+function StreamerArray <T extends readonly Streamer[]> (arr: T) {
   return arr
 }
 

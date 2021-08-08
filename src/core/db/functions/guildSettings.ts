@@ -41,8 +41,15 @@ export async function removeBlacklisted (
   const newBlacklist  = blacklist.filter (entry => entry.ytId !== ytId)
 
   if (isValid) updateSettings (g, { blacklist: newBlacklist })
-
   return isValid
+}
+
+export async function isBlacklisted (
+  ytId: YouTubeChannelId | undefined, gid: Snowflake
+): Promise<boolean> {
+  const settings  = await getSettings (gid)
+  const blacklist = settings.blacklist
+  return blacklist.some (entry => entry.ytId === ytId)
 }
 
 export async function updateSettings (

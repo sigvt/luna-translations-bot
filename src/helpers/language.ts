@@ -1,6 +1,5 @@
 /** @file General helpers wrapping around ECMAScript itself */
-
-import { equals, head, isEmpty, isNil, tail, zip } from "ramda"
+import { equals, head, isEmpty, isNil, tail } from "ramda"
 
 /**
  * Match expression. Supply it a dictionary for patterns, or Map if you

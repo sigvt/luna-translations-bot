@@ -4,12 +4,14 @@ import { Map as ImmutableMap } from 'immutable'
 import { UpdateQuery } from 'mongoose'
 import { zip } from 'ramda'
 import { isGuild } from '../../../helpers/discord'
-import { deleteKey, setKey, toES6 } from '../../../helpers/immutableES6MapFunctions'
+import { deleteKey, setKey } from '../../../helpers/immutableES6MapFunctions'
 import { VideoId } from '../../../modules/holodex/frames'
 import { client } from '../../lunaBotClient'
 import { RelayedComment } from '../models/RelayedComment'
 import { GuildData, BlacklistNotice, GuildDataDb } from '../models/GuildData'
 import { YouTubeChannelId } from '../../../modules/holodex/frames'
+
+// TODO: make this more DRY using general functions but constrained types
 
 export type ImmutableRelayHistory = ImmutableMap<VideoId, RelayedComment[]>
 

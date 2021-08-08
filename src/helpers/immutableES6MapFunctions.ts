@@ -1,5 +1,3 @@
-import { Map as ImmutableMap } from 'immutable'
-
 /**
  * Same as Map.prototype.set except it returns a new map (use with F# pipes)
  * Usage: const newMap = oldMap |> setKey (key, value)
@@ -16,15 +14,11 @@ export function deleteKey (key: any): <K, V> (m: Map<K, V>) => Map<K, V> {
   return getFnCallingMethodOnMapCopy ({ method: 'delete', args: [key] })
 }
 
-/** convert an immutablejs Map to an ES6 map */
-export function toES6 <V> (m: ImmutableMap<any, V>): Map<string, V> {
-  return new Map (m.toArray ())
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
 type MapMethods = 'clear' | 'delete' | 'set'
 
+// I regret doing currying in this way...
 function getFnCallingMethodOnMapCopy (
   { method, args }: { method: MapMethods, args: any[] }
 ): <K, V> (m: Map<K, V>) => Map<K, V> {

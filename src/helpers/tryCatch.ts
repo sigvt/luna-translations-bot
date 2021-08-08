@@ -1,46 +1,4 @@
-import { Fn, throwIt } from './language'
 import { debug } from './logging'
-
-// TODO: This interface needs to be streamlined
-
-export function tryOrDie <T> (
-  tryFn: () => T,
-  catchFn: (e: any) => never = throwIt
-): T {
-  try {
-    return tryFn ()
-  } catch (e) {
-    catchFn (e)
-  }
-}
-
-export function tryOrDo <T> (tryFn: () => T, catchFn: Fn): T | undefined {
-  try {
-    return tryFn ()
-  } catch (e) {
-    catchFn (e)
-  }
-}
-
-export function tryOrLog <T> (tryFn: () => T): T | undefined {
-  try {
-    return tryFn ()
-  } catch (e) {
-    debug (e)
-  }
-}
-
-export async function asyncTryOrLog <T> (
-  fn: () => Promise<T>
-): Promise<T | undefined> {
-  try {
-    const value = await fn ()
-    return value
-  } catch (e) {
-    debug (e)
-  }
-}
-
 
 export function tryOrDefault <T> (tryFn: () => T, defaultValue: T): T {
   try {
@@ -61,3 +19,14 @@ export async function asyncTryOrDefault <T> (
     return defaultValue
   }
 }
+
+export function tryOrLog <T> (tryFn: () => T): T | undefined {
+  return tryOrDefault (tryFn, undefined)
+}
+
+export async function asyncTryOrLog <T> (
+  tryFn: () => Promise<T>
+): Promise<T | undefined> {
+  return asyncTryOrDefault (tryFn, undefined)
+}
+

@@ -1,6 +1,6 @@
-import { Message } from 'discord.js'
-import { head } from 'ramda'
-import { Command, createEmbedMessage, reply, send } from '../../helpers/discord'
+import { Message, Snowflake } from 'discord.js'
+import { head, isEmpty, isNil } from 'ramda'
+import { Command, createEmbedMessage, reply } from '../../helpers/discord'
 import { updateSettings } from '../db/functions'
 import { client } from '../lunaBotClient'
 
@@ -18,19 +18,23 @@ export const logChannel: Command = {
     const channelMention = head (args)
     const channelId      = channelMention?.match(/<#(.*?)>/)?.[1]
     const channelObj     = client.channels.cache.find (c => c.id === channelId)
-
-    if (args.length === 0) {
-      updateSettings (msg, { logChannel: undefined })
-      reply (msg, createEmbedMessage (
-        `Tl logs will be posted in the relay channel.`
-      ))
-    } else if (!channelObj) {
-      reply (msg, createEmbedMessage (`${channelMention} is invalid.`))
-    } else {
-      updateSettings (msg, { logChannel: channelId })
-      reply (msg, createEmbedMessage (
-        `TL logs will be posted in <#${channelId}>.`
-      ))
-    }
+    const processMsg     = isEmpty (args)     ? clearSetting
+                         : isNil (channelObj) ? respondInvalid
+                                              : setLogChannel
+    processMsg (msg, channelId!)
   }
+}
+
+function clearSetting (msg: Message): void {
+  updateSettings (msg, { logChannel: undefined })
+  reply (msg, createEmbedMessage ('Logs will be posted in the relay channel.'))
+}
+
+function respondInvalid (msg: Message): void {
+  reply (msg, createEmbedMessage (`Invalid channel supplied.`))
+}
+
+function setLogChannel (msg: Message, channelId: Snowflake): void {
+  updateSettings (msg, { logChannel: channelId })
+  reply (msg, createEmbedMessage (`Logs will be posted in <#${channelId}>.`))
 }

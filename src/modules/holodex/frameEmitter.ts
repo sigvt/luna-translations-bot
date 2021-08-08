@@ -38,5 +38,6 @@ function isNew (frame: DexFrame, previousFrames: DexFrame[]): boolean {
     const previousHasStart = !isNil (pf.start_actual)
     return isLive ? (isSame && previousHasStart) : isSame
   }))
+
   return isLive ? (!isEmitted && hasStart) : !isEmitted
 }

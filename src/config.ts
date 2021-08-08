@@ -1,6 +1,6 @@
 import { GuildMember, Intents, Message } from 'discord.js'
-import { isGuildOwner, isBotOwner, hasKickPerms } from './helpers/discord'
 import { isBlacklister, isAdmin } from './core/db/functions'
+import { isGuildOwner, isBotOwner, hasKickPerms } from './helpers/discord'
 
 export const config: LunaBotConfig = {
   deeplKey: process.env.DEEPL_KEY,
@@ -27,7 +27,7 @@ export interface PermLevel {
   check: (x: Message | GuildMember) => boolean | Promise<boolean>
 }
 
-//// PRIVATE ///////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 
 interface LunaBotConfig {
   deeplKey?:          string

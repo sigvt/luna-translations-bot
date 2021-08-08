@@ -1,5 +1,5 @@
 import { Interaction, ButtonInteraction, Snowflake } from 'discord.js'
-import { doNothing, debug, match, isNotNil } from '../../helpers'
+import { doNothing, match, isNotNil } from '../../helpers'
 import { createEmbedMessage, findTextChannel } from '../../helpers/discord'
 import { getNoticeFromMsgId, removeBlacklisted, excludeLine, getGuildRelayHistory } from '../db/functions'
 import { BlacklistNotice } from '../db/models/GuildData'
@@ -16,13 +16,13 @@ export function interactionCreate (intr: Interaction): void {
 
 async function processButton (btn: ButtonInteraction): Promise<void> {
   const notice     = await getNoticeFromMsgId (btn.guild!, btn.message.id)
-  const btnHandler = match (btn.customId, {
+  const btnHandler = notice ? match (btn.customId, {
     cancel:  cancelBlacklisting,
     cancel2: cancelBlacklistingAndExcludeLine,
     clear:   clearAuthorTls
-  })
+  }): doNothing
 
-  if (notice) btnHandler (btn, notice)
+  btnHandler (btn, notice)
 }
 
 async function cancelBlacklisting (
@@ -56,10 +56,6 @@ async function clearAuthorTls (
   const msgs   = <Snowflake[]> cmts.map (cmt => cmt.msgId).filter (isNotNil)
   const ch     = findTextChannel (last (cmts)?.discordCh ?? '')
 
-  debug (`deleting in ch ${ch?.name}`)
-  debug (`deleting ${msgs.length} msgs`)
-
-    // TODO: more robust permission checks
   ch?.bulkDelete (msgs)
   .then (deleted => btn.update ({ components: [], embeds: [createEmbedMessage (
     `Deleted ${deleted.size} translations.`

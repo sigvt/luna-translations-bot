@@ -1,7 +1,7 @@
 import { Command, emoji } from '../../helpers/discord'
 import { oneLine } from 'common-tags'
 import { Message } from 'discord.js'
-import {validateInputAndModifyEntryList } from '../db/functions'
+import { validateInputAndModifyEntryList } from '../db/functions'
 
 const usage = 'cameos <add|remove> <streamer name>'
 

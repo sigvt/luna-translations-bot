@@ -1,6 +1,6 @@
 import { Command } from '../../helpers/discord'
-import { oneLine } from 'common-tags'
 import { Message } from 'discord.js'
+import { oneLine } from 'common-tags'
 import { validateInputAndModifyRoleList } from '../db/functions/roles'
 
 export const admins: Command = {

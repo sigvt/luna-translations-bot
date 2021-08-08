@@ -19,7 +19,7 @@ export const run: Command = {
   },
   callback: async (msg: Message, args: string[]): Promise<void> => {
     const output = await processCode (msg, args)
-    reply (msg, undefined, '```' + output + '```')
+    reply (msg, undefined, '```js\n' + output + '\n```')
   }
 }
 
@@ -28,9 +28,8 @@ export const run: Command = {
 async function processCode (msg: Message, code: string[]): Promise<string> {
   // keep imports in eval scope via _
   const _ = { client, getSettings, updateSettings, getGuildData, updateGuildData }
-  const evaled  = tryOrDefault (() => eval (code.join (' ')), '')
-  const awaited = await evaled
-  const string  = toString (awaited)
+  const evaled  = await tryOrDefault (() => eval (code.join (' ')), '')
+  const string  = toString (evaled)
   const cleaned = string
     .replace (/`/g, "`" + String.fromCharCode (8203))
     .replace (/@/g, "@" + String.fromCharCode (8203))

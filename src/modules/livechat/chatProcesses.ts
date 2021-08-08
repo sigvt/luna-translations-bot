@@ -1,5 +1,4 @@
 import { ChildProcessWithoutNullStreams, spawn } from 'child_process'
-import { debug } from '../../helpers'
 import { VideoId } from '../holodex/frames'
 
 /** Returns a singleton of the chat process for a given video ID */
@@ -18,6 +17,5 @@ const chatProcesses: Record<VideoId, ChatProcess> = {}
 type ChatProcess = ChildProcessWithoutNullStreams
 
 function spawnChatProcess (liveId: VideoId): ChatProcess {
-  // debug (`spawning ${liveId}`)
   return spawn ('python3', ['-u', './modules/livechat/chat_dl.py', liveId])
 }

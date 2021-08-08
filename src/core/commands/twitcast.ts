@@ -22,6 +22,7 @@ export const twitcast: Command = {
   callback: async (msg: Message, [verb, ...name]: string[]): Promise<void> => {
     const role     = validateRole (msg.guild!, last (name))
     const streamer = role ? init (name).join (' ') : name.join (' ')
+
     validateInputAndModifyEntryList ({
       msg, verb, streamer, role, usage,
       feature: 'twitcasting',

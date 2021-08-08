@@ -2,8 +2,25 @@ import { createEmbedMessage, reply, validateRole } from '../../../helpers/discor
 import { getSettings, updateSettings } from './'
 import { Message, Snowflake } from 'discord.js'
 import { config } from '../../../config'
-import { RoleSetting } from '../models'
+import { GuildSettings, RoleSetting } from '../models'
 import { match } from '../../../helpers'
+
+export async function validateInputAndModifyRoleList (
+  opts: RoleModifyOptions
+): Promise<void> {
+  const isVerbValid   = validVerbs.includes (opts.verb as any)
+  const validatedRole = validateRole (opts.msg.guild!, opts.role)
+  const isValid       = isVerbValid && validatedRole !== undefined
+  const modifyIfValid = isValid ? modifyRoleList : showHelp
+  const g              = await getSettings (opts.msg)
+
+  modifyIfValid ({ ...opts, role: validatedRole, g } as ValidatedOptions)
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+const validVerbs = ['add', 'remove'] as const
+type ValidVerb   = typeof validVerbs[number]
 
 interface RoleModifyOptions {
   type: RoleSetting
@@ -12,73 +29,59 @@ interface RoleModifyOptions {
   role: string
 }
 
-interface RoleModifyValidatedOptions extends RoleModifyOptions {
+interface ValidatedOptions extends RoleModifyOptions {
   verb: ValidVerb
   role: Snowflake
+  g:    GuildSettings
 }
 
-export function validateInputAndModifyRoleList (opts: RoleModifyOptions): void {
-  const isVerbValid   = validVerbs.includes (opts.verb as any)
-  const validatedRole = validateRole (opts.msg.guild!, opts.role)
-  const isValid       = isVerbValid && validatedRole !== undefined
-  const modifyIfValid = isValid ? modifyRoleList : showHelp
-
-  modifyIfValid ({ ...opts, role: validatedRole } as RoleModifyValidatedOptions)
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
-const validVerbs = ['add', 'remove'] as const
-type ValidVerb   = typeof validVerbs[number]
-
-async function showHelp (opts: RoleModifyValidatedOptions) {
-  const settings = await getSettings (opts.msg.guild!)
+function showHelp (opts: ValidatedOptions): void {
   reply (opts.msg, createEmbedMessage (`
     **Usage:** \`${config.prefix}${opts.type} <add|remove> <role ID|mention>\`
-    ${getRoleList (settings[opts.type])}
+    ${getRoleList (opts.g[opts.type])}
   `))
 }
 
-async function modifyRoleList (opts: RoleModifyValidatedOptions): Promise<void> {
-  const applyModification = match (opts.verb, {
-    add:    addRole,
-    remove: removeRole
+function modifyRoleList (opts: ValidatedOptions): void {
+  const isNew  = ! opts.g[opts.type].includes (opts.role)
+  const modify = match (opts.verb, {
+    add:    isNew  ? addRole    : notifyNotNew,
+    remove: !isNew ? removeRole : notifyNotFound
   })
-  applyModification (opts)
+
+  modify (opts)
 }
 
-async function addRole (opts: RoleModifyValidatedOptions): Promise<void> {
-  const g = await getSettings (opts.msg)
-  if (g[opts.type].includes (opts.role)) {
-    reply (opts.msg, createEmbedMessage (`
-      :warning: <@&${opts.role}> already in the ${opts.type} list.
-      ${getRoleList (g[opts.type])}
-    `))
-  } else {
-    const newRoles = [...g[opts.type], opts.role]
-    updateSettings (opts.msg, { [opts.type]: newRoles })
-    reply (opts.msg, createEmbedMessage (`
-      :white_check_mark: <@&${opts.role}> was added to the ${opts.type} list.
-      ${getRoleList (newRoles)}
-    `))
-  }
+function addRole (opts: ValidatedOptions): void {
+  const newRoles = [...opts.g[opts.type], opts.role]
+  updateSettings (opts.msg, { [opts.type]: newRoles })
+  reply (opts.msg, createEmbedMessage (`
+    :white_check_mark: <@&${opts.role}> was added to the ${opts.type} list.
+    ${getRoleList (newRoles)}
+  `))
 }
 
-async function removeRole (opts: RoleModifyValidatedOptions): Promise<void> {
-  const g = await getSettings (opts.msg)
-  if (g[opts.type].includes (opts.role)) {
-    const newRoles = g[opts.type].filter (id => id !== opts.role)
-    updateSettings (opts.msg, { [opts.type]: newRoles })
-    reply (opts.msg, createEmbedMessage (`
-      :white_check_mark: <@&${opts.role}> was removed from the ${opts.type} list.
-      ${getRoleList (newRoles)}
-    `))
-  } else {
-    reply (opts.msg, createEmbedMessage (`
-      :warning: <@&${opts.role}> not found in the current ${opts.type} list.
-      ${getRoleList (g[opts.type])}
-    `))
-  }
+async function removeRole (opts: ValidatedOptions): Promise<void> {
+  const newRoles = opts.g[opts.type].filter (id => id !== opts.role)
+  updateSettings (opts.msg, { [opts.type]: newRoles })
+  reply (opts.msg, createEmbedMessage (`
+    :white_check_mark: <@&${opts.role}> was removed from the ${opts.type} list.
+    ${getRoleList (newRoles)}
+  `))
+}
+
+function notifyNotNew (opts: ValidatedOptions): void {
+  reply (opts.msg, createEmbedMessage (`
+    :warning: <@&${opts.role}> already in the ${opts.type} list.
+    ${getRoleList (opts.g[opts.type])}
+  `))
+}
+
+function notifyNotFound (opts: ValidatedOptions): void {
+  reply (opts.msg, createEmbedMessage (`
+    :warning: <@&${opts.role}> not found in the current ${opts.type} list.
+    ${getRoleList (opts.g[opts.type])}
+  `))
 }
 
 function getRoleList (roles: Snowflake[]) {

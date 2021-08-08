@@ -34,4 +34,6 @@ export async function addToBotRelayHistory (
   updateBotData ({ relayHistory: newHistory })
 }
 
+///////////////////////////////////////////////////////////////////////////////
+
 type NewData = UpdateQuery<DocumentType<BotData>>

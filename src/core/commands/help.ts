@@ -9,7 +9,6 @@ import { Command, createEmbed, emoji, reply } from '../../helpers/discord'
 import { oneLine } from 'common-tags'
 import { config } from '../../config'
 
-
 export const help: Command = {
   config: {
     aliases:   ['h', 'halp'],
@@ -35,7 +34,7 @@ export const help: Command = {
   }
 }
 
-//// PRIVATE //////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 
 async function getCommandsAtUserLevel (msg: Message) {
   const authorLevel = await getPermLevel (msg)
@@ -114,17 +113,17 @@ function getWatchList (
 ): string {
   const first = head (entries)
   const firstMention = first?.roleToNotify
-                       ? `mentioning <@&${first.roleToNotify}>`
-                       : ''
+                         ? `mentioning <@&${first.roleToNotify}>`
+                         : ''
   const templates = {
     empty: `None. Run \`${config.prefix}.${feature}\``,
     one: `${first!.streamer} in <#${first!.discordCh}> ${firstMention}`,
     many: `Multiple. Run \`${config.prefix}${feature}\``
   }
 
-  return isEmpty (entries) ? templates.empty
-    : entries.length === 1 ? templates.one
-                           : templates.many
+  return isEmpty (entries)    ? templates.empty
+       : entries.length === 1 ? templates.one
+                              : templates.many
 }
 
 function getRoleList (
