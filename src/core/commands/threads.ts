@@ -5,7 +5,7 @@ import { oneLine } from 'common-tags'
 
 export const threads: Command = {
   config: {
-    aliases:   ['togglethreads'],
+    aliases:   ['togglethreads', 'thread', 'togglethread'],
     permLevel: 2
   },
   help: {
