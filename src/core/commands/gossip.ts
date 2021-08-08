@@ -3,7 +3,7 @@ import { oneLine } from 'common-tags'
 import { Message } from 'discord.js'
 import { validateInputAndModifyEntryList } from '../db/functions'
 
-const usage = 'holochats <add|remove> <streamer name>'
+const usage = 'gossip <add|remove> <streamer name>'
 
 export const gossip: Command = {
   config: {
