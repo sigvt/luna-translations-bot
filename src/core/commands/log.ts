@@ -9,7 +9,7 @@ import { RelayedComment } from '../db/models/RelayedComment'
 export const log: Command = {
   config: {
     aliases:   ['history', 'tlLog', 'relayLog'],
-    permLevel: 1
+    permLevel: 0
   },
   help: {
     category:    'Relay',
