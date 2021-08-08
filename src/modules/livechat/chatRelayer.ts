@@ -1,4 +1,4 @@
-import { ciEquals, debug } from '../../helpers'
+import { ciEquals, debug, doNothing, match } from '../../helpers'
 import { tryOrDefault } from '../../helpers/tryCatch'
 import { frameEmitter } from '../holodex/frameEmitter'
 import { DexFrame, isPublic, VideoId } from '../holodex/frames'
@@ -57,25 +57,22 @@ function processComments (frame: DexFrame, data: string): void {
     guilds.forEach (g => {
       features.forEach (f => {
         getRelayEntries (g, f, streamer?.name).forEach (e => {
-          const discordCh = findTextChannel (e.discordCh)
+          const discordCh       = findTextChannel (e.discordCh)
+          const mustRelayCameo  = isCameo && author?.name === e.streamer
+          const mustRelayGossip = isStreamer (cmt.id) || isTl (cmt.body)
           const data: RelayData = {
+            e, cmt, frame, g,
             discordCh: discordCh!,
-            from:      cmt.name,
-            inStream:  frame.id,
             deepLTl:   mustShowTl ? deepLTl : undefined,
+            to:        streamer?.name ?? 'Discord',
           }
+          const relayCmt = match (f, {
+            cameos: mustRelayCameo  ? relayCameo  : doNothing,
+            gossip: mustRelayGossip ? relayGossip : doNothing,
+            relay:  relayTlOrStreamerComment
+          })
 
-          if (f === 'cameos' && isCameo && author?.name === e.streamer)  {
-            relayCameo ({ ...data, to: streamer!.name, content: cmt.body, })
-          }
-          if (f === 'gossip' && (isStreamer (cmt.id) || isTl (cmt.body))) {
-            relayGossip (e, frame, {
-              ...data, to: streamer!.name, content: cmt.body
-            })
-          }
-          if (f === 'relay') {
-            relayTlOrStreamerComment ({...data, cmt, g, frame, })
-          }
+          relayCmt (data)
         })
       })
     })
@@ -83,26 +80,26 @@ function processComments (frame: DexFrame, data: string): void {
 }
 
 function relayCameo (
-  { discordCh, from, to, content, deepLTl, inStream }: CameoRelayData,
+  { discordCh, to, cmt, deepLTl, frame }: RelayData,
   isGossip?: boolean
 ): void {
-  const cleaned = content.replaceAll ('`', "'")
+  const cleaned = cmt.body.replaceAll ('`', "'")
   const emj     = isGossip ? emoji.peek : emoji.holo
-  const line1   = `${emj} **${from}** in **${to}**'s chat: \`${cleaned}\``
+  const line1   = `${emj} **${cmt.name}** in **${to}**'s chat: \`${cleaned}\``
   const line2   = deepLTl ? `\n${emoji.deepl}**DeepL:** \`${deepLTl}\`` : ''
-  const line3   = `\n<https://youtu.be/${inStream}>`
+  const line3   = `\n<https://youtu.be/${frame.id}>`
   send (discordCh, line1 + line2 + line3)
 }
 
 function relayGossip (
-  e: WatchFeatureSettings, frame: DexFrame, data: CameoRelayData
+  data: RelayData
 ): void {
-  const streamer = streamers.find (s => s.name === e.streamer)
-  if (isGossip (data.content, streamer!, frame)) relayCameo (data, true)
+  const stalked = streamers.find (s => s.name === data.e.streamer)
+  if (isGossip (data.cmt.body, stalked!, data.frame)) relayCameo (data, true)
 }
 
 async function relayTlOrStreamerComment (
-  { discordCh, from, inStream, deepLTl, cmt, g, frame }: TlRelayData
+  { discordCh, deepLTl, cmt, g, frame }: RelayData
 ): Promise<void> {
   const mustPost = cmt.isOwner
                 || (isTl (cmt.body, g) && !isBlacklisted (cmt.id, g))
@@ -114,10 +111,10 @@ async function relayTlOrStreamerComment (
                                       : ':tools:'
 
   const url = frame.status === 'live' ? ''
-            : deepLTl                 ? `\n<https://youtu.be/${inStream}>`
-                                      : ` | <https://youtu.be/${inStream}>`
+            : deepLTl                 ? `\n<https://youtu.be/${frame.id}>`
+                                      : ` | <https://youtu.be/${frame.id}>`
 
-  const author = isTl (cmt.body, g) ? `||${from}:||` : `**${from}:**`
+  const author = isTl (cmt.body, g) ? `||${cmt.name}:||` : `**${cmt.name}:**`
   const text   = cmt.body.replaceAll ('`', "''")
   const tl     = deepLTl ? `\n${emoji.deepl}**DeepL:** \`${deepLTl}\`` : ''
 
@@ -168,13 +165,13 @@ function saveComment (
                        .toISOString ()
                        .substr (11, 8)
   addFn (frame.id, {
-    msgId: msg?.id,
-    discordCh: msg?.channel.id,
-    body: cmt.body,
-    ytId: cmt.id,
-    author: cmt.name,
+    msgId:        msg?.id,
+    discordCh:    msg?.channel.id,
+    body:         cmt.body,
+    ytId:         cmt.id,
+    author:       cmt.name,
     timestamp,
-    stream: frame.id,
+    stream:       frame.id,
     absoluteTime: cmt.time
   }, gid!)
 }
@@ -194,12 +191,12 @@ function getRelayEntries (
     .filter (entry => entry.streamer === streamer || entry.streamer === 'all')
 }
 
-function isGossip (text: string, streamer: Streamer, frame: DexFrame): boolean {
-  const isOwnChannel    = frame.channel.id === streamer.ytId
-  const isCollab        = frame.description.includes (streamer.twitter)
+function isGossip (text: string, stalked: Streamer, frame: DexFrame): boolean {
+  const isOwnChannel    = frame.channel.id === stalked.ytId
+  const isCollab        = frame.description.includes (stalked.twitter)
   const mentionsWatched = text
     .split (' ')
-    .some (w => streamer.aliases.some (a => ciEquals (a, w)))
+    .some (w => stalked.aliases.some (a => ciEquals (a, w)))
   
   return !isOwnChannel && !isCollab && mentionsWatched
 }
@@ -207,18 +204,21 @@ function isGossip (text: string, streamer: Streamer, frame: DexFrame): boolean {
 
 interface RelayData {
   discordCh: TextChannel | ThreadChannel
-  from: string
-  inStream: VideoId
-  deepLTl?: string
+  deepLTl?:  string
+  cmt:       ChatComment
+  g:         GuildSettings
+  frame:     DexFrame
+  to:        StreamerName
+  e:         WatchFeatureSettings
 }
 
-interface CameoRelayData extends RelayData {
-  to: StreamerName
-  content: string
-}
+// interface CameoRelayData extends RelayData {
+  // to: StreamerName
+  // content: string
+// }
 
-interface TlRelayData extends RelayData {
-  cmt: ChatComment
-  g: GuildSettings
-  frame: DexFrame
-}
+// interface TlRelayData extends RelayData {
+  // cmt: ChatComment
+  // g: GuildSettings
+  // frame: DexFrame
+// }
