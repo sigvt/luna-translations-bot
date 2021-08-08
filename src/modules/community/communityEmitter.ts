@@ -40,7 +40,7 @@ async function checkChannel (
   const post      = await getLatestPost (ytId)
   const recorded  = lastPosts.get (ytId)
   const newPosts  = lastPosts |> setKey (ytId, post?.url)
-  const mustEmit  = !post || post.url === recorded || !post.isToday
+  const mustEmit  = post && post.url !== recorded && post.isToday
   const callback  = mustEmit ? saveAndEmit : doNothing
   callback (newPosts, emitter, post!)
 }
