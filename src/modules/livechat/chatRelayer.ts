@@ -60,19 +60,18 @@ function processComments (frame: DexFrame, data: string): void {
           const discordCh       = findTextChannel (e.discordCh)
           const mustRelayCameo  = isCameo && author?.name === e.streamer
           const mustRelayGossip = isStreamer (cmt.id) || isTl (cmt.body)
-          const data: RelayData = {
-            e, cmt, frame, g,
-            discordCh: discordCh!,
-            deepLTl:   mustShowTl ? deepLTl : undefined,
-            to:        streamer?.name ?? 'Discord',
-          }
-          const relayCmt = match (f, {
+          const relayCmt        = match (f, {
             cameos: mustRelayCameo  ? relayCameo  : doNothing,
             gossip: mustRelayGossip ? relayGossip : doNothing,
             relay:  relayTlOrStreamerComment
           })
 
-          relayCmt (data)
+          relayCmt ({
+            e, cmt, frame, g,
+            discordCh: discordCh!,
+            deepLTl:   mustShowTl ? deepLTl : undefined,
+            to:        streamer?.name ?? 'Discord',
+          })
         })
       })
     })
@@ -211,14 +210,3 @@ interface RelayData {
   to:        StreamerName
   e:         WatchFeatureSettings
 }
-
-// interface CameoRelayData extends RelayData {
-  // to: StreamerName
-  // content: string
-// }
-
-// interface TlRelayData extends RelayData {
-  // cmt: ChatComment
-  // g: GuildSettings
-  // frame: DexFrame
-// }
