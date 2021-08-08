@@ -116,7 +116,7 @@ function getWatchList (
                          ? `mentioning <@&${first.roleToNotify}>`
                          : ''
   const templates = {
-    empty: `None. Run \`${config.prefix}.${feature}\``,
+    empty: `None. Run \`${config.prefix}${feature}\``,
     one: `${first?.streamer} in <#${first?.discordCh}> ${firstMention}`,
     many: `Multiple. Run \`${config.prefix}${feature}\``
   }
