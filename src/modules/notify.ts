@@ -35,9 +35,10 @@ export async function notifyOneGuild (
     })
     .then (msg => {
       if (msg && feature === 'relay') {
-        const ch = msg.channel as TextChannel
+        const ch         = msg.channel as TextChannel
+        const mustThread = canBot ('USE_PUBLIC_THREADS', ch) && g.threads
         addRelayNotice (g._id, opts.videoId!, msg.id)
-        if (canBot ('USE_PUBLIC_THREADS', ch)) return ch.threads.create ({
+        if (mustThread) return ch.threads.create ({
           name: `Log ${streamer.name} ${opts.videoId}`,
           startMessage: msg,
           autoArchiveDuration: 1440
