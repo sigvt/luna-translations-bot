@@ -22,7 +22,7 @@ export async function notifyOneGuild (
   const notices  = await getRelayNotices (g._id)
   const announce = notices.get (opts.videoId ?? '')
 
-  return announce ? Promise.all (entries.map (({ discordCh, roleToNotify }) => {
+  return !announce ? Promise.all (entries.map (({ discordCh, roleToNotify }) => {
     const ch = <TextChannel> guildObj?.channels.cache
                   .find (ch => ch.id === discordCh)
     return send (ch, {
