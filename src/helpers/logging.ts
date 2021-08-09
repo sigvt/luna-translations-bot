@@ -13,12 +13,7 @@ export function warn (data: any) {
   return logger ('warn', data)
 }
 
-/** Logs formatted error to console and log file. */
-export function error (data: any) {
-  return logger ('error', data)
-}
-
-/** Logs formatted error information to console and log file. */
+/** Logs formatted debug information to console and log file. */
 export function debug (data: any) {
   return logger ('debug', data)
 }
