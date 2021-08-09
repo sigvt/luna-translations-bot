@@ -38,7 +38,8 @@ export async function validateInputAndModifyEntryList ({
 }
 
 export async function getSubbedGuilds (
-  nameOrChannelId: string, features: WatchFeature | WatchFeature[]
+  nameOrChannelId: string,
+  features: WatchFeature | WatchFeature[],
 ): Promise<GuildSettings[]> {
   const guilds   = await getAllSettings ()
   const streamer = streamers.find (s => s.ytId === nameOrChannelId)?.name

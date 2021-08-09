@@ -22,8 +22,9 @@ export function getSettings (
   return getGuildSettings (id ?? '0')
 }
 
-export function getAllSettings (): Promise<GuildSettings[]> {
-  return Promise.all (client.guilds.cache.map (getSettings))
+export async function getAllSettings () {
+  cachedSettings ??= await getAllSettingsRefreshed ()
+  return cachedSettings
 }
 
 export async function addBlacklisted (
@@ -97,6 +98,13 @@ export type PrivilegedRole = 'admins' | 'blacklisters'
 export type NewSettings = UpdateQuery<DocumentType<GuildSettings>>
 
 //// PRIVATE //////////////////////////////////////////////////////////////////
+
+let cachedSettings: GuildSettings[] | undefined
+setInterval (() => cachedSettings = undefined, 60000)
+
+function getAllSettingsRefreshed (): Promise<GuildSettings[]> {
+  return Promise.all (client.guilds.cache.map (getSettings))
+}
 
 async function getGuildSettings (g: Guild | Snowflake): Promise<GuildSettings> {
   const _id = isGuild (g) ? g.id : g
