@@ -33,8 +33,8 @@ async function processCode (msg: Message, code: string[]): Promise<string> {
   const cleaned = string
     .replace (/`/g, "`" + String.fromCharCode (8203))
     .replace (/@/g, "@" + String.fromCharCode (8203))
-    .replace (config.token ?? '[censored]', '[censored]')
-    .replace (config.deeplKey ?? '[censored]', '[censored]')
+    .replaceAll (config.token ?? '[censored]', '[censored]')
+    .replaceAll (config.deeplKey ?? '[censored]', '[censored]')
   return cleaned
 }
 
