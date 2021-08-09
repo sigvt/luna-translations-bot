@@ -100,7 +100,7 @@ export type NewSettings = UpdateQuery<DocumentType<GuildSettings>>
 //// PRIVATE //////////////////////////////////////////////////////////////////
 
 let cachedSettings: GuildSettings[] | undefined
-setInterval (() => cachedSettings = undefined, 60000)
+setInterval (() => cachedSettings = undefined, 5000)
 
 function getAllSettingsRefreshed (): Promise<GuildSettings[]> {
   return Promise.all (client.guilds.cache.map (getSettings))
