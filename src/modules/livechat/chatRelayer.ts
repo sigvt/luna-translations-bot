@@ -8,7 +8,7 @@ import { emoji, findTextChannel, send } from '../../helpers/discord'
 import { Message, Snowflake, TextChannel, ThreadChannel } from 'discord.js'
 import { tl } from '../deepl'
 import { addToBotRelayHistory, addToGuildRelayHistory, getSubbedGuilds, getRelayNotices, getSettings, getGuildData } from '../../core/db/functions'
-import { isBlacklisted, isHoloID, isStreamer, isTl } from './commentBooleans'
+import { isBlacklisted, isBlacklistedOrUnwanted, isHoloID, isStreamer, isTl } from './commentBooleans'
 import { GuildSettings, WatchFeature, WatchFeatureSettings } from '../../core/db/models'
 import { retryIfStillUpThenPostLog } from './closeHandler'
 import { logCommentData } from './logging'
@@ -99,9 +99,9 @@ async function relayTlOrStreamerComment (
   { discordCh, deepLTl, cmt, g, frame }: RelayData
 ): Promise<void> {
   const mustPost = cmt.isOwner
-                || (isTl (cmt.body, g) && !isBlacklisted (cmt.id, g))
+                || (isTl (cmt.body, g) && !isBlacklistedOrUnwanted (cmt, g))
                 || isStreamer (cmt.id)
-                || (cmt.isMod && g.modMessages && !isBlacklisted (cmt.id, g))
+                || (cmt.isMod && g.modMessages && !isBlacklistedOrUnwanted (cmt, g))
 
   const premoji = isTl (cmt.body, g)  ? ':speech_balloon:'
                 : isStreamer (cmt.id) ? emoji.holo

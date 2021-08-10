@@ -1,5 +1,6 @@
 import { GuildSettings } from '../../core/db/models'
 import { Streamer, streamers } from '../../core/db/streamers'
+import { ChatComment } from './chatRelayer'
 
 const tlPatterns = [
   /[\S]+ tl[:)\]\】\］]/i,                  // stuff like 'rough tl)'
@@ -15,6 +16,12 @@ export function isTl (cmt: string, g?: GuildSettings): boolean {
 export function isWanted (cmt: string, g: GuildSettings): boolean {
   return g.customWantedPatterns
     .some (pattern => cmt.toLowerCase ().startsWith (pattern.toLowerCase ()))
+}
+
+export function isBlacklistedOrUnwanted (
+  cmt: ChatComment, g: GuildSettings
+): boolean {
+  return isBlacklisted (cmt.id, g) || isUnwanted (cmt.body, g)
 }
 
 export function isUnwanted (cmt: string, g: GuildSettings): boolean {
