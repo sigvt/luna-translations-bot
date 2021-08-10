@@ -2,7 +2,7 @@ import { GuildSettings } from '../../core/db/models'
 import { Streamer, streamers } from '../../core/db/streamers'
 import { ChatComment } from './chatRelayer'
 
-const tlPatterns = [
+const tlPatterns: RegExp[] = [
   /[\S]+ tl[:)\]\】\］]/i,                  // stuff like 'rough tl)'
   /([(\[/\［\【]|^)(tl|eng?)[\]):\】\］]/i, // (eng?/tl]:
   /^[\[(](eng?|tl)/i,                       // TLs who forget closing bracket
