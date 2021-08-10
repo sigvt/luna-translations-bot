@@ -4,7 +4,7 @@ import { Guild, GuildMember, Message, Snowflake } from 'discord.js'
 import { isGuild, hasRole, getGuildId } from '../../../helpers/discord'
 import { GuildSettings, GuildSettingsDb, BlacklistItem } from '../models'
 import { config, PermLevel } from '../../../config'
-import { asyncFind } from '../../../helpers'
+import { asyncFind, debug } from '../../../helpers'
 import { UpdateQuery } from 'mongoose'
 import { DocumentType } from '@typegoose/typegoose'
 import { client } from '../../lunaBotClient'
@@ -102,8 +102,14 @@ export type NewSettings = UpdateQuery<DocumentType<GuildSettings>>
 let cachedSettings: GuildSettings[] | undefined
 setInterval (() => cachedSettings = undefined, 5000)
 
-function getAllSettingsRefreshed (): Promise<GuildSettings[]> {
-  return Promise.all (client.guilds.cache.map (getSettings))
+async function getAllSettingsRefreshed (): Promise<GuildSettings[]> {
+  debug ('query all guild settings')
+  const guildIds = client.guilds.cache.map (g => g.id)
+  await GuildSettingsDb.bulkWrite(guildIds.map (_id => ({
+    updateOne: { filter: { _id }, update: { _id }, upsert: true }
+  })))
+  return GuildSettingsDb.find ()
+  // return Promise.all (client.guilds.cache.map (getSettings))
 }
 
 async function getGuildSettings (g: Guild | Snowflake): Promise<GuildSettings> {
