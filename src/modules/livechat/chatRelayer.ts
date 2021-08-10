@@ -8,7 +8,7 @@ import { emoji, findTextChannel, send } from '../../helpers/discord'
 import { Message, Snowflake, TextChannel, ThreadChannel } from 'discord.js'
 import { tl } from '../deepl'
 import { addToBotRelayHistory, addToGuildRelayHistory, getSubbedGuilds, getRelayNotices, getSettings, getGuildData } from '../../core/db/functions'
-import { isBlacklisted, isBlacklistedOrUnwanted, isHoloID, isStreamer, isTl } from './commentBooleans'
+import { isBlacklistedOrUnwanted, isHoloID, isStreamer, isTl } from './commentBooleans'
 import { GuildSettings, WatchFeature, WatchFeatureSettings } from '../../core/db/models'
 import { retryIfStillUpThenPostLog } from './closeHandler'
 import { logCommentData } from './logging'
@@ -23,7 +23,7 @@ export function setupRelay (frame: DexFrame): void {
   const chat = getChatProcess (frame.id)
 
   chat.stdout.removeAllListeners ('data')
-  chat.stdout.on ('data', (data: string) => processComments (frame, data))
+  chat.stdout.on ('data', data => processComments (frame, data))
 
   chat.removeAllListeners ('close')
   chat.on ('close', exitCode => retryIfStillUpThenPostLog (frame, exitCode))
@@ -176,9 +176,8 @@ function saveComment (
   }, gid!)
 }
 
-function extractComments (jsonl: string): ChatComment[] {
-  const cmts = jsonl
-    .toString ()
+function extractComments (jsonl: any): ChatComment[] {
+  const cmts = String (jsonl)
     .split ('\n')
     .filter (x => x !== '')
   return tryOrDefault (() => cmts.map (cmt => JSON.parse (cmt)), [])
