@@ -56,7 +56,7 @@ function processComments (frame: DexFrame, data: string): void {
     if (isTl (cmt.body)) saveComment (cmt, frame, 'bot')
     guilds.forEach (g => {
       features.forEach (f => {
-        getRelayEntries (g, f, streamer?.name).forEach (e => {
+        getRelayEntries (g, f, author?.name).forEach (e => {
           const mustRelayCameo  = isCameo && author?.name === e.streamer
           const mustRelayGossip = isStreamer (cmt.id) || isTl (cmt.body)
           const relayCmt        = match (f, {
