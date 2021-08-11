@@ -40,8 +40,8 @@ export interface ChatComment {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-function processComments (frame: DexFrame, data: string): void {
-  extractComments (data).forEach (async cmt => {
+async function processComments (frame: DexFrame, data: string): Promise<void> {
+  for (const cmt of extractComments (data)) { // sequential processing desired
     const features: WatchFeature[] = ['relay', 'cameos', 'gossip']
     const guilds     = await getSubbedGuilds (frame.channel.id, features)
     const streamer   = streamers.find (s => s.ytId === frame.channel.id)
@@ -75,7 +75,7 @@ function processComments (frame: DexFrame, data: string): void {
         })
       })
     })
-  })
+  }
 }
 
 function relayCameo (
