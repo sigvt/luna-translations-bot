@@ -6,7 +6,7 @@ import { GuildSettings, WatchFeatureSettings, WatchFeature } from '../db/models'
 import { toTitleCase } from '../../helpers'
 import { head, isEmpty } from 'ramda'
 import { Command, createEmbed, emoji, reply } from '../../helpers/discord'
-import { oneLine } from 'common-tags'
+import { oneLine, stripIndents } from 'common-tags'
 import { config } from '../../config'
 
 export const help: Command = {
@@ -87,7 +87,7 @@ function getSettingsField (
 ): EmbedField {
   return {
     name: 'Current settings', inline: false,
-    value: `
+    value: stripIndents`
       :speech_balloon: **Translation relay:** ${getWatchList ('relay', relay)}
       ${emoji.holo} **Live chat cameos:** ${getWatchList ('cameos', cameos)}
       ${emoji.peek} **Gossip:** ${getWatchList ('gossip', gossip)}
