@@ -103,13 +103,11 @@ let cachedSettings: GuildSettings[] | undefined
 setInterval (() => cachedSettings = undefined, 5000)
 
 async function getAllSettingsRefreshed (): Promise<GuildSettings[]> {
-  debug ('query all guild settings')
   const guildIds = client.guilds.cache.map (g => g.id)
   await GuildSettingsDb.bulkWrite(guildIds.map (_id => ({
     updateOne: { filter: { _id }, update: { _id }, upsert: true }
   })))
   return GuildSettingsDb.find ()
-  // return Promise.all (client.guilds.cache.map (getSettings))
 }
 
 async function getGuildSettings (g: Guild | Snowflake): Promise<GuildSettings> {
