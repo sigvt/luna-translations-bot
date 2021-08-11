@@ -2,6 +2,7 @@ import EventEmitter from 'events'
 import { isEmpty, isNil } from 'ramda'
 import { DexFrame, getFrameList } from './frames'
 import { isSupported } from '../../core/db/streamers'
+import { removeDupeObjects } from '../../helpers'
 
 export const frameEmitter = FrameEmitter ()
 
@@ -18,13 +19,13 @@ async function continuouslyEmitNewFrames (
   previousFrames: DexFrame[] = []
 ): Promise<void> {
   const allFrames = await getFrameList ()
-  const newFrames = allFrames
-    ?.filter (frame => isNew (frame, previousFrames))
-    ?? []
+  const newFrames = removeDupeObjects (
+    allFrames?.filter (frame => isNew (frame, previousFrames)) ?? []
+  )
 
-    newFrames.forEach (frame => {
-      if (isSupported (frame.channel.id)) emitter.emit ('frame', frame)
-    })
+  newFrames.forEach (frame => {
+    if (isSupported (frame.channel.id)) emitter.emit ('frame', frame)
+  })
 
   const currentFrames = isEmpty (allFrames) ? previousFrames : allFrames
   setTimeout (() => continuouslyEmitNewFrames (emitter, currentFrames), 30000)

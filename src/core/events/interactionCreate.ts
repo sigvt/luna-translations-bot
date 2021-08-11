@@ -5,11 +5,10 @@ import { getNoticeFromMsgId, removeBlacklisted, excludeLine, getGuildRelayHistor
 import { BlacklistNotice } from '../db/models/GuildData'
 import { oneLine } from 'common-tags'
 import { last } from 'ramda'
+import { tryOrLog } from '../../helpers/tryCatch'
 
 export function interactionCreate (intr: Interaction): void {
-  const processInteraction = intr.isButton () ? processButton
-                                              : doNothing
-  processInteraction (intr as any)
+  if (intr.isButton()) tryOrLog(() => processButton (intr as any))
 }
 
 ///////////////////////////////////////////////////////////////////////////////
