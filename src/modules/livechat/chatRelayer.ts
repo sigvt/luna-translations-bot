@@ -7,7 +7,7 @@ import { Streamer, StreamerName, streamers } from '../../core/db/streamers'
 import { emoji, findTextChannel, send } from '../../helpers/discord'
 import { Message, Snowflake, TextChannel, ThreadChannel } from 'discord.js'
 import { tl } from '../deepl'
-import { addToBotRelayHistory, addToGuildRelayHistory, getSubbedGuilds, getRelayNotices, getSettings, getGuildData } from '../../core/db/functions'
+import { addToBotRelayHistory, addToGuildRelayHistory, getSubbedGuilds, getRelayNotices, getSettings, getGuildData, getAllSettings } from '../../core/db/functions'
 import { isBlacklistedOrUnwanted, isHoloID, isStreamer, isTl } from './commentBooleans'
 import { GuildSettings, WatchFeature, WatchFeatureSettings } from '../../core/db/models'
 import { retryIfStillUpThenPostLog } from './closeHandler'
@@ -43,12 +43,11 @@ export interface ChatComment {
 async function processComments (frame: DexFrame, data: string): Promise<void> {
   for (const cmt of extractComments (data)) { // sequential processing desired
     const features: WatchFeature[] = ['relay', 'cameos', 'gossip']
-    const guilds     = await getSubbedGuilds (frame.channel.id, features)
+    const guilds     = await getAllSettings ()
     const streamer   = streamers.find (s => s.ytId === frame.channel.id)
     const author     = streamers.find (s => s.ytId === cmt.id)
     const isCameo    = isStreamer (cmt.id) && !cmt.isOwner
-    const mustDeepL  = guilds.some (g => g.deepl)
-                    && isStreamer (cmt.id) && !isHoloID (streamer)
+    const mustDeepL  = isStreamer (cmt.id) && !isHoloID (streamer)
     const deepLTl    = mustDeepL ? await tl (cmt.body) : undefined
     const mustShowTl = mustDeepL && deepLTl !== cmt.body
     const getWatched = (f: WatchFeature) => f === 'cameos' ? author : streamer
@@ -91,6 +90,7 @@ function relayCameo (
 function relayGossip (
   data: RelayData
 ): void {
+  console.log ('in gossip fn')
   const stalked = streamers.find (s => s.name === data.e.streamer)
   if (isGossip (data.cmt.body, stalked!, data.frame)) relayCameo (data, true)
 }
@@ -195,6 +195,8 @@ function isGossip (text: string, stalked: Streamer, frame: DexFrame): boolean {
   const mentionsWatched = text
     .split (' ')
     .some (w => stalked.aliases.some (a => ciEquals (a, w)))
+  const isg = !isOwnChannel && !isCollab && mentionsWatched
+  console.log (`${isg}, text: ${text}`)
   
   return !isOwnChannel && !isCollab && mentionsWatched
 }
