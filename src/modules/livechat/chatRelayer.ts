@@ -7,7 +7,7 @@ import { Streamer, StreamerName, streamers } from '../../core/db/streamers'
 import { emoji, findTextChannel, send } from '../../helpers/discord'
 import { Message, Snowflake, TextChannel, ThreadChannel } from 'discord.js'
 import { tl } from '../deepl'
-import { addToBotRelayHistory, addToGuildRelayHistory, getSubbedGuilds, getRelayNotices, getSettings, getGuildData, getAllSettings } from '../../core/db/functions'
+import { addToBotRelayHistory, addToGuildRelayHistory, getRelayNotices, getSettings, getGuildData, getAllSettings } from '../../core/db/functions'
 import { isBlacklistedOrUnwanted, isHoloID, isStreamer, isTl } from './commentBooleans'
 import { GuildSettings, WatchFeature, WatchFeatureSettings } from '../../core/db/models'
 import { retryIfStillUpThenPostLog } from './closeHandler'
@@ -90,7 +90,6 @@ function relayCameo (
 function relayGossip (
   data: RelayData
 ): void {
-  console.log ('in gossip fn')
   const stalked = streamers.find (s => s.name === data.e.streamer)
   if (isGossip (data.cmt.body, stalked!, data.frame)) relayCameo (data, true)
 }
@@ -195,8 +194,6 @@ function isGossip (text: string, stalked: Streamer, frame: DexFrame): boolean {
   const mentionsWatched = text
     .split (' ')
     .some (w => stalked.aliases.some (a => ciEquals (a, w)))
-  const isg = !isOwnChannel && !isCollab && mentionsWatched
-  console.log (`${isg}, text: ${text}`)
   
   return !isOwnChannel && !isCollab && mentionsWatched
 }
