@@ -58,10 +58,9 @@ async function processComments (frame: DexFrame, data: string): Promise<void> {
     guilds.forEach (g => {
       features.forEach (f => {
         getRelayEntries (g, f, getWatched (f)?.name).forEach (e => {
-          const mustRelayCameo  = isCameo && author?.name === e.streamer
           const mustRelayGossip = isStreamer (cmt.id) || isTl (cmt.body)
           const relayCmt        = match (f, {
-            cameos: mustRelayCameo  ? relayCameo  : doNothing,
+            cameos: isCameo ? relayCameo  : doNothing,
             gossip: mustRelayGossip ? relayGossip : doNothing,
             relay:  relayTlOrStreamerComment
           })
