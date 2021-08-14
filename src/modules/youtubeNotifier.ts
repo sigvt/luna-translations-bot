@@ -6,7 +6,7 @@ import { notifyDiscord, NotifyOptions } from './notify'
 import { frameEmitter } from './holodex/frameEmitter'
 import { DexFrame } from './holodex/frames'
 
-frameEmitter.on ('frame', notifyFrame)
+// frameEmitter.on ('frame', notifyFrame)
 
 async function notifyFrame (frame: DexFrame): Promise<void> {
   const botData    = await getBotData ()

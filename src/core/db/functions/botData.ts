@@ -1,5 +1,6 @@
 import { DocumentType } from '@typegoose/typegoose'
 import { UpdateQuery } from 'mongoose'
+import { debug } from '../../../helpers'
 import { setKey } from '../../../helpers/immutableES6MapFunctions'
 import { VideoId } from '../../../modules/holodex/frames'
 import { BotData, BotDataDb } from '../models'
@@ -8,6 +9,7 @@ import { RelayedComment } from '../models/RelayedComment'
 const _id = '000000000022'
 
 export async function getBotData (): Promise<BotData> {
+  debug ('getting the bot data')
   const query = [{ _id }, { _id }, { upsert: true, new: true }] as const
   return BotDataDb.findOneAndUpdate (...query)
 }

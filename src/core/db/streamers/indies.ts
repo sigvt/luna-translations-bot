@@ -23,4 +23,10 @@ export const indies = [
     groups: ['indies'], twitter: 'discord',
     aliases: ['discord']
   },
+  {
+    name: 'Pochi', ytId: 'UC22BVlBsZc6ta3Dqz75NU6Q',
+    picture: 'https://yt3.ggpht.com/ytc/AKedOLTQgr7qlDG11tgi1eCM1xawXiQD9eP2_dN3NOTQ=s88-c-k-c0x00ffffff-no-rj',
+    groups: ['indies', 'parents'], twitter: 'lizhi3',
+    aliases: ['pochi', 'pochimaru']
+  }
 ] as const

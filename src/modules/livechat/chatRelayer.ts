@@ -24,9 +24,15 @@ export function setupRelay (frame: DexFrame): void {
 
   chat.stdout.removeAllListeners ('data')
   chat.stdout.on ('data', data => processComments (frame, data))
+  // chat.stdout.on ('data', data => foobar (frame, data))
+  // chat.stdout.on ('data', data => dataQueue.push ({ frame, data }))
 
   chat.removeAllListeners ('close')
   chat.on ('close', exitCode => retryIfStillUpThenPostLog (frame, exitCode))
+}
+
+function foobar (frame: any, data: any) {
+  debug (`${frame.id} ${data?.length}`)
 }
 
 export interface ChatComment {
@@ -40,7 +46,24 @@ export interface ChatComment {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-async function processComments (frame: DexFrame, data: string): Promise<void> {
+// interface DataQueueItem {
+  // frame: DexFrame
+  // data: any
+// }
+// const dataQueue: DataQueueItem[] = []
+// processDataQueue ()
+
+// async function processDataQueue (): Promise<void> {
+  // if (dataQueue[0]) {
+    // await processComments (dataQueue[0].frame, dataQueue[0].data)
+    // dataQueue.shift ()
+  // }
+  // await new Promise (res => setImmediate (res))
+  // processDataQueue ()
+// }
+
+async function processComments (frame: DexFrame, data: any): Promise<void> {
+  debug (`${frame.id} ${data?.length}`)
   for (const cmt of extractComments (data)) { // sequential processing desired
     const features: WatchFeature[] = ['relay', 'cameos', 'gossip']
     const guilds     = await getAllSettings ()
@@ -53,7 +76,7 @@ async function processComments (frame: DexFrame, data: string): Promise<void> {
     const getWatched = (f: WatchFeature) => f === 'cameos' ? author : streamer
 
     logCommentData (cmt, frame, streamer)
-    if (isTl (cmt.body)) saveComment (cmt, frame, 'bot')
+    if (isTl (cmt.body) || isStreamer (cmt.id)) saveComment (cmt, frame, 'bot')
     guilds.forEach (g => {
       features.forEach (f => {
         getRelayEntries (g, f, getWatched (f)?.name).forEach (e => {
@@ -115,9 +138,10 @@ async function relayTlOrStreamerComment (
   const tl     = deepLTl ? `\n${emoji.deepl}**DeepL:** \`${deepLTl}\`` : ''
 
   if (mustPost) {
+    // TODO: reinstate this with no race condition
     await announceIfNotDone (frame, g._id)
     const thread = await findFrameThread (frame.id, g, discordCh)
-
+    // var thread = undefined
     send (thread ?? discordCh, `${premoji} ${author} \`${text}\`${tl}${url}`)
     .then (msg => saveComment (cmt, frame, 'guild', g._id, msg))
     .catch (debug)

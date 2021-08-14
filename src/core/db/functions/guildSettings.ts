@@ -22,7 +22,7 @@ export function getSettings (
   return getGuildSettings (id ?? '0')
 }
 
-export async function getAllSettings () {
+export async function getAllSettings (): Promise<GuildSettings[]> {
   cachedSettings ??= await getAllSettingsRefreshed ()
   return cachedSettings
 }
@@ -100,9 +100,11 @@ export type NewSettings = UpdateQuery<DocumentType<GuildSettings>>
 //// PRIVATE //////////////////////////////////////////////////////////////////
 
 let cachedSettings: GuildSettings[] | undefined
-setInterval (() => cachedSettings = undefined, 5000)
+// (async () => cachedSettings = await getAllSettingsRefreshed ())()
+setInterval (async () => cachedSettings = await getAllSettingsRefreshed (), 5000)
 
 async function getAllSettingsRefreshed (): Promise<GuildSettings[]> {
+  debug ('refreshing all settings!!!')
   const guildIds = client.guilds.cache.map (g => g.id)
   await GuildSettingsDb.bulkWrite(guildIds.map (_id => ({
     updateOne: { filter: { _id }, update: { _id }, upsert: true }
@@ -111,9 +113,11 @@ async function getAllSettingsRefreshed (): Promise<GuildSettings[]> {
 }
 
 async function getGuildSettings (g: Guild | Snowflake): Promise<GuildSettings> {
+  const guilds = await getAllSettings ()
   const _id = isGuild (g) ? g.id : g
-  const query = [{ _id }, { _id }, { upsert: true, new: true }] as const
-  return GuildSettingsDb.findOneAndUpdate (...query)
+  const guild = guilds.find (g => g._id === _id)
+  if (!guild) cachedSettings = await getAllSettingsRefreshed ()
+  return guild ?? guilds.find (g => g._id === _id)!
 }
 
 /** Returns perm levels in descending order (Bot Owner -> User) */

@@ -16,7 +16,7 @@ export const config: LunaBotConfig = {
     { level: 10, name: 'Bot Owner',   check: isBotOwner }
   ],
   prefix:            'tl.',
-  token:             process.env.DISCORD_PROD_TOKEN,
+  token:             process.env.DISCORD_DEV_TOKEN,
   twitcastingId:     process.env.TWITCASTING_CLIENT_ID,
   twitcastingSecret: process.env.TWITCASTING_CLIENT_SECRET,
 }
