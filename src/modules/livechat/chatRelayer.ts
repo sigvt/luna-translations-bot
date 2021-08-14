@@ -24,15 +24,9 @@ export function setupRelay (frame: DexFrame): void {
 
   chat.stdout.removeAllListeners ('data')
   chat.stdout.on ('data', data => processComments (frame, data))
-  // chat.stdout.on ('data', data => foobar (frame, data))
-  // chat.stdout.on ('data', data => dataQueue.push ({ frame, data }))
 
   chat.removeAllListeners ('close')
   chat.on ('close', exitCode => retryIfStillUpThenPostLog (frame, exitCode))
-}
-
-function foobar (frame: any, data: any) {
-  debug (`${frame.id} ${data?.length}`)
 }
 
 export interface ChatComment {
@@ -46,54 +40,41 @@ export interface ChatComment {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-// interface DataQueueItem {
-  // frame: DexFrame
-  // data: any
-// }
-// const dataQueue: DataQueueItem[] = []
-// processDataQueue ()
-
-// async function processDataQueue (): Promise<void> {
-  // if (dataQueue[0]) {
-    // await processComments (dataQueue[0].frame, dataQueue[0].data)
-    // dataQueue.shift ()
-  // }
-  // await new Promise (res => setImmediate (res))
-  // processDataQueue ()
-// }
+let guilds: GuildSettings[] = [] // Simple caching
+setInterval (() => guilds = getAllSettings (), 5000)
 
 async function processComments (frame: DexFrame, data: any): Promise<void> {
-  debug (`${frame.id} ${data?.length}`)
-  for (const cmt of extractComments (data)) { // sequential processing desired
+  for (const cmt of extractComments (data)) {
     const features: WatchFeature[] = ['relay', 'cameos', 'gossip']
-    const guilds     = await getAllSettings ()
-    const streamer   = streamers.find (s => s.ytId === frame.channel.id)
-    const author     = streamers.find (s => s.ytId === cmt.id)
-    const isCameo    = isStreamer (cmt.id) && !cmt.isOwner
-    const mustDeepL  = isStreamer (cmt.id) && !isHoloID (streamer)
-    const deepLTl    = mustDeepL ? await tl (cmt.body) : undefined
-    const mustShowTl = mustDeepL && deepLTl !== cmt.body
-    const getWatched = (f: WatchFeature) => f === 'cameos' ? author : streamer
+    const streamer    = streamers.find (s => s.ytId === frame.channel.id)
+    const author      = streamers.find (s => s.ytId === cmt.id)
+    const isCameo     = isStreamer (cmt.id) && !cmt.isOwner
+    const mustDeepL   = isStreamer (cmt.id) && !isHoloID (streamer)
+    const deepLTl     = mustDeepL ? await tl (cmt.body) : undefined
+    const mustShowTl  = mustDeepL && deepLTl !== cmt.body
+    const getWatched  = (f: WatchFeature) => f === 'cameos' ? author : streamer
+    const maybeGossip = isStreamer (cmt.id) || isTl (cmt.body)
+    const entries =
+      guilds.flatMap (g =>
+        features.flatMap (f =>
+          getRelayEntries (g, f, getWatched (f)?.name).map (e =>
+            [g, f, e] as [GuildSettings, WatchFeature, WatchFeatureSettings])))
 
     logCommentData (cmt, frame, streamer)
     if (isTl (cmt.body) || isStreamer (cmt.id)) saveComment (cmt, frame, 'bot')
-    guilds.forEach (g => {
-      features.forEach (f => {
-        getRelayEntries (g, f, getWatched (f)?.name).forEach (e => {
-          const mustRelayGossip = isStreamer (cmt.id) || isTl (cmt.body)
-          const relayCmt        = match (f, {
-            cameos: isCameo ? relayCameo  : doNothing,
-            gossip: mustRelayGossip ? relayGossip : doNothing,
-            relay:  relayTlOrStreamerComment
-          })
 
-          relayCmt ({
-            e, cmt, frame, g,
-            discordCh: findTextChannel (e.discordCh)!,
-            deepLTl:   mustShowTl ? deepLTl : undefined,
-            to:        streamer?.name ?? 'Discord',
-          })
-        })
+    entries.forEach (([g, f, e]) => {
+      const relayCmt = match (f, {
+        cameos: isCameo     ? relayCameo  : doNothing,
+        gossip: maybeGossip ? relayGossip : doNothing,
+        relay:  relayTlOrStreamerComment
+      })
+
+      relayCmt ({
+        e, cmt, frame, g,
+        discordCh: findTextChannel (e.discordCh)!,
+        deepLTl:   mustShowTl ? deepLTl : undefined,
+        to:        streamer?.name ?? 'Discord',
       })
     })
   }
@@ -138,10 +119,8 @@ async function relayTlOrStreamerComment (
   const tl     = deepLTl ? `\n${emoji.deepl}**DeepL:** \`${deepLTl}\`` : ''
 
   if (mustPost) {
-    // TODO: reinstate this with no race condition
-    await announceIfNotDone (frame, g._id)
+    // await announceIfNotDone (frame, g._id)
     const thread = await findFrameThread (frame.id, g, discordCh)
-    // var thread = undefined
     send (thread ?? discordCh, `${premoji} ${author} \`${text}\`${tl}${url}`)
     .then (msg => saveComment (cmt, frame, 'guild', g._id, msg))
     .catch (debug)
@@ -178,7 +157,7 @@ function saveComment (
   gid?: Snowflake,
   msg?: Message
 ): void {
-  const addFn = type === 'guild' ? addToGuildRelayHistory : addToBotRelayHistory
+  const addFn = type === 'guild' ? addToGuildRelayHistory : doNothing
   const startTime  = new Date (Date.parse (frame.start_actual ?? '')).valueOf ()
   const loggedTime = new Date (+cmt.time).valueOf ()
   const timestamp  = !frame.start_actual

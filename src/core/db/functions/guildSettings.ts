@@ -10,6 +10,10 @@ import { DocumentType } from '@typegoose/typegoose'
 import { client } from '../../lunaBotClient'
 import { YouTubeChannelId } from '../../../modules/holodex/frames'
 import { RelayedComment } from '../models/RelayedComment'
+import Enmap from 'enmap'
+
+export const guildSettingsEnmap: Enmap<Snowflake, GuildSettings> =
+  new Enmap ({ name: 'guildSettings' })
 
 /**
  * Returns guild settings from the DB or creates them if they don't exist.
@@ -17,27 +21,25 @@ import { RelayedComment } from '../models/RelayedComment'
  */
 export function getSettings (
   x: Message | Guild | GuildMember | Snowflake
-): Promise<GuildSettings> {
+): GuildSettings {
   const id = (typeof x === 'string') ? x : getGuildId (x)
   return getGuildSettings (id ?? '0')
 }
 
-export async function getAllSettings (): Promise<GuildSettings[]> {
-  cachedSettings ??= await getAllSettingsRefreshed ()
-  return cachedSettings
+export function getAllSettings (): GuildSettings[] {
+  return client.guilds.cache.map (getGuildSettings)
 }
 
-export async function addBlacklisted (
+export function addBlacklisted (
   g: Guild | Snowflake, item: BlacklistItem
-): Promise<void> {
-  const settings  = await getSettings (g)
-  updateSettings (g, { blacklist: [...settings.blacklist, item] })
+): void {
+  updateSettings (g, { blacklist: [...getSettings (g).blacklist, item] })
 }
 
-export async function removeBlacklisted (
+export function removeBlacklisted (
   g: Guild | Snowflake, ytId?: YouTubeChannelId
-): Promise<boolean> {
-  const { blacklist } = await getSettings (g)
+): boolean {
+  const { blacklist } = getSettings (g)
   const isValid       = blacklist.some (entry => entry.ytId === ytId)
   const newBlacklist  = blacklist.filter (entry => entry.ytId !== ytId)
 
@@ -45,32 +47,30 @@ export async function removeBlacklisted (
   return isValid
 }
 
-export async function isBlacklisted (
+export function isBlacklisted (
   ytId: YouTubeChannelId | undefined, gid: Snowflake
-): Promise<boolean> {
-  const settings  = await getSettings (gid)
-  const blacklist = settings.blacklist
-  return blacklist.some (entry => entry.ytId === ytId)
+): boolean {
+  return getSettings (gid).blacklist.some (entry => entry.ytId === ytId)
 }
 
-export async function updateSettings (
+export function updateSettings (
   x: Message | Guild | GuildMember | Snowflake, update: NewSettings
-): Promise<GuildSettings> {
-  // TODO: make this more straightforward?
+): void {
   const isObject = x instanceof Message
                 || x instanceof Guild
                 || x instanceof GuildMember
-  const _id = isObject ? (getGuildId (x as any) ?? '0') : x as any
-  return GuildSettingsDb.findOneAndUpdate (
-    { _id }, { ...update, _id }, { upsert: true, new: true }
-  )
+  const _id      = isObject ? (getGuildId (x as any) ?? '0') : x as any
+  const current  = getSettings (_id)
+  const newData  = { ...current, ...update }
+
+  guildSettingsEnmap.set (_id, newData)
 }
 
-export function isAdmin (x: Message | GuildMember): Promise<boolean> {
+export function isAdmin (x: Message | GuildMember): boolean {
   return hasPerms (x, 'admins')
 }
 
-export function isBlacklister (x: Message | GuildMember): Promise<boolean> {
+export function isBlacklister (x: Message | GuildMember): boolean {
   return hasPerms (x, 'blacklisters')
 }
 
@@ -80,11 +80,11 @@ export async function getPermLevel (x: Message | GuildMember): Promise<PermLevel
   return userPerm!
 }
 
-export async function filterAndStringifyHistory (
+export function filterAndStringifyHistory (
   guild: Message | Guild | GuildMember | Snowflake,
   history: RelayedComment[]
-): Promise<string> {
-  const g         = await getSettings (guild)
+): string {
+  const g         = getSettings (guild)
   const blacklist = g.blacklist.map (entry => entry.ytId)
   const unwanted  = g.customBannedPatterns
   return history
@@ -99,25 +99,16 @@ export type NewSettings = UpdateQuery<DocumentType<GuildSettings>>
 
 //// PRIVATE //////////////////////////////////////////////////////////////////
 
-let cachedSettings: GuildSettings[] | undefined
-// (async () => cachedSettings = await getAllSettingsRefreshed ())()
-setInterval (async () => cachedSettings = await getAllSettingsRefreshed (), 5000)
-
-async function getAllSettingsRefreshed (): Promise<GuildSettings[]> {
-  debug ('refreshing all settings!!!')
-  const guildIds = client.guilds.cache.map (g => g.id)
-  await GuildSettingsDb.bulkWrite(guildIds.map (_id => ({
-    updateOne: { filter: { _id }, update: { _id }, upsert: true }
-  })))
-  return GuildSettingsDb.find ()
-}
-
-async function getGuildSettings (g: Guild | Snowflake): Promise<GuildSettings> {
-  const guilds = await getAllSettings ()
+function getGuildSettings (g: Guild | Snowflake): GuildSettings {
   const _id = isGuild (g) ? g.id : g
-  const guild = guilds.find (g => g._id === _id)
-  if (!guild) cachedSettings = await getAllSettingsRefreshed ()
-  return guild ?? guilds.find (g => g._id === _id)!
+  const defaults: GuildSettings = {
+    _id,
+    admins: [], blacklist: [], blacklisters: [], cameos: [], community: [],
+    customWantedPatterns: [], customBannedPatterns: [], deepl: true,
+    logChannel: undefined, gossip: [], modMessages: true, relay: [],
+    threads: false, twitcasting: [], youtube: []
+  }
+  return guildSettingsEnmap.ensure (_id, defaults)
 }
 
 /** Returns perm levels in descending order (Bot Owner -> User) */
@@ -125,10 +116,10 @@ function getPermLevels (): PermLevel[] {
   return [...config.permLevels].sort ((a, b) => b.level - a.level)
 }
 
-async function hasPerms (
+function hasPerms (
   x: Message | GuildMember, roleType: PrivilegedRole
-): Promise<boolean> {
-  const settings = await getSettings (x)
+): boolean {
+  const settings = getSettings (x)
   const roles = settings[roleType]
 
   return <boolean> roles!.some (role => hasRole (x, role))

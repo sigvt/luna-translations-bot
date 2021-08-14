@@ -1,9 +1,9 @@
 import EventEmitter from 'events'
-import { getAllSettings } from '../../core/db/functions'
+import { addNotifiedCommunityPost, getAllSettings, getNotifiedCommunityPosts } from '../../core/db/functions'
 import { doNothing, removeDupes, sleep } from '../../helpers'
 import { CommunityPost, getLatestPost } from './getLatestPost'
 import { streamers } from '../../core/db/streamers/'
-import { getBotData, updateBotData } from '../../core/db/functions'
+import { getBotData } from '../../core/db/functions'
 import { asyncTryOrLog } from '../../helpers/tryCatch'
 import { setKey } from '../../helpers/immutableES6MapFunctions'
 
@@ -35,21 +35,12 @@ async function continuouslyEmitNewPosts (emitter: EventEmitter): Promise<void> {
 async function checkChannel (
   ytId: string, emitter: EventEmitter
 ): Promise<void> {
-  const botData   = await getBotData ()
-  const lastPosts = botData.lastCommunityPosts
+  const notified  = getNotifiedCommunityPosts ()
   const post      = await getLatestPost (ytId)
-  const recorded  = lastPosts.get (ytId)
-  const newPosts  = lastPosts |> setKey (ytId, post?.url)
-  const mustEmit  = post && post.url !== recorded && post.isToday
-  const callback  = mustEmit ? saveAndEmit : doNothing
-  callback (newPosts, emitter, post!)
-}
+  const mustEmit  = post && notified.includes (post.url) && post.isToday
 
-function saveAndEmit (
-  newCommunityPostMap: Map<string, string>,
-  emitter: EventEmitter,
-  post: CommunityPost
-): void {
-  updateBotData ({ lastCommunityPosts: newCommunityPostMap })
-  emitter.emit ('post', post)
+  if (mustEmit) {
+    addNotifiedCommunityPost (post!.url)
+    emitter.emit ('post', post)
+  }
 }

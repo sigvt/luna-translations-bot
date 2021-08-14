@@ -1,4 +1,4 @@
-import { getBotData, updateBotData } from '../core/db/functions'
+import { addNotifiedLive, getNotifiedLives } from '../core/db/functions'
 import { Streamer, streamers } from '../core/db/streamers'
 import { log } from '../helpers'
 import { emoji } from '../helpers/discord'
@@ -6,12 +6,11 @@ import { notifyDiscord, NotifyOptions } from './notify'
 import { frameEmitter } from './holodex/frameEmitter'
 import { DexFrame } from './holodex/frames'
 
-// frameEmitter.on ('frame', notifyFrame)
+frameEmitter.on ('frame', notifyFrame)
 
 async function notifyFrame (frame: DexFrame): Promise<void> {
-  const botData    = await getBotData ()
   const streamer   = streamers.find (s => s.ytId === frame.channel.id)
-  const isRecorded = botData.notifiedYtLives.includes (frame.id)
+  const isRecorded = getNotifiedLives ().includes (frame.id)
   const isNew      = streamer && !isRecorded
   const mustNotify = isNew && frame.status === 'live'
 
@@ -27,7 +26,7 @@ async function notifyFrame (frame: DexFrame): Promise<void> {
 
     notifyDiscord (getRelayNotifyProps (frame))
 
-    updateBotData ({ notifiedYtLives: [ ...botData.notifiedYtLives, frame.id ]})
+    addNotifiedLive (frame.id)
   }
 }
 

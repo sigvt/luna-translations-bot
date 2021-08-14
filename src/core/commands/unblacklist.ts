@@ -26,8 +26,8 @@ export const unblacklist: Command = {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-async function unblacklistLastItem (msg: Message): Promise<void> {
-  const { blacklist }   = await getSettings (msg)
+function unblacklistLastItem (msg: Message): void {
+  const { blacklist }   = getSettings (msg)
   const lastBlacklisted = last (blacklist)
   const replyContent    = lastBlacklisted
     ? oneLine`
@@ -40,10 +40,10 @@ async function unblacklistLastItem (msg: Message): Promise<void> {
   if (lastBlacklisted) updateSettings (msg, { blacklist: init (blacklist) })
 }
 
-async function unblacklistItem (msg: Message, ytId: string): Promise<void> {
-  removeBlacklisted (msg.guild!, ytId)
-  .then (success => reply (msg, createEmbedMessage (success
+function unblacklistItem (msg: Message, ytId: string): void {
+  const success = removeBlacklisted (msg.guild!, ytId)
+  reply (msg, createEmbedMessage (success
     ? `:white_check_mark: Successfully unblacklisted ${ytId}.`
     : `:warning: YouTube channel ID ${ytId} was not found.`
-  )))
+  ))
 }

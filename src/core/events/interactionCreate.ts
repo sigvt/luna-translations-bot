@@ -13,8 +13,8 @@ export function interactionCreate (intr: Interaction): void {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-async function processButton (btn: ButtonInteraction): Promise<void> {
-  const notice     = await getNoticeFromMsgId (btn.guild!, btn.message.id)
+function processButton (btn: ButtonInteraction): void {
+  const notice     = getNoticeFromMsgId (btn.guild!, btn.message.id)
   const btnHandler = notice ? match (btn.customId, {
     cancel:  cancelBlacklisting,
     cancel2: cancelBlacklistingAndExcludeLine,
@@ -27,13 +27,13 @@ async function processButton (btn: ButtonInteraction): Promise<void> {
 async function cancelBlacklisting (
   btn: ButtonInteraction, notice: BlacklistNotice
 ): Promise<void> {
-  removeBlacklisted (btn.guild!, notice.ytId)
-  .then (success => btn.update ({ components: [], embeds: [
+  const success = removeBlacklisted (btn.guild!, notice.ytId)
+  btn.update ({ components: [], embeds: [
     createEmbedMessage (success
       ? `${notice?.ytId}'s blacklisting has been cancelled.`
       : `Something went wrong unblacklisting ${notice?.ytId}.`
     )
-  ]}))
+  ]})
 }
 
 async function cancelBlacklistingAndExcludeLine (
@@ -47,10 +47,10 @@ async function cancelBlacklistingAndExcludeLine (
   `)]})
 }
 
-async function clearAuthorTls (
+function clearAuthorTls (
   btn: ButtonInteraction, notice: BlacklistNotice
-): Promise<void> {
-  const vidLog = await getGuildRelayHistory (btn.guild!, notice.videoId)
+): void {
+  const vidLog = getGuildRelayHistory (btn.guild!, notice.videoId)
   const cmts   = vidLog.filter (cmt => cmt.ytId === notice.ytId)
   const msgs   = <Snowflake[]> cmts.map (cmt => cmt.msgId).filter (isNotNil)
   const ch     = findTextChannel (last (cmts)?.discordCh ?? '')
