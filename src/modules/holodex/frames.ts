@@ -1,5 +1,6 @@
 import { range } from 'ramda'
-import { debug, getJson, Params, removeDupeObjects, sleep } from '../../helpers'
+import {config} from '../../config'
+import { debug, getJson, isEven, Params, removeDupeObjects, sleep } from '../../helpers'
 import { asyncTryOrLog } from '../../helpers/tryCatch'
 const { max, ceil } = Math
 
@@ -15,6 +16,24 @@ export async function getFrameList () {
 
 export function isPublic (frame: DexFrame): boolean {
   return frame.topic_id !== 'membersonly'
+}
+
+export async function getStartTime (
+  videoId: VideoId
+): Promise<DateTimeString|undefined> {
+  // TODO: clean this up
+  let attempts = 0
+  let data
+  while (attempts < 5) {
+    const status = isEven (attempts) ? 'live' : 'past'
+    data = await asyncTryOrLog (() => getJson (
+      `https://holodex.net/api/v2/videos?status=${status}&include=live_info&type=stream&order=desc&id=${videoId}`,
+      { headers: { 'X-APIKEY': config.holodexKey! } }
+    ))
+    if (data?.[0]?.start_actual == undefined) attempts += 1
+    else break
+  }
+  return data?.[0]?.start_actual
 }
 
 export interface DexFrame {
@@ -42,12 +61,14 @@ const params = {
   include: 'description',
   limit: '50',
   paginated:'1',
-  max_upcoming_hours: '0n'
+  max_upcoming_hours: '999999'
 }
 
 function getOneFramePage (): Promise<PaginatedResp | undefined> {
   const url = framesUrl + Params (params)
-  return asyncTryOrLog (() => getJson (url))
+  return asyncTryOrLog (() => getJson (url, { headers: {
+    'X-APIKEY': config.holodexKey!
+  }}))
 }
 
 async function getFramePages (
@@ -59,7 +80,8 @@ async function getFramePages (
     for (const page of range (offset, limit)) {
       await sleep (1000)
       pages.push (await getJson (
-        framesUrl + Params ({ ...params, offset: (50 * page).toString ()})
+        framesUrl + Params ({ ...params, offset: (50 * page).toString ()}),
+        { headers: { 'X-APIKEY': config.holodexKey! } }
       ))
     }
     return pages

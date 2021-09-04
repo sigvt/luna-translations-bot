@@ -31,10 +31,10 @@ export const blacklist: Command = {
 
 //////////////////////////////////////////////////////////////////////////////
 
-async function blacklistTl (msg: Message, reason: string): Promise<void> {
-  const settings  = await getSettings (msg.guild!)
+function blacklistTl (msg: Message, reason: string): void {
+  const settings  = getSettings (msg.guild!)
   const refId     = msg.reference!.messageId
-  const history   = await getFlatGuildRelayHistory (msg.guild!)
+  const history   = getFlatGuildRelayHistory (msg.guild!)
   const culprit   = history.find (cmt => cmt.msgId === refId)
   const duplicate = culprit && isBlacklisted (culprit.ytId, settings)
   const callback  = duplicate ? notifyDuplicate
@@ -44,8 +44,8 @@ async function blacklistTl (msg: Message, reason: string): Promise<void> {
   callback (msg, culprit!, reason)
 }
 
-async function showHelp (msg: Message): Promise<void> {
-  const g       = await getSettings (msg)
+function showHelp (msg: Message): void {
+  const g       = getSettings (msg)
   const header  = 'Channel ID               | Name (Reason)\n'
   const entries = g.blacklist.map (e => `${e.ytId} | ${e.name} (${e.reason})`)
                              .join ('\n')

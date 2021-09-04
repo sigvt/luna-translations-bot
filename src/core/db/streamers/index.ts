@@ -58,6 +58,7 @@ export type Streamer = Readonly<{
   picture: string
   twitter: string
   ytId:    string
+  chName:  string
 }>
 
 //////////////////////////////////////////////////////////////////////////////

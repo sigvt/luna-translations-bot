@@ -48,7 +48,7 @@ export async function addToBotRelayHistory (
 ): Promise<void> {
   const history    = (await getBotData ()).relayHistory
   const cmts       = history.get (videoId) ?? []
-  const newHistory = history |> setKey (videoId, [...cmts, cmt])
+  const newHistory = setKey (videoId, [...cmts, cmt]) (history)
   updateBotData ({ relayHistory: newHistory })
 }
 

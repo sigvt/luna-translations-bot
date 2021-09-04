@@ -28,7 +28,7 @@ export const help: Command = {
     const categories    = getCategoriesOfCommands (commands)
     const helpToShow    = categories.includes (askedCategory)
                           ? getCategoryHelp (askedCategory)
-                          : getMainHelp (categories, await getSettings (msg))
+                          : getMainHelp (categories, getSettings (msg))
 
     reply (msg, helpToShow)
   }

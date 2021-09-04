@@ -21,7 +21,7 @@ export function debug (data: any) {
 ////////////////////////////////////////////////////////////////////////////////
 
 function logger <T> (category: string, data: T): T {
-  const logFile = fs.createWriteStream (config.logFile, { flags: 'a' })
+  const logFile = fs.createWriteStream ('debug3.log', { flags: 'a' })
   const colorString = match (category, {
     log:   chalk.bgBlack,
     warn:  chalk.black.bgYellowBright,

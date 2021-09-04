@@ -19,14 +19,14 @@ import { getAllSettings } from './guildSettings'
 import { isEmpty, splitEvery } from 'ramda'
 const { isArray } = Array
 
-export async function validateInputAndModifyEntryList ({
+export function validateInputAndModifyEntryList ({
   msg, verb, streamer, role, usage, feature, add, remove
-}: WatchFeatureModifyOptions): Promise<void> {
+}: WatchFeatureModifyOptions): void {
   const isVerbValid       = validVerbs.includes (verb as any)
   const validatedVerb     = <ValidVerb> verb
   const validatedStreamer = <StreamerName> findStreamerName (streamer)
   const mustShowList      = verb !== 'clear' && !validatedStreamer
-  const g                 = await getSettings (msg.guild!)
+  const g                 = getSettings (msg.guild!)
   const modifyIfValid     = !isVerbValid ? showHelp
                           : mustShowList ? replyStreamerList
                                          : modifyEntryList
@@ -37,11 +37,11 @@ export async function validateInputAndModifyEntryList ({
   })
 }
 
-export async function getSubbedGuilds (
+export function getSubbedGuilds (
   nameOrChannelId: string,
   features: WatchFeature | WatchFeature[],
-): Promise<GuildSettings[]> {
-  const guilds   = await getAllSettings ()
+): GuildSettings[] {
+  const guilds   = getAllSettings ()
   const streamer = streamers.find (s => s.ytId === nameOrChannelId)?.name
                 ?? streamers.find (s => s.name === nameOrChannelId)?.name as any
   const feats    = isArray (features) ? features : [features]
@@ -56,22 +56,22 @@ export async function getSubbedGuilds (
 const validVerbs = ['add', 'remove', 'clear'] as const
 type ValidVerb   = typeof validVerbs[number]
 
-async function showHelp (
+function showHelp (
   { msg, feature, usage }: ValidatedOptions
-): Promise<void> {
-  const settings = await getSettings (msg.guild!)
+): void {
+  const settings = getSettings (msg.guild!)
   const list     = getEntryList (settings[feature], 60)
   const embeds   = (isEmpty (list) ? [''] : list)
     .map ((list, i) => createEmbedMessage (
-      i > 0 ? '' : `**Usage:** \`${config.prefix}${usage}\n\n\``
+      i > 0 ? '.' : `**Usage:** \`${config.prefix}${usage}\n\n\``
       + `**Currently relayed:**\n${list}`
     ))
 
   reply (msg, embeds)
 }
 
-async function modifyEntryList (opts: ValidatedOptions): Promise<void> {
-  const g     = await getSettings (opts.msg)
+function modifyEntryList (opts: ValidatedOptions): void {
+  const g     = getSettings (opts.msg)
   const isNew = g[opts.feature].every (
     r => r.discordCh != opts.msg.channel.id || r.streamer != opts.streamer
   )
@@ -175,7 +175,7 @@ function getEntryList (
     ? `${x.streamer} in <#${x.discordCh}> @mentioning <@&${x.roleToNotify}>`
     : `${x.streamer} in <#${x.discordCh}>`
   )
-  const chunks = lines |> splitEvery (linesPerChunk)
+  const chunks = splitEvery (linesPerChunk) (lines)
 
   return chunks.map (chunk => chunk.join ('\n'))
 }

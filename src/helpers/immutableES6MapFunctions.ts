@@ -14,15 +14,21 @@ export function deleteKey (key: any): <K, V> (m: Map<K, V>) => Map<K, V> {
   return getFnCallingMethodOnMapCopy ({ method: 'delete', args: [key] })
 }
 
+export function filter <K, V> (
+  m: Map<K, V>, predicate: (v: V, k: K) => boolean
+): Map<K, V> {
+  return new Map ([...m].filter(([k, v]) => predicate (v, k)))
+}
+
+
 ///////////////////////////////////////////////////////////////////////////////
 
 type MapMethods = 'clear' | 'delete' | 'set'
 
-// I regret doing currying in this way...
 function getFnCallingMethodOnMapCopy (
   { method, args }: { method: MapMethods, args: any[] }
-): <K, V> (m: Map<K, V>) => Map<K, V> {
-  return <K, V> (oldMap: Map<K, V>) => {
+) {
+  return <K, V> (oldMap: Map<K, V>): Map<K, V> => {
     const newMap = new Map (oldMap)
     newMap[method] (args[0], args[1])
     return newMap

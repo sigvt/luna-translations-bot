@@ -22,7 +22,7 @@ function initTwitcast (): void {
 async function processMessage (data: any): Promise<void> {
   const json     = tryOrLog (() => JSON.parse (data as string))
   const lives    = json?.movies?.map (processPayloadEntry) as any[]
-  const settings = await getAllSettings ()
+  const settings = getAllSettings ()
   lives?.forEach (live => notifyLive (live, settings))
 }
 
@@ -37,6 +37,7 @@ async function notifyLive (
   live: TwitcastingLive, settings: GuildSettings[]
 ): Promise<void> {
   return notifyDiscord ({
+    avatarUrl: '',
     subbedGuilds: settings.filter (g => isRelaying (g, live.name)),
     feature: 'twitcasting',
     streamer: streamers.find (x => x.twitter === live.name) as Streamer,

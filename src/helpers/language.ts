@@ -61,3 +61,7 @@ export function isNotNil (scrutinee: unknown): boolean {
 }
 
 export type Fn = (...args: unknown[]) => unknown
+
+export function isEven (n: number): boolean {
+  return n % 2 === 0
+}

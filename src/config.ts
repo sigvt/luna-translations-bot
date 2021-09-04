@@ -1,11 +1,9 @@
-import { GuildMember, Intents, Message } from 'discord.js'
+import { GuildMember, Message } from 'discord.js'
 import { isBlacklister, isAdmin } from './core/db/functions'
 import { isGuildOwner, isBotOwner, hasKickPerms } from './helpers/discord'
 
 export const config: LunaBotConfig = {
   deeplKey: process.env.DEEPL_KEY,
-  intents:  new Intents (["GUILDS","GUILD_MESSAGES","DIRECT_MESSAGES"]),
-  logFile:  'debug3.log',
   ownerId:  '150696503428644864',
   permLevels: [
     { level: 0,  name: 'User',        check: () => true },
@@ -19,6 +17,7 @@ export const config: LunaBotConfig = {
   token:             process.env.DISCORD_PROD_TOKEN,
   twitcastingId:     process.env.TWITCASTING_CLIENT_ID,
   twitcastingSecret: process.env.TWITCASTING_CLIENT_SECRET,
+  holodexKey:        process.env.HOLODEX_API_KEY,
 }
 
 export interface PermLevel {
@@ -31,12 +30,11 @@ export interface PermLevel {
 
 interface LunaBotConfig {
   deeplKey?:          string
-  intents:            Intents
-  logFile:            string
   ownerId:            string
   permLevels:         PermLevel[]
   prefix:             string
   token?:             string
   twitcastingId?:     string
   twitcastingSecret?: string
+  holodexKey?:        string
 }

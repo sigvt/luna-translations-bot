@@ -3,10 +3,8 @@ import { createEmbedMessage, reply } from '../../../helpers/discord'
 import { SettingToggle } from '../models/GuildSettings'
 import { getSettings, updateSettings } from './guildSettings'
 
-export async function toggleSetting (
-  props: ToggleProps
-): Promise<void> {
-  const settings = await getSettings (props.msg)
+export function toggleSetting (props: ToggleProps): void {
+  const settings = getSettings (props.msg)
   const current  = settings[props.setting]
   const notice   = current === true ? props.disable : props.enable
 

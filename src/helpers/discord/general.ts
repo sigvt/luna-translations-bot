@@ -6,7 +6,7 @@ import { client } from '../../core'
 export function findTextChannel (
   id: Snowflake | undefined
 ): TextChannel | ThreadChannel | undefined {
-  const ch    = client.channels.cache.find(c => c.id === id)
+  const ch    = client.channels.cache.find (c => c.id === id)
   const valid = [TextChannel, ThreadChannel].some (type => ch instanceof type)
   return valid ? <TextChannel | ThreadChannel> ch : undefined
 }
@@ -88,4 +88,8 @@ export function canBot (
   return isSupported
       && !!validated?.guild.me
       && validated.permissionsFor (validated.guild.me!).has (perm)
+}
+
+export function snowflakeToUnix (snowflake: Snowflake): number {
+  return new Date (Number (snowflake) / 4194304 + 1420070400000).getTime ()
 }

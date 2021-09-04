@@ -1,10 +1,10 @@
 import EventEmitter from 'events'
-import { isEmpty, isNil } from 'ramda'
+import { isEmpty } from 'ramda'
 import { DexFrame, getFrameList } from './frames'
 import { isSupported } from '../../core/db/streamers'
 import { removeDupeObjects } from '../../helpers'
 
-export const frameEmitter = FrameEmitter ()
+export const frameEmitter =  FrameEmitter ()
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -24,7 +24,9 @@ async function continuouslyEmitNewFrames (
   )
 
   newFrames.forEach (frame => {
-    if (isSupported (frame.channel.id)) emitter.emit ('frame', frame)
+    if (isSupported (frame.channel.id)) {
+      emitter.emit ('frame', frame)
+    }
   })
 
   const currentFrames = isEmpty (allFrames) ? previousFrames : allFrames
@@ -32,13 +34,8 @@ async function continuouslyEmitNewFrames (
 }
 
 function isNew (frame: DexFrame, previousFrames: DexFrame[]): boolean {
-  const isLive    = frame.status === 'live'
-  const hasStart  = !isNil (frame.start_actual)
-  const isEmitted = Boolean (previousFrames.find (pf => {
-    const isSame           = pf.id === frame.id && pf.status === frame.status
-    const previousHasStart = !isNil (pf.start_actual)
-    return isLive ? (isSame && previousHasStart) : isSame
-  }))
-
-  return isLive ? (!isEmitted && hasStart) : !isEmitted
+  return !Boolean (previousFrames.find (
+    pf => pf.id === frame.id && pf.status === frame.status
+  ))
 }
+

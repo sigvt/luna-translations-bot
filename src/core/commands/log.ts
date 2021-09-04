@@ -2,7 +2,7 @@ import { Message } from 'discord.js'
 import { head, isEmpty } from 'ramda'
 import { config } from '../../config'
 import { Command, createEmbedMessage, reply, send } from '../../helpers/discord'
-import { VideoId } from '../../modules/holodex/frames'
+import { getStartTime, VideoId } from '../../modules/holodex/frames'
 import { getRelayHistory, filterAndStringifyHistory } from '../db/functions'
 import { RelayedComment } from '../db/models/RelayedComment'
 
@@ -40,7 +40,8 @@ function notifyLogNotFound (msg: Message, videoId: VideoId): void {
 async function sendLog (
   msg: Message, videoId: VideoId, history: RelayedComment[]
 ): Promise<void> {
-  const tlLog = await filterAndStringifyHistory (msg, history)
+  const start = await getStartTime (videoId)
+  const tlLog = filterAndStringifyHistory (msg, history, start)
   send (msg.channel, {
     content: `Here is the TL log for <https://youtu.be/${videoId}>`,
     files:   [{ attachment: Buffer.from (tlLog), name: `${videoId}.txt` }]

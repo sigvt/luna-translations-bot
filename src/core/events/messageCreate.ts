@@ -3,7 +3,7 @@ import { config } from '../../config'
 import { log, doNothing } from '../../helpers'
 import { Message } from 'discord.js'
 import { getPermLevel } from '../db/functions'
-import { isNil, head } from 'ramda'
+import { isNil, head, compose } from 'ramda'
 import { oneLine } from 'common-tags'
 import {
   isDm, createEmbed, emoji, Command, reply, mentionsMe, isBot
@@ -31,13 +31,11 @@ function lacksBotPrefix (msg: Message): boolean {
 }
 
 function isInvalidCommand (msg: Message): boolean {
-  return getCommandWords (msg) |> head |> findCommand |> isNil
+  return compose (isNil, findCommand, head, getCommandWords) (msg)
 }
 
 function getCommandWords (msg: Message) {
-  return msg.content.slice (config.prefix.length)
-                    .trim ()
-                    .split (/ +/g)
+  return msg.content.slice (config.prefix.length).trim ().split (/ +/g)
 }
 
 function findCommand (cmd?: string): Command | undefined {
@@ -49,7 +47,7 @@ function findCommand (cmd?: string): Command | undefined {
 async function isAuthorTooLowLevel (msg: Message): Promise<boolean> {
   await ensureAuthorIsCached (msg)
   const authorLevel = await getAuthorPermLevel (msg)
-  const command     = getCommandWords (msg) [0] |> findCommand
+  const command     = compose (findCommand, head, getCommandWords) (msg)
 
   return authorLevel < command!.config.permLevel
 }

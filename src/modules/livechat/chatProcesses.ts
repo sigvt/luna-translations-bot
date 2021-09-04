@@ -6,15 +6,19 @@ export function getChatProcess (videoId: VideoId): ChatProcess {
   return chatProcesses[videoId] ??= spawnChatProcess (videoId)
 }
 
+export function chatProcessExists (videoId: VideoId): boolean {
+  return chatProcesses[videoId] != undefined
+}
+
 export function deleteChatProcess (videoId: VideoId): void {
   delete chatProcesses[videoId]
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-const chatProcesses: Record<VideoId, ChatProcess> = {}
-
 type ChatProcess = ChildProcessWithoutNullStreams
+
+const chatProcesses: Record<VideoId, ChatProcess> = {}
 
 function spawnChatProcess (liveId: VideoId): ChatProcess {
   return spawn ('python3', ['-u', './modules/livechat/chat_dl.py', liveId])

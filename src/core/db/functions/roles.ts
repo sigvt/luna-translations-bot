@@ -5,14 +5,12 @@ import { config } from '../../../config'
 import { GuildSettings, RoleSetting } from '../models'
 import { match } from '../../../helpers'
 
-export async function validateInputAndModifyRoleList (
-  opts: RoleModifyOptions
-): Promise<void> {
+export function validateInputAndModifyRoleList (opts: RoleModifyOptions): void {
   const isVerbValid   = validVerbs.includes (opts.verb as any)
   const validatedRole = validateRole (opts.msg.guild!, opts.role)
   const isValid       = isVerbValid && validatedRole !== undefined
   const modifyIfValid = isValid ? modifyRoleList : showHelp
-  const g              = await getSettings (opts.msg)
+  const g             = getSettings (opts.msg)
 
   modifyIfValid ({ ...opts, role: validatedRole, g } as ValidatedOptions)
 }

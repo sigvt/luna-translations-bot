@@ -18,11 +18,9 @@ export const filter: Command = {
     usage,
     description: 'Manage custom-banned strings and custom-desired strings.',
   },
-  callback: async (
-    msg: Message, [type, verb, ...pattern]: string[]
-  ): Promise<void> => {
+  callback: (msg: Message, [type, verb, ...pattern]: string[]): void => {
     const str            = pattern.join ('')
-    const g              = await getSettings (msg)
+    const g              = getSettings (msg)
     const feature        = type === 'blacklist' ? 'customBannedPatterns'
                                                 : 'customWantedPatterns'
     const current        = g[feature]
@@ -56,7 +54,7 @@ interface ModifyPatternListOptions {
   g:       GuildSettings
 }
 
-async function showHelp ({ msg, g }: ModifyPatternListOptions): Promise<void> {
+function showHelp ({ msg, g }: ModifyPatternListOptions): void {
   reply (msg, createEmbed ({ fields: [{
     name:   'Usage',
     value:  config.prefix + usage,

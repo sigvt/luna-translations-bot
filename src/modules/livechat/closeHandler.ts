@@ -2,7 +2,7 @@ import { deleteRelayHistory, filterAndStringifyHistory, getAllRelayHistories, ge
 import { RelayedComment } from "../../core/db/models/RelayedComment"
 import { debug, isNotNil, log} from "../../helpers"
 import { findTextChannel, send } from "../../helpers/discord"
-import { DexFrame, getFrameList, VideoId } from "../holodex/frames"
+import { DexFrame, getFrameList, getStartTime, VideoId } from "../holodex/frames"
 import { deleteChatProcess } from "./chatProcesses"
 import { findFrameThread, setupRelay } from "./chatRelayer"
 
@@ -29,16 +29,17 @@ export async function retryIfStillUpThenPostLog (
 const retries: Record<VideoId, number> = {}
 
 async function sendAndForgetHistory (videoId: VideoId): Promise<void> {
-  const relevantHistories = (await getAllRelayHistories ())
+  const relevantHistories = getAllRelayHistories ()
     .map (history => history.get (videoId))
     .filter (isNotNil)
 
   relevantHistories.forEach (async (history: RelayedComment[], gid) => {
-    const g      = await getSettings (gid)
+    const g      = getSettings (gid)
     const setCh  = findTextChannel (g.logChannel)
     const ch     = findTextChannel (history[0].discordCh!)
-    const thread = await findFrameThread (videoId, g, ch)
-    const tlLog  = await filterAndStringifyHistory (gid, history)
+    const thread = findFrameThread (videoId, g, ch)
+    const start  = await getStartTime (videoId)
+    const tlLog  = filterAndStringifyHistory (gid, history, start)
 
     deleteRelayHistory (videoId, gid)
     send (setCh ?? thread ?? ch, {

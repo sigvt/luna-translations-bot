@@ -1,19 +1,19 @@
 import { ciEquals, debug, doNothing, match } from '../../helpers'
 import { tryOrDefault } from '../../helpers/tryCatch'
-import { frameEmitter } from '../holodex/frameEmitter'
 import { DexFrame, isPublic, VideoId } from '../holodex/frames'
 import { getChatProcess } from './chatProcesses'
 import { Streamer, StreamerName, streamers } from '../../core/db/streamers'
 import { emoji, findTextChannel, send } from '../../helpers/discord'
 import { Message, Snowflake, TextChannel, ThreadChannel } from 'discord.js'
 import { tl } from '../deepl'
-import { addToBotRelayHistory, addToGuildRelayHistory, getRelayNotices, getSettings, getGuildData, getAllSettings } from '../../core/db/functions'
+import { addToGuildRelayHistory, getRelayNotices, getSettings, getGuildData, getAllSettings } from '../../core/db/functions'
 import { isBlacklistedOrUnwanted, isHoloID, isStreamer, isTl } from './commentBooleans'
 import { GuildSettings, WatchFeature, WatchFeatureSettings } from '../../core/db/models'
 import { retryIfStillUpThenPostLog } from './closeHandler'
 import { logCommentData } from './logging'
 import { getRelayNotifyProps } from '../youtubeNotifier'
 import { notifyOneGuild } from '../notify'
+import { frameEmitter } from '../holodex/frameEmitter'
 
 frameEmitter.on ('frame', (frame: DexFrame) => {
   if (isPublic (frame)) setupRelay (frame)
@@ -69,10 +69,9 @@ async function processComments (frame: DexFrame, data: any): Promise<void> {
         gossip: maybeGossip ? relayGossip : doNothing,
         relay:  relayTlOrStreamerComment
       })
-
       relayCmt ({
         e, cmt, frame, g,
-        discordCh: findTextChannel (e.discordCh)!,
+        discordCh: findTextChannel (e.discordCh),
         deepLTl:   mustShowTl ? deepLTl : undefined,
         to:        streamer?.name ?? 'Discord',
       })
@@ -98,9 +97,9 @@ function relayGossip (
   if (isGossip (data.cmt.body, stalked!, data.frame)) relayCameo (data, true)
 }
 
-async function relayTlOrStreamerComment (
+function relayTlOrStreamerComment (
   { discordCh, deepLTl, cmt, g, frame }: RelayData
-): Promise<void> {
+): void {
   const mustPost = cmt.isOwner
                 || (isTl (cmt.body, g) && !isBlacklistedOrUnwanted (cmt, g))
                 || isStreamer (cmt.id)
@@ -119,34 +118,35 @@ async function relayTlOrStreamerComment (
   const tl     = deepLTl ? `\n${emoji.deepl}**DeepL:** \`${deepLTl}\`` : ''
 
   if (mustPost) {
-    // await announceIfNotDone (frame, g._id)
-    const thread = await findFrameThread (frame.id, g, discordCh)
+    // I haven't checked yet if this causes spam so i'll be keeping it disabled
+    // announceIfNotDone (frame, g._id)
+    const thread = findFrameThread (frame.id, g, discordCh)
     send (thread ?? discordCh, `${premoji} ${author} \`${text}\`${tl}${url}`)
     .then (msg => saveComment (cmt, frame, 'guild', g._id, msg))
     .catch (debug)
   }
 }
 
-export async function findFrameThread (
+export function findFrameThread (
   videoId: VideoId, g: GuildSettings, channel?: TextChannel | ThreadChannel
-): Promise<ThreadChannel | undefined> {
-  const gdata  = await getGuildData (g._id)
+): ThreadChannel | undefined {
+  const gdata  = getGuildData (g._id)
   const notice = gdata.relayNotices.get (videoId)
   const validch = channel as TextChannel
   if (g.threads) return validch?.threads?.cache.find (thr => thr.id === notice)
 }
 
-async function announceIfNotDone (
+function announceIfNotDone (
   frame: DexFrame, gid: Snowflake
 ): Promise<void[]> {
-  const notices    = await getRelayNotices (gid)
+  const notices    = getRelayNotices (gid)
   const announce   = notices.get (frame.id)
-  const g          = await getSettings (gid)
+  const g          = getSettings (gid)
   const mustNotify = !announce && frame.status === 'live'
 
   return mustNotify ? notifyOneGuild (g, {
     subbedGuilds: [g], ...getRelayNotifyProps (frame)
-  }) : []
+  }) : Promise.resolve ([])
 }
 
 
@@ -192,9 +192,12 @@ function getRelayEntries (
 }
 
 function isGossip (text: string, stalked: Streamer, frame: DexFrame): boolean {
-  const isOwnChannel    = frame.channel.id === stalked.ytId
-  const isCollab        = frame.description.includes (stalked.twitter)
+  const isOwnChannel = frame.channel.id === stalked.ytId
+  const isCollab =
+    [stalked.twitter, stalked.ytId, stalked.name, stalked.chName]
+      .some (str => frame.description.includes (str))
   const mentionsWatched = text
+    .replace(/[,()]|'s/g, '')
     .split (' ')
     .some (w => stalked.aliases.some (a => ciEquals (a, w)))
   

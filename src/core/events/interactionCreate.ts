@@ -28,12 +28,12 @@ async function cancelBlacklisting (
   btn: ButtonInteraction, notice: BlacklistNotice
 ): Promise<void> {
   const success = removeBlacklisted (btn.guild!, notice.ytId)
-  btn.update ({ components: [], embeds: [
+  tryOrLog (() => btn.update ({ components: [], embeds: [
     createEmbedMessage (success
       ? `${notice?.ytId}'s blacklisting has been cancelled.`
       : `Something went wrong unblacklisting ${notice?.ytId}.`
     )
-  ]})
+  ]}))
 }
 
 async function cancelBlacklistingAndExcludeLine (
@@ -41,10 +41,10 @@ async function cancelBlacklistingAndExcludeLine (
 ): Promise<void> {
   removeBlacklisted (btn.guild!, notice.ytId)
   excludeLine (btn.guild!, notice.videoId, notice.originalMsgId)
-  btn.update ({ components: [], embeds: [createEmbedMessage (oneLine`
+  tryOrLog (() => btn.update ({ components: [], embeds: [createEmbedMessage (oneLine`
     ${notice?.ytId}'s blacklisting has been cancelled but the deleted message
     will not be in the final log.
-  `)]})
+  `)]}))
 }
 
 function clearAuthorTls (
@@ -56,10 +56,10 @@ function clearAuthorTls (
   const ch     = findTextChannel (last (cmts)?.discordCh ?? '')
 
   ch?.bulkDelete (msgs)
-  .then (deleted => btn.update ({ components: [], embeds: [createEmbedMessage (
+  .then (deleted => tryOrLog (() => btn.update ({ components: [], embeds: [createEmbedMessage (
     `Deleted ${deleted.size} translations.`
-  )]}))
-  .catch (_ => btn.update ({ components: [], embeds: [createEmbedMessage (
+  )]})))
+  .catch (_ => tryOrLog (() => btn.update ({ components: [], embeds: [createEmbedMessage (
     'I need Manage Messages permissions.'
-  )]}))
+  )]})))
 }

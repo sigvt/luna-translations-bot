@@ -1,6 +1,7 @@
 import { client } from '../'
 import { config } from '../../config'
 import { log } from '../../helpers'
+import {clearOldData} from '../db/functions'
 
 export async function ready () {
   log (`${client.user!.tag} serving ${client.guilds.cache.size} servers.`)
@@ -9,4 +10,6 @@ export async function ready () {
   import ('../../modules/youtubeNotifier')
   import ('../../modules/twitcastingNotifier')
   import ('../../modules/livechat/chatRelayer')
+
+  setInterval (clearOldData, 24*60*60*100)
 }

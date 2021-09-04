@@ -2,9 +2,9 @@
 
 import { Guild, GuildMember, Message, Snowflake } from 'discord.js'
 import { isGuild, hasRole, getGuildId } from '../../../helpers/discord'
-import { GuildSettings, GuildSettingsDb, BlacklistItem } from '../models'
+import { GuildSettings, BlacklistItem } from '../models'
 import { config, PermLevel } from '../../../config'
-import { asyncFind, debug } from '../../../helpers'
+import { asyncFind } from '../../../helpers'
 import { UpdateQuery } from 'mongoose'
 import { DocumentType } from '@typegoose/typegoose'
 import { client } from '../../lunaBotClient'
@@ -82,15 +82,27 @@ export async function getPermLevel (x: Message | GuildMember): Promise<PermLevel
 
 export function filterAndStringifyHistory (
   guild: Message | Guild | GuildMember | Snowflake,
-  history: RelayedComment[]
+  history: RelayedComment[],
+  start?: string
 ): string {
   const g         = getSettings (guild)
   const blacklist = g.blacklist.map (entry => entry.ytId)
   const unwanted  = g.customBannedPatterns
   return history
     .filter (cmt => isNotBanned (cmt, unwanted, blacklist))
-    .map (cmt => `${cmt.timestamp} (${cmt.author}) ${cmt.body}`)
+    .map (cmt => {
+      const startTime = new Date (Date.parse (start ?? '')).valueOf ()
+      const loggedTime = new Date (+cmt.absoluteTime).valueOf ()
+      const timestamp = start
+        ? new Date (loggedTime - startTime).toISOString().substr (11, 8)
+        : '[?]'
+      return `${timestamp} (${cmt.author}) ${cmt.body}`
+    })
     .join ('\n')
+}
+
+export function deleteGuildSettings (g: Snowflake): void {
+  if (guildSettingsEnmap.has (g)) guildSettingsEnmap.delete (g)
 }
 
 export type PrivilegedRole = 'admins' | 'blacklisters'

@@ -22,6 +22,7 @@ async function notifyFrame (frame: DexFrame): Promise<void> {
       streamer: streamer as Streamer,
       embedBody: `I am live on YouTube!\nhttps://youtu.be/${frame.id}`,
       emoji: emoji.yt,
+      avatarUrl: frame.channel.photo
     })
 
     notifyDiscord (getRelayNotifyProps (frame))
@@ -40,6 +41,7 @@ export function getRelayNotifyProps (frame: DexFrame): NotifyOptions {
       https://youtu.be/${frame.id}
     `,
     emoji: emoji.holo,
-    videoId: frame.id
+    videoId: frame.id,
+    avatarUrl: frame.channel.photo
   }
 }
